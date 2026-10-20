@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracker: Work Tracking and Sprint Velocity for Engineering Teams</title>
+  <meta name="description" content="Tracker is a work tracking platform for software engineering teams. Track sprint velocity and sync GitHub issues in real time.">
+  <meta name="keywords" content="work tracker, sprint tracking, issue tracking, engineering velocity, software project management, git sync">
+  <meta name="author" content="Tracker App Inc.">
+  <link rel="canonical" href="https://tracker.app/">
+
+  <!-- Open Graph / Social Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tracker.app/">
+  <meta property="og:title" content="Tracker: Work Tracking and Sprint Velocity">
+  <meta property="og:description" content="Work tracking and sprint velocity for engineering teams. Synchronize issues with git workflows.">
+  <meta property="og:image" content="https://tracker.app/og-image.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tracker: Work Tracking and Sprint Velocity">
+  <meta name="twitter:description" content="Work tracking and sprint velocity platform for software engineering teams.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Google Fonts: Instrument Serif & Inter (Steep typography) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;450;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/src/style.css">
+
+  <!-- Schema.org JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Tracker",
+    "operatingSystem": "Web, macOS, Windows, Linux",
+    "applicationCategory": "ProjectManagementApplication",
+    "description": "Governed work tracking and sprint velocity platform for software engineering teams.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "1280"
+    }
+  }
+  </script>
+
+  <!-- Google Analytics (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRACKER2026"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-TRACKER2026', { 'anonymize_ip': true });
+  </script>
+</head>
+<body>
+  <!-- Breadcrumbs for SEO & Accessibility -->
+  <nav aria-label="Breadcrumb" class="sr-only">
+    <ol>
+      <li><a href="/">Home</a></li>
+      <li><a href="#workflows">Workflows</a></li>
+      <li><a href="#sprints">Sprints</a></li>
+      <li><a href="#demo-board">Interactive Demo</a></li>
+    </ol>
+  </nav>
+
+  <!-- Top Global Navigation -->
+  <header>
+    <nav class="site-nav" id="site-nav">
+      <a href="/" class="nav-logo" aria-label="Tracker home">
+        <div class="nav-logo-mark">T</div>
+        <span>Tracker</span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="#timer" class="nav-link" id="nav-pomodoro-link" style="color: #ba6542; font-weight: 600;">Pomodoro Timer</a>
+        <a href="#demo-board" class="nav-link">Sprint Board</a>
+        <a href="#case-study" class="nav-link">Case Study</a>
+        <a href="#sla" class="nav-link">SLA &amp; Trust</a>
+        <a href="#faqs" class="nav-link">FAQ</a>
+      </div>
+
+      <div class="nav-actions">
+        <button class="theme-toggle-btn" id="theme-toggle-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <button class="nav-login-btn" id="open-auth-btn" type="button">Sign in</button>
+        <a href="#demo-board" class="motion-btn motion-btn-sm" id="nav-cta-btn">
+          <span class="motion-btn-circle" aria-hidden="true"></span>
+          <span class="motion-btn-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </span>
+          <span class="motion-btn-text">Start tracking free</span>
+        </a>
+
+        <!-- Logged In User Pill -->
+        <div class="nav-user-pill" id="nav-user-pill" hidden>
+          <div class="user-avatar-badge">AC</div>
+          <span class="user-name-tag">Alex Chen</span>
+          <button class="pill-btn-primary user-dash-btn" id="nav-open-app-btn" type="button">Open App</button>
+          <button class="nav-signout-btn" id="nav-signout-btn" type="button" title="Sign out" aria-label="Sign out">&times;</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ========================================================================
+       HERO PINNED SCROLL-ANIMATION SECTION
+       ======================================================================== -->
+  <main>
+    <section class="hero-scroll-container" id="hero-scroll-container">
+      <!-- Background layer with warm peach glow -->
+      <div class="hero-bg-layer" id="hero-bg-layer"></div>
+      
+      <!-- Centered Coordinate Stage (scaled & pinned via GSAP) -->
+      <div class="hero-stage" id="hero-stage">
+        
+        <!-- Center Hero Headline & CTAs -->
+        <div class="hero-text-block" id="hero-text-block">
+          <h1 class="hero-headline font-serif">
+            <span class="headline-line">Work tracking built for</span>
+            <span class="headline-line">software engineering teams</span>
+          </h1>
+          <p class="hero-subhead font-sans">
+            Tracker connects issue tracking with git pull requests to measure sprint velocity in real time.
+          </p>
+          <div class="hero-cta-row">
+            <a href="#demo-board" class="motion-btn" id="hero-start-btn">
+              <span class="motion-btn-circle" aria-hidden="true"></span>
+              <span class="motion-btn-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </span>
+              <span class="motion-btn-text">Start tracking free</span>
+            </a>
+            <a href="#demo-board" class="pill-btn-ghost">Try interactive demo</a>
+          </div>
+        </div>
+
+        <!-- Main Central Desktop App Window (1200px) -->
+        <div class="desktop-app-frame clockit-desktop-mockup" id="hero-app-frame">
+          <!-- Top App Chrome Bar with Window Controls & ClockIt Nav -->
+          <div class="app-topbar clockit-mockup-topbar">
+            <div class="app-window-controls">
+              <span class="window-dot dot-red"></span>
+              <span class="window-dot dot-yellow"></span>
+              <span class="window-dot dot-green"></span>
+            </div>
+
+            <div class="clockit-logo" style="margin-left: 20px;">
+              <span class="clockit-logo-dot" style="width: 14px; height: 14px;"></span>
+              <span class="clockit-brand-name" style="font-size: 18px;">ClockIt</span>
+            </div>
+
+            <div class="clockit-nav-links" style="margin-left: 24px;">
+              <button class="clockit-nav-pill active" style="padding: 4px 14px; font-size: 12px;" type="button">Home</button>
+              <button class="clockit-nav-pill" style="padding: 4px 14px; font-size: 12px;" type="button">Tasks</button>
+              <button class="clockit-nav-pill" style="padding: 4px 14px; font-size: 12px;" type="button">Backlog</button>
+              <button class="clockit-nav-pill" style="padding: 4px 14px; font-size: 12px;" type="button">Notes</button>
+            </div>
+
+            <div class="clockit-nav-actions" style="margin-left: auto;">
+              <button class="clockit-icon-btn" type="button" aria-label="Search" style="padding: 4px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </button>
+              <div class="clockit-avatar-btn" style="width: 28px; height: 28px; font-size: 11.5px;">A</div>
+            </div>
+          </div>
+
+          <!-- Viewport holding START STATE and DOCKED STATE -->
+          <div class="clockit-mockup-viewport">
+            
+            <!-- START STATE: Blueprint/Placeholder outlines for floating cards to dock into -->
+            <div class="app-content-start clockit-mockup-start" id="app-content-start">
+              <!-- Banner placeholder outline -->
+              <div class="content-placeholder-slot slot-banner">
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; padding: 0 24px;">
+                  <div>
+                    <span style="font-size: 10px; text-transform: uppercase; color: #9ea1a8; font-weight: 600; letter-spacing: 0.08em;">WED, 15 OCT 2026</span>
+                    <h3 class="font-serif" style="font-size: 30px; color: #17191c; margin: 2px 0;">Make today count.</h3>
+                    <p style="font-size: 12.5px; color: #8e929b; margin: 0;">A little progress each day adds up to big results.</p>
+                  </div>
+                  <div style="text-align: right; opacity: 0.5;">
+                    <span class="font-serif" style="font-size: 34px; color: #17191c;">08 : 24</span>
+                    <span style="font-size: 12px; color: #8e929b; font-weight: 600;">PM</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3 Summary Slots Outline -->
+              <div class="slot-summary-row">
+                <!-- Slot 1: Today's Progress target -->
+                <div class="content-placeholder-slot slot-card" id="slot-target-progress">
+                  <span style="font-size: 12.5px; font-weight: 500; color: #9ea1a8;">[ Today's Progress (60%) ]</span>
+                </div>
+                <!-- Slot 2: Focus Timer target (Peach) -->
+                <div class="content-placeholder-slot slot-card slot-peach" id="slot-target-timer">
+                  <span style="font-size: 12.5px; font-weight: 500; color: #ba6542;">[ Focus Timer (25:00) ]</span>
+                </div>
+                <!-- Slot 3: Backlog target -->
+                <div class="content-placeholder-slot slot-card" id="slot-target-backlog">
+                  <span style="font-size: 12.5px; font-weight: 500; color: #9ea1a8;">[ Backlog (4 ideas) ]</span>
+                </div>
+              </div>
+
+              <!-- Main Grid Blueprint Outline -->
+              <div class="slot-main-grid">
+                <!-- Task Board Outline (4 columns) -->
+                <div class="content-placeholder-slot slot-board" id="slot-target-board">
+                  <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: 12px 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                      <span style="font-size: 13.5px; font-weight: 600; color: #17191c;">Task Board</span>
+                      <span style="font-size: 11px; background: #17191c; color: #fff; padding: 3px 10px; border-radius: 9999px;">+ Add Task</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1;">
+                      <div style="border: 1px dashed rgba(0,0,0,0.08); border-radius: 8px; background: rgba(0,0,0,0.01);"></div>
+                      <div style="border: 1px dashed rgba(0,0,0,0.08); border-radius: 8px; background: rgba(0,0,0,0.01);"></div>
+                      <div style="border: 1px dashed rgba(0,0,0,0.08); border-radius: 8px; background: rgba(0,0,0,0.01);"></div>
+                      <div style="border: 1px dashed rgba(0,0,0,0.08); border-radius: 8px; background: rgba(0,0,0,0.01);"></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Quick Notes Outline -->
+                <div class="content-placeholder-slot slot-notes" id="slot-target-notes">
+                  <span style="font-size: 12.5px; font-weight: 500; color: #9ea1a8;">[ Quick Notes ]</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- DOCKED STATE: The Exact Constructed ClockIt Dashboard -->
+            <div class="app-content-docked clockit-mockup-docked" id="app-content-docked" style="opacity: 0;">
+              <!-- Banner Card -->
+              <section class="clockit-banner-card mockup-banner">
+                <div class="clockit-banner-left">
+                  <div class="clockit-date-badge">WED, 15 OCT 2026</div>
+                  <h2 class="clockit-greeting-title font-serif" style="font-size: 34px;">Make today count.</h2>
+                  <p class="clockit-greeting-sub" style="font-size: 12.5px;">A little progress each day adds up to big results.</p>
+                </div>
+
+                <div class="clockit-banner-right" style="padding-right: 120px;">
+                  <div class="clockit-digital-clock">
+                    <span class="clock-digits" style="font-size: 38px;">08 : 24</span>
+                    <span class="clock-ampm">PM</span>
+                  </div>
+                  <div class="clockit-greeting-user" style="font-size: 12.5px;">
+                    <span class="greeting-sun-icon">&#9728;&#65039;</span>
+                    <span>Good evening, Ashay.</span>
+                  </div>
+                </div>
+
+                <!-- Mountain sunset graphic backdrop -->
+                <div class="clockit-mountain-backdrop" aria-hidden="true" style="width: 480px;">
+                  <svg class="mountain-backdrop-svg" viewBox="0 0 800 240" preserveAspectRatio="xMaxYMid meet">
+                    <defs>
+                      <linearGradient id="mockupSunGlow" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#f8bfa2" stop-opacity="0.9" />
+                        <stop offset="100%" stop-color="#f5a480" stop-opacity="0.6" />
+                      </linearGradient>
+                      <linearGradient id="mockupMtnBack" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#f0e4dc" stop-opacity="0.8" />
+                        <stop offset="100%" stop-color="#fdfbf8" stop-opacity="0.2" />
+                      </linearGradient>
+                      <linearGradient id="mockupMtnMid" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#e2d2c7" stop-opacity="0.9" />
+                        <stop offset="100%" stop-color="#f9f6f2" stop-opacity="0.3" />
+                      </linearGradient>
+                      <linearGradient id="mockupMtnFront" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#cfbbb0" stop-opacity="0.95" />
+                        <stop offset="100%" stop-color="#f5efe9" stop-opacity="0.4" />
+                      </linearGradient>
+                    </defs>
+                    <circle cx="680" cy="100" r="48" fill="url(#mockupSunGlow)" />
+                    <path d="M410,118 Q414,115 418,118 Q422,115 426,118" fill="none" stroke="#ba8c7b" stroke-width="1.2" opacity="0.55" />
+                    <path d="M432,125 Q436,122 440,125 Q444,122 448,125" fill="none" stroke="#ba8c7b" stroke-width="1" opacity="0.45" />
+                    <path d="M300,240 L380,185 L460,205 L550,165 L650,195 L740,150 L800,180 L800,240 Z" fill="url(#mockupMtnBack)" />
+                    <path d="M370,240 L470,192 L560,218 L660,172 L750,198 L800,165 L800,240 Z" fill="url(#mockupMtnMid)" />
+                    <path d="M450,240 L550,215 L640,228 L730,192 L800,212 L800,240 Z" fill="url(#mockupMtnFront)" />
+                    <g fill="#43342d" opacity="0.82">
+                      <polygon points="772,240 769,205 775,205" /><polygon points="772,165 766,180 778,180" /><polygon points="772,175 764,192 780,192" /><polygon points="772,188 762,206 782,206" />
+                      <polygon points="786,240 783,210 789,210" /><polygon points="786,152 779,168 793,168" /><polygon points="786,164 777,182 795,182" /><polygon points="786,178 775,198 797,198" /><polygon points="786,194 773,212 799,212" />
+                      <polygon points="756,240 754,215 758,215" /><polygon points="756,182 751,194 761,194" /><polygon points="756,191 749,205 763,205" /><polygon points="756,202 747,217 765,217" />
+                      <polygon points="742,240 740,225 744,225" /><polygon points="742,198 738,208 746,208" /><polygon points="742,206 736,218 748,218" />
+                      <polygon points="798,240 795,210 801,210" /><polygon points="798,170 792,185 804,185" /><polygon points="798,182 790,200 806,200" />
+                    </g>
+                  </svg>
+                </div>
+              </section>
+
+              <!-- 3 Summary Cards Row -->
+              <section class="clockit-summary-row mockup-summary-row">
+                <!-- Card 1: Today's Progress -->
+                <div class="clockit-summary-card">
+                  <div class="summary-card-header">
+                    <div class="summary-card-title">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                      <span style="font-size: 13px;">Today's Progress</span>
+                    </div>
+                    <span class="summary-more-btn">&bull;&bull;&bull;</span>
+                  </div>
+                  <div class="summary-card-body progress-body">
+                    <div class="donut-ring-wrap" style="width: 52px; height: 52px;">
+                      <svg class="donut-svg" viewBox="0 0 36 36">
+                        <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="3.5" />
+                        <path class="donut-fill" stroke-dasharray="60, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ba6542" stroke-width="3.5" stroke-linecap="round" />
+                      </svg>
+                      <span class="donut-center-text" style="font-size: 12px;">60%</span>
+                    </div>
+                    <div class="progress-details">
+                      <div class="progress-ratio" style="font-size: 22px;">3 / 5</div>
+                      <div class="progress-sub" style="font-size: 11px;">tasks completed</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 2: Focus Timer (Peach) -->
+                <div class="clockit-summary-card timer-card">
+                  <div class="summary-card-header">
+                    <div class="summary-card-title">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      <span style="font-size: 13px;">Focus Timer</span>
+                    </div>
+                    <span class="summary-more-btn">&bull;&bull;&bull;</span>
+                  </div>
+                  <div class="summary-card-body timer-body">
+                    <div class="timer-left">
+                      <div class="timer-digits font-serif" style="font-size: 30px;">25 : 00</div>
+                      <div class="timer-sub" style="font-size: 11px;">Get things done.</div>
+                    </div>
+                    <div class="timer-play-btn" style="width: 40px; height: 40px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 3: Backlog -->
+                <div class="clockit-summary-card">
+                  <div class="summary-card-header">
+                    <div class="summary-card-title">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                      <span style="font-size: 13px;">Backlog</span>
+                    </div>
+                    <span class="summary-more-btn">&bull;&bull;&bull;</span>
+                  </div>
+                  <div class="summary-card-body backlog-body">
+                    <div class="backlog-left">
+                      <div class="backlog-number font-serif" style="font-size: 30px;">4</div>
+                      <div class="backlog-sub" style="font-size: 11px;">ideas for later</div>
+                    </div>
+                    <div class="backlog-arrow-btn" style="width: 36px; height: 36px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Main Grid: Task Board (4 Columns) + Quick Notes -->
+              <section class="clockit-main-grid mockup-main-grid">
+                <!-- 4-Column Kanban Task Board -->
+                <div class="clockit-board-card">
+                  <div class="board-card-header" style="margin-bottom: 10px;">
+                    <div class="board-card-title" style="font-size: 14px;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                      <span>Task Board</span>
+                    </div>
+                    <div class="board-card-actions">
+                      <span class="clockit-add-task-btn" style="font-size: 11px; padding: 4px 12px;">+ Add Task</span>
+                      <span class="summary-more-btn">&bull;&bull;&bull;</span>
+                    </div>
+                  </div>
+
+                  <div class="clockit-kanban-columns mockup-columns">
+                    <!-- Column 1: Backlog -->
+                    <div class="app-board-col">
+                      <div class="clockit-col-header">
+                        <div class="col-indicator-wrap">
+                          <span class="status-dot dot-todo"></span>
+                          <span class="col-title-text" style="font-size: 12px;">Backlog</span>
+                        </div>
+                        <span class="col-count-bubble">2</span>
+                      </div>
+                      <div class="app-cards-container">
+                        <div class="app-task-card">
+                          <div class="app-card-top"><span class="app-card-id">ST-104</span><span class="app-card-pts">8 pts</span></div>
+                          <div class="app-card-title">WebSocket sync stream for active sprint standup</div>
+                          <div class="app-card-bottom"><span class="app-squad-tag Platform">Platform</span><div class="app-assignee-avatar">JB</div></div>
+                        </div>
+                        <div class="app-task-card">
+                          <div class="app-card-top"><span class="app-card-id">ST-120</span><span class="app-card-pts">3 pts</span></div>
+                          <div class="app-card-title">Cluster autoscaling threshold alert channels</div>
+                          <div class="app-card-bottom"><span class="app-squad-tag DevOps">DevOps</span><div class="app-assignee-avatar">JB</div></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Column 2: In Progress -->
+                    <div class="app-board-col">
+                      <div class="clockit-col-header">
+                        <div class="col-indicator-wrap">
+                          <span class="status-dot dot-inprogress"></span>
+                          <span class="col-title-text" style="font-size: 12px;">In Progress</span>
+                        </div>
+                        <span class="col-count-bubble">2</span>
+                      </div>
+                      <div class="app-cards-container">
+                        <div class="app-task-card">
+                          <div class="app-card-top"><span class="app-card-id">ST-101</span><span class="app-card-pts">5 pts</span></div>
+                          <div class="app-card-title">Distributed Redis lease coordinator with heartbeat</div>
+                          <div class="app-card-bottom"><span class="app-squad-tag Platform">Platform</span><div class="app-assignee-avatar">AC</div></div>
+                        </div>
+                        <div class="app-task-card">
+                          <div class="app-card-top"><span class="app-card-id">ST-125</span><span class="app-card-pts">8 pts</span></div>
+                          <div class="app-card-title">Zero-downtime database schema migration runner</div>
+                          <div class="app-card-bottom"><span class="app-squad-tag Platform">Platform</span><div class="app-assignee-avatar">AC</div></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Column 3: In Review -->
+                    <div class="app-board-col">
+                      <div class="clockit-col-header">
+                        <div class="col-indicator-wrap">
+                          <span class="status-dot dot-review"></span>
+                          <span class="col-title-text" style="font-size: 12px;">In Review</span>
+                        </div>
+                        <span class="col-count-bubble">2</span>
+                      </div>
+                      <div class="app-cards-container">
+                        <div class="app-task-card">
+                          <div class="app-card-top"><span class="app-card-id">ST-112</span><span class="app-card-pts">3 pts</span></div>
+                          <div class="app-card-title">Optimistic UI rollback and conflict resolution modal</div>
+                          <div class="app-card-bottom"><span class="app-squad-tag Frontend">Frontend</span><div class="app-assignee-avatar">SL</div></div>
+                        </div>
+                        <div class="app-task-card">
+                          <div class="app-card-top"><span class="app-card-id">ST-118</span><span class="app-card-pts">5 pts</span></div>
+                          <div class="app-card-title">Multi-cloud Terraform VPC peering configuration</div>
+                          <div class="app-card-bottom"><span class="app-squad-tag DevOps">DevOps</span><div class="app-assignee-avatar">ER</div></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Column 4: Done & Merged -->
+                    <div class="app-board-col">
+                      <div class="clockit-col-header">
+                        <div class="col-indicator-wrap">
+                          <span class="status-dot dot-done"></span>
+                          <span class="col-title-text" style="font-size: 12px;">Done &amp; Merged</span>
+                        </div>
+                        <span class="col-count-bubble">2</span>
+                      </div>
+                      <div class="app-cards-container">
+                        <div class="app-task-card">
+                          <div class="app-card-top"><span class="app-card-id">ST-115</span><span class="app-card-pts">5 pts</span></div>
+                          <div class="app-card-title">Automated SOC 2 token revocation middleware</div>
+                          <div class="app-card-bottom"><span class="app-squad-tag Security">Security</span><div class="app-assignee-avatar">MV</div></div>
+                        </div>
+                        <div class="app-task-card">
+                          <div class="app-card-top"><span class="app-card-id">ST-122</span><span class="app-card-pts">5 pts</span></div>
+                          <div class="app-card-title">Interactive soundstage lo-fi audio deck</div>
+                          <div class="app-card-bottom"><span class="app-squad-tag Frontend">Frontend</span><div class="app-assignee-avatar">AC</div></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Quick Notes Card (Right Column) -->
+                <aside class="clockit-notes-card mockup-notes-card">
+                  <div class="notes-card-header" style="margin-bottom: 6px;">
+                    <div class="notes-card-title" style="font-size: 13px;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                      <span>Quick Notes</span>
+                    </div>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  </div>
+                  <div style="background: #f4f5f7; border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #9ea1a8; margin-bottom: 8px;">Write something...</div>
+                  <div class="notes-items-list" style="gap: 8px;">
+                    <div class="quick-note-item border-yellow" style="padding: 7px 10px;">
+                      <div class="note-item-header"><span class="note-item-tag" style="font-size: 11px;">&#128161; Ideas</span><span class="note-item-time" style="font-size: 9.5px;">7:30 PM</span></div>
+                      <ul class="note-bullets" style="font-size: 10px; padding-left: 12px; margin-top: 2px;">
+                        <li>Dashboard animations</li>
+                        <li>Music widget</li>
+                      </ul>
+                    </div>
+                    <div class="quick-note-item border-red" style="padding: 7px 10px;">
+                      <div class="note-item-header"><span class="note-item-tag" style="font-size: 11px;">&#128204; Important</span><span class="note-item-time" style="font-size: 9.5px;">5:20 PM</span></div>
+                      <ul class="note-bullets" style="font-size: 10px; padding-left: 12px; margin-top: 2px;">
+                        <li>PBL submission next week</li>
+                      </ul>
+                    </div>
+                    <div class="quick-note-item border-purple" style="padding: 7px 10px;">
+                      <div class="note-item-header"><span class="note-item-tag" style="font-size: 11px;">&#128172; Random</span><span class="note-item-time" style="font-size: 9.5px;">Yesterday</span></div>
+                      <ul class="note-bullets" style="font-size: 10px; padding-left: 12px; margin-top: 2px;">
+                        <li>Learn GSAP</li>
+                        <li>Try new UI ideas</li>
+                      </ul>
+                    </div>
+                  </div>
+                </aside>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             FLOATING PRODUCT ARTIFACTS (CLOCKIT DASHBOARD COMPONENTS)
+             ==================================================================== -->
+
+        <!-- Artifact 1: Left Card (Today's Progress Donut) -->
+        <div class="floating-artifact clockit-floating-progress" id="hero-blue-block">
+          <div class="clockit-summary-card floating-card-inner">
+            <div class="summary-card-header">
+              <div class="summary-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                <span>Today's Progress</span>
+              </div>
+              <span class="summary-more-btn">&bull;&bull;&bull;</span>
+            </div>
+            <div class="summary-card-body progress-body">
+              <div class="donut-ring-wrap" style="width: 58px; height: 58px;">
+                <svg class="donut-svg" viewBox="0 0 36 36">
+                  <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="3.5" />
+                  <path class="donut-fill" stroke-dasharray="60, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ba6542" stroke-width="3.5" stroke-linecap="round" />
+                </svg>
+                <span class="donut-center-text" style="font-size: 13px;">60%</span>
+              </div>
+              <div class="progress-details">
+                <div class="progress-ratio" style="font-size: 24px;">3 / 5</div>
+                <div class="progress-sub" style="font-size: 11.5px;">tasks completed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artifact 2: Right Peach Card (Focus Timer 25:00) -->
+        <div class="floating-artifact clockit-floating-timer" id="hero-pink-block">
+          <div class="clockit-summary-card timer-card floating-card-inner">
+            <div class="summary-card-header">
+              <div class="summary-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span>Focus Timer</span>
+              </div>
+              <span class="summary-more-btn">&bull;&bull;&bull;</span>
+            </div>
+            <div class="summary-card-body timer-body">
+              <div class="timer-left">
+                <div class="timer-digits font-serif" style="font-size: 34px;">25 : 00</div>
+                <div class="timer-sub" style="font-size: 11.5px;">Get things done.</div>
+              </div>
+              <div class="timer-play-btn" style="width: 44px; height: 44px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artifact 3: Bottom-Left Card (Backlog 4 ideas) -->
+        <div class="floating-artifact clockit-floating-backlog" id="hero-gray-block">
+          <div class="clockit-summary-card floating-card-inner">
+            <div class="summary-card-header">
+              <div class="summary-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                <span>Backlog</span>
+              </div>
+              <span class="summary-more-btn">&bull;&bull;&bull;</span>
+            </div>
+            <div class="summary-card-body backlog-body">
+              <div class="backlog-left">
+                <div class="backlog-number font-serif" style="font-size: 34px;">4</div>
+                <div class="backlog-sub" style="font-size: 11.5px;">ideas for later</div>
+              </div>
+              <div class="backlog-arrow-btn" style="width: 40px; height: 40px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artifact 4: Bottom-Right Card (Quick Notes) -->
+        <div class="floating-artifact clockit-floating-notes" id="hero-ai-composer">
+          <div class="clockit-notes-card floating-card-inner" style="width: 270px; padding: 16px 18px;">
+            <div class="notes-card-header" style="margin-bottom: 8px;">
+              <div class="notes-card-title" style="font-size: 13.5px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span>Quick Notes</span>
+              </div>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </div>
+            <div style="background: #f4f5f7; border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #9ea1a8; margin-bottom: 8px;">Write something...</div>
+            <div class="notes-items-list" style="gap: 8px;">
+              <div class="quick-note-item border-yellow" style="padding: 7px 10px;">
+                <div class="note-item-header"><span class="note-item-tag" style="font-size: 11px;">&#128161; Ideas</span><span class="note-item-time" style="font-size: 9.5px;">7:30 PM</span></div>
+                <ul class="note-bullets" style="font-size: 10px; padding-left: 12px; margin-top: 2px;">
+                  <li>Dashboard animations</li>
+                  <li>Music widget</li>
+                </ul>
+              </div>
+              <div class="quick-note-item border-red" style="padding: 7px 10px;">
+                <div class="note-item-header"><span class="note-item-tag" style="font-size: 11px;">&#128204; Important</span><span class="note-item-time" style="font-size: 9.5px;">5:20 PM</span></div>
+                <ul class="note-bullets" style="font-size: 10px; padding-left: 12px; margin-top: 2px;">
+                  <li>PBL submission next week</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carousel ticker beneath hero -->
+        <div class="floating-artifact" id="hero-carousel" style="width: 110%; left: -5%;">
+          <div class="logo-ticker-section">
+            <div class="ticker-label">Trusted by high-velocity engineering teams at</div>
+            <div class="ticker-wrapper">
+              <div class="ticker-mask-left"></div>
+              <div class="ticker-mask-right"></div>
+              
+              <div class="ticker-track">
+                <!-- Group 1 -->
+                <div class="ticker-group">
+                  <span class="ticker-logo-item">GitHub</span>
+                  <span class="ticker-logo-item">Datadog</span>
+                  <span class="ticker-logo-item">Supabase</span>
+                  <span class="ticker-logo-item">Cloudflare</span>
+                  <span class="ticker-logo-item">Vercel</span>
+                  <span class="ticker-logo-item">Stripe</span>
+                  <span class="ticker-logo-item">Monzo</span>
+                  <span class="ticker-logo-item">Retool</span>
+                  <span class="ticker-logo-item">Ramp</span>
+                </div>
+                <!-- Group 2 (Infinite repeat) -->
+                <div class="ticker-group">
+                  <span class="ticker-logo-item">GitHub</span>
+                  <span class="ticker-logo-item">Datadog</span>
+                  <span class="ticker-logo-item">Supabase</span>
+                  <span class="ticker-logo-item">Cloudflare</span>
+                  <span class="ticker-logo-item">Vercel</span>
+                  <span class="ticker-logo-item">Stripe</span>
+                  <span class="ticker-logo-item">Monzo</span>
+                  <span class="ticker-logo-item">Retool</span>
+                  <span class="ticker-logo-item">Ramp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         REAL PRODUCT DEMO: INTERACTIVE LIVE SPRINT BOARD
+         Interactive Sandbox where user can move tasks and see live updates
+         ======================================================================== -->
+    <section class="section-container" id="demo-board" style="padding-top: 60px;">
+      <div class="section-header-centered">
+        <span class="section-eyebrow">Interactive Product Demo</span>
+        <h2 class="section-title-serif font-serif">Try the live sprint board</h2>
+        <p class="section-subhead">
+          Click any task to advance its status across the governed sprint pipeline. Watch velocity calculate automatically.
+        </p>
+      </div>
+
+      <div class="interactive-demo-shell">
+        <!-- Interactive Demo Header -->
+        <div class="demo-board-toolbar">
+          <div class="demo-toolbar-left">
+            <span class="demo-sprint-badge">Sprint 34 Active</span>
+            <span class="demo-sprint-meta">Cycle Oct 01 - Oct 15 : <strong id="live-velocity-count">36 / 48 pts completed</strong></span>
+          </div>
+          <div class="demo-toolbar-right">
+            <button class="pill-btn-ghost-sm" id="reset-demo-board-btn" type="button">Reset Board</button>
+            <button class="pill-btn-primary" id="add-demo-task-btn" style="height: 34px; font-size: 13px;" type="button">+ Quick Issue</button>
+          </div>
+        </div>
+
+        <!-- Kanban Columns -->
+        <div class="demo-kanban-grid" id="kanban-grid">
+          <!-- Column 1: Backlog -->
+          <div class="kanban-column" data-status="todo">
+            <div class="kanban-col-header">
+              <span class="col-title">To Do</span>
+              <span class="col-count" id="count-todo">2</span>
+            </div>
+            <div class="kanban-cards-stack" id="stack-todo">
+              <div class="interactive-task-card" data-id="ST-120" data-points="5" tabindex="0">
+                <div class="card-top-row">
+                  <span class="task-code">ST-120</span>
+                  <span class="task-pts-chip">5 pts</span>
+                </div>
+                <div class="task-name">Cluster autoscaling threshold alerts</div>
+                <div class="card-footer-row">
+                  <span class="task-squad">Platform</span>
+                  <span class="task-action-hint">Click to advance -></span>
+                </div>
+              </div>
+
+              <div class="interactive-task-card" data-id="ST-124" data-points="8" tabindex="0">
+                <div class="card-top-row">
+                  <span class="task-code">ST-124</span>
+                  <span class="task-pts-chip">8 pts</span>
+                </div>
+                <div class="task-name">SOC 2 audit session invalidation hook</div>
+                <div class="card-footer-row">
+                  <span class="task-squad">Security</span>
+                  <span class="task-action-hint">Click to advance -></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: In Progress -->
+          <div class="kanban-column" data-status="inprogress">
+            <div class="kanban-col-header">
+              <span class="col-title">In Progress</span>
+              <span class="col-count" id="count-inprogress">1</span>
+            </div>
+            <div class="kanban-cards-stack" id="stack-inprogress">
+              <div class="interactive-task-card active-pulse" data-id="ST-104" data-points="8" tabindex="0">
+                <div class="card-top-row">
+                  <span class="task-code">ST-104</span>
+                  <span class="task-pts-chip">8 pts</span>
+                </div>
+                <div class="task-name">Realtime WebSocket sync engine</div>
+                <div class="card-footer-row">
+                  <span class="task-squad">Core Engine</span>
+                  <span class="task-action-hint">Click to advance -></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3: In Review -->
+          <div class="kanban-column" data-status="review">
+            <div class="kanban-col-header">
+              <span class="col-title">In Review</span>
+              <span class="col-count" id="count-review">1</span>
+            </div>
+            <div class="kanban-cards-stack" id="stack-review">
+              <div class="interactive-task-card" data-id="ST-108" data-points="5" tabindex="0">
+                <div class="card-top-row">
+                  <span class="task-code">ST-108</span>
+                  <span class="task-pts-chip">5 pts</span>
+                </div>
+                <div class="task-name">Multi-tenant workspace billing verification</div>
+                <div class="card-footer-row">
+                  <span class="task-squad">Billing</span>
+                  <span class="task-action-hint">Click to advance -></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 4: Done -->
+          <div class="kanban-column" data-status="done">
+            <div class="kanban-col-header">
+              <span class="col-title">Done</span>
+              <span class="col-count" id="count-done">3</span>
+            </div>
+            <div class="kanban-cards-stack" id="stack-done">
+              <div class="interactive-task-card card-done" data-id="ST-112" data-points="13" tabindex="0">
+                <div class="card-top-row">
+                  <span class="task-code">ST-112</span>
+                  <span class="task-pts-chip">13 pts</span>
+                </div>
+                <div class="task-name">Postgres logical replication pipeline</div>
+                <div class="card-footer-row">
+                  <span class="task-squad">Platform</span>
+                  <span class="task-done-badge">Merged</span>
+                </div>
+              </div>
+
+              <div class="interactive-task-card card-done" data-id="ST-115" data-points="5" tabindex="0">
+                <div class="card-top-row">
+                  <span class="task-code">ST-115</span>
+                  <span class="task-pts-chip">5 pts</span>
+                </div>
+                <div class="task-name">GitHub PR webhook auto-transition trigger</div>
+                <div class="card-footer-row">
+                  <span class="task-squad">DevOps</span>
+                  <span class="task-done-badge">Merged</span>
+                </div>
+              </div>
+
+              <div class="interactive-task-card card-done" data-id="ST-118" data-points="5" tabindex="0">
+                <div class="card-top-row">
+                  <span class="task-code">ST-118</span>
+                  <span class="task-pts-chip">5 pts</span>
+                </div>
+                <div class="task-name">Keyboard shortcut palette for issue filter</div>
+                <div class="card-footer-row">
+                  <span class="task-squad">Frontend</span>
+                  <span class="task-done-badge">Merged</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Status Bar -->
+        <div class="demo-board-footer">
+          <div class="sync-status">
+            <span class="status-indicator-dot"></span>
+            <span>Local WebSocket engine synchronized: sub-20ms latency</span>
+          </div>
+          <button class="pill-btn-ghost-sm" id="trigger-empty-state-btn" type="button">Preview Empty State</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         REAL CASE STUDIES WITH SCROLL ISLAND NAVIGATION
+         ======================================================================== -->
+    
+    <!-- Scroll Island Floating Index Pill -->
+    <div class="scroll-island-container" id="scroll-island" aria-label="Case Studies Progress and Navigation">
+      <div class="scroll-island-card" id="scroll-island-card">
+        <div class="scroll-island-trigger" id="scroll-island-trigger" role="button" aria-expanded="false" tabindex="0">
+          <div class="island-trigger-left">
+            <div class="island-progress-circle" id="island-progress-ring">
+              <div class="island-progress-cutout"></div>
+            </div>
+            <span class="island-title">Case Studies</span>
+            <svg class="island-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="island-percent-badge" id="island-progress-num">0%</div>
+        </div>
+        <div class="scroll-island-menu" id="scroll-island-menu">
+          <div class="island-menu-divider"></div>
+          <button class="island-topic-btn" data-target="cs-monzo" type="button">
+            <span>1. Monzo : Cycle Time</span>
+            <span class="island-topic-badge">-42%</span>
+          </button>
+          <button class="island-topic-btn" data-target="cs-supabase" type="button">
+            <span>2. Supabase : Async Releases</span>
+            <span class="island-topic-badge">2.1x</span>
+          </button>
+          <button class="island-topic-btn" data-target="cs-datadog" type="button">
+            <span>3. Datadog : Telemetry Sync</span>
+            <span class="island-topic-badge">140+ Svc</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="island-backdrop" id="island-backdrop"></div>
+
+    <section class="section-container" id="case-study">
+      <div class="section-header-centered" style="margin-bottom: 40px;">
+        <span class="section-eyebrow">Engineering Case Studies</span>
+        <h2 class="section-title-serif font-serif">Production metrics from scaling teams</h2>
+        <p class="section-subhead">
+          How engineering organizations replace manual tracking with git-synchronized sprints.
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 40px;">
+        <!-- Case Study 1: Monzo -->
+        <div class="case-study-box" id="cs-monzo">
+          <div class="case-study-badge">Monzo Product Engineering</div>
+          <h3 class="case-study-title font-serif">
+            How Monzo reduced sprint cycle time by 42%
+          </h3>
+          <p class="case-study-summary">
+            Monzo scaled from 120 to over 400 engineers across 28 squads. By connecting pull request webhooks directly to Tracker, sprint planning dropped from 3 hours to 45 minutes, and PR cycle times decreased from 3.8 days to 1.4 days.
+          </p>
+
+          <div class="case-study-metrics-grid">
+            <div class="metric-card">
+              <div class="metric-num">-42%</div>
+              <div class="metric-desc">Reduction in PR cycle time across platform squads</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-num">60%</div>
+              <div class="metric-desc">Less time spent in weekly sprint backlog grooming</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-num">100%</div>
+              <div class="metric-desc">Automated GitHub status synchronization</div>
+            </div>
+          </div>
+
+          <div class="case-study-quote-wrap">
+            <p class="case-study-quote font-serif">
+              "Our squads use Tracker each morning to review pull requests and plan sprint handoffs without friction."
+            </p>
+            <div class="case-study-author">
+              Sarah Chen : VP of Product Engineering at Monzo
+            </div>
+          </div>
+        </div>
+
+        <!-- Case Study 2: Supabase -->
+        <div class="case-study-box" id="cs-supabase">
+          <div class="case-study-badge">Supabase Core Infrastructure</div>
+          <h3 class="case-study-title font-serif">
+            How Supabase coordinates asynchronous releases across 18 squads
+          </h3>
+          <p class="case-study-summary">
+            Supabase coordinates open-source contributors and distributed core maintainers across 12 timezones. Commit linking and real-time state updates allow squads to coordinate releases asynchronously without blocking on daily status meetings.
+          </p>
+
+          <div class="case-study-metrics-grid">
+            <div class="metric-card">
+              <div class="metric-num">2.1x</div>
+              <div class="metric-desc">Sprint delivery velocity on core database engine</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-num">98%</div>
+              <div class="metric-desc">On-time milestone completion rate</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-num">0</div>
+              <div class="metric-desc">Manual status check-in meetings required</div>
+            </div>
+          </div>
+
+          <div class="case-study-quote-wrap">
+            <p class="case-study-quote font-serif">
+              "Tracker gives our team full visibility into active PRs and cycle bottlenecks without requiring engineers to fill out forms."
+            </p>
+            <div class="case-study-author">
+              Paul Copplestone : CEO &amp; Co-founder at Supabase
+            </div>
+          </div>
+        </div>
+
+        <!-- Case Study 3: Datadog -->
+        <div class="case-study-box" id="cs-datadog">
+          <div class="case-study-badge">Datadog Telemetry Platforms</div>
+          <h3 class="case-study-title font-serif">
+            How Datadog automated sprint issue transitions across 140 services
+          </h3>
+          <p class="case-study-summary">
+            Datadog telemetry squads manage hundreds of production service deployments weekly. Tracker webhooks automate ticket transitions upon code review approvals and CI verification, saving thousands of engineering hours annually.
+          </p>
+
+          <div class="case-study-metrics-grid">
+            <div class="metric-card">
+              <div class="metric-num">3.5h</div>
+              <div class="metric-desc">Saved per engineer every week on ticket updates</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-num">&lt; 20ms</div>
+              <div class="metric-desc">Multi-region WebSocket synchronization latency</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-num">140+</div>
+              <div class="metric-desc">Microservices tracked simultaneously</div>
+            </div>
+          </div>
+
+          <div class="case-study-quote-wrap">
+            <p class="case-study-quote font-serif">
+              "The sub-50ms synchronization is noticeable immediately. Issue states reflect live pull request activity with zero lag."
+            </p>
+            <div class="case-study-author">
+              David M. : Staff Infrastructure Engineer at Datadog
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         RESPONSE TIME PROMISE & SLA GUARANTEE
+         ======================================================================== -->
+    <section class="section-container" id="sla">
+      <div class="section-header-centered">
+        <span class="section-eyebrow">Reliability & SLA</span>
+        <h2 class="section-title-serif font-serif">Service level agreements and reliability</h2>
+        <p class="section-subhead">
+          Tracker provides clear performance guarantees and real-time infrastructure metrics.
+        </p>
+      </div>
+
+      <div class="sla-grid">
+        <div class="sla-card">
+          <div class="sla-headline">&lt; 50ms</div>
+          <div class="sla-name">Real-Time Sync Latency</div>
+          <p class="sla-desc">
+            Peer-to-peer WebSocket state synchronization updates changes instantly across all team members without full-page reloads.
+          </p>
+        </div>
+
+        <div class="sla-card">
+          <div class="sla-headline">99.99%</div>
+          <div class="sla-name">Uptime SLA Guarantee</div>
+          <p class="sla-desc">
+            Multi-region database replication with automatic failover ensures your sprint boards are always accessible worldwide.
+          </p>
+        </div>
+
+        <div class="sla-card">
+          <div class="sla-headline">&lt; 15 min</div>
+          <div class="sla-name">Priority Support Response</div>
+          <p class="sla-desc">
+            Direct access to dedicated engineering support with guaranteed response times for all workspace inquiries.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         5 COMPREHENSIVE FAQS (ACCORDION)
+         ======================================================================== -->
+    <section class="section-container" id="faqs">
+      <div class="section-header-centered">
+        <span class="section-eyebrow">Frequently Asked Questions</span>
+        <h2 class="section-title-serif font-serif">Questions and answers</h2>
+        <p class="section-subhead">
+          Everything you need to know about migrating your team and running governed sprints.
+        </p>
+      </div>
+
+      <div class="faq-accordion" id="faq-accordion">
+        <!-- FAQ 1 -->
+        <div class="faq-item">
+          <button class="faq-trigger" type="button" aria-expanded="false">
+            <span class="faq-question">How does Tracker integrate with existing git workflows?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Tracker connects directly to GitHub pull requests through webhooks. When pull requests merge, associated issues update their status automatically without manual board maintenance.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item">
+          <button class="faq-trigger" type="button" aria-expanded="false">
+            <span class="faq-question">Can we import our existing workspace from Linear or Jira?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Yes. Tracker includes a one-click migration utility that imports issues, tags, assignees, sprints, and historical cycle metrics from Linear, Jira, or CSV exports with zero data loss.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item">
+          <button class="faq-trigger" type="button" aria-expanded="false">
+            <span class="faq-question">How does the AI velocity copilot process repository data?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Tracker analyzes PR turnaround times and issue velocity using sandboxed models. Repository code and issue descriptions are not used to train public machine learning models.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="faq-item">
+          <button class="faq-trigger" type="button" aria-expanded="false">
+            <span class="faq-question">Is Tracker compliant with SOC 2 Type II and GDPR standards?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Yes. Tracker is audited annually for SOC 2 Type II compliance and is fully compliant with GDPR regulations. All data in transit is encrypted using TLS 1.3 and at rest with AES-256 encryption.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 5 -->
+        <div class="faq-item">
+          <button class="faq-trigger" type="button" aria-expanded="false">
+            <span class="faq-question">What git integrations and CI/CD platforms are supported?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Tracker supports webhooks for GitHub, GitLab, and Bitbucket. Pull request merges and approvals update issue statuses automatically.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         FINAL CTA BANNER
+         ======================================================================== -->
+    <section class="section-container" style="text-align: center; padding-top: 20px; padding-bottom: 80px;">
+      <h2 class="font-serif" style="font-size: 52px; letter-spacing: -1.2px; color: var(--color-ink-black); margin-bottom: 16px;">
+        Start tracking sprints today
+      </h2>
+      <p style="font-size: 18px; color: var(--color-slate-gray); max-width: 520px; margin: 0 auto 32px auto;">
+        Create a workspace and connect your GitHub repository in two minutes.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 12px; align-items: center;">
+        <a href="#demo-board" class="motion-btn">
+          <span class="motion-btn-circle" aria-hidden="true"></span>
+          <span class="motion-btn-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </span>
+          <span class="motion-btn-text">Start tracking free</span>
+        </a>
+        <button class="pill-btn-ghost" id="open-contact-btn" style="height: 48px; padding: 0 24px; font-size: 15px;" type="button">Get support</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       FOOTER (With Legal, Contact & Real Links)
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <div class="nav-logo">
+            <div class="nav-logo-mark">T</div>
+            <span>Tracker</span>
+          </div>
+          <p style="font-size: 14px; color: var(--color-slate-gray); line-height: 1.5;">
+            Work tracking and sprint velocity platform for software engineering teams.
+          </p>
+          <div class="footer-contact-info">
+            <div>Support: <a href="mailto:support@tracker.app" class="contact-link">support@tracker.app</a></div>
+            <div>Hotline: <a href="tel:+18005550199" class="contact-link">+1 (800) 555-0199</a></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Product</div>
+          <div class="footer-col-links">
+            <a href="#demo-board" class="footer-link">Interactive Board</a>
+            <a href="#demo-board" class="footer-link">Sprint Velocity</a>
+            <a href="#case-study" class="footer-link">Monzo Case Study</a>
+            <a href="#sla" class="footer-link">SLA &amp; Latency</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Resources</div>
+          <div class="footer-col-links">
+            <a href="#faqs" class="footer-link">FAQ & Migration</a>
+            <button class="footer-btn-link" id="simulate-404-btn" type="button">Preview 404 View</button>
+            <a href="https://status.tracker.app" class="footer-link" target="_blank" rel="noopener">System Status</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Legal & Security</div>
+          <div class="footer-col-links">
+            <button class="footer-btn-link" id="open-tos-btn" type="button">Terms of Service</button>
+            <button class="footer-btn-link" id="open-privacy-btn" type="button">Privacy Policy</button>
+            <a href="#sla" class="footer-link">SOC 2 Type II</a>
+            <a href="#sla" class="footer-link">GDPR Processing</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>(C) 2026 Tracker App Inc. All rights reserved.</div>
+        <div class="system-status-indicator">
+          <span class="status-dot"></span>
+          <span>All systems operational : Sub-50ms WebSocket sync</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       ACTUAL APP: INTERACTIVE SPRINT DASHBOARD
+       Full application experience launched on Sign In / Open App
+       ======================================================================== -->
+  <div class="actual-app-view" id="actual-app-view" hidden>
+    <div class="clockit-container">
+      <!-- ClockIt Top Header -->
+      <header class="clockit-nav">
+        <div class="clockit-logo">
+          <span class="clockit-logo-dot"></span>
+          <span class="clockit-brand-name">ClockIt</span>
+        </div>
+
+        <nav class="clockit-nav-links">
+          <button class="clockit-nav-pill active" id="clockit-nav-home" data-view="home" type="button">Home</button>
+          <button class="clockit-nav-pill" id="clockit-nav-tasks" data-view="tasks" type="button">Tasks</button>
+          <button class="clockit-nav-pill" id="clockit-nav-timer" data-view="timer" type="button">Timer</button>
+          <button class="clockit-nav-pill" id="clockit-nav-backlog" data-view="backlog" type="button">Backlog</button>
+          <button class="clockit-nav-pill" id="clockit-nav-notes" data-view="notes" type="button">Notes</button>
+        </nav>
+
+        <div class="clockit-nav-actions">
+          <button class="clockit-icon-btn" id="clockit-search-btn" type="button" aria-label="Search" title="Search tasks">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+          <div class="clockit-user-menu-wrap">
+            <button class="clockit-avatar-btn" id="clockit-user-btn" type="button" title="Alex Chen (Ashay)">A</button>
+            <div class="clockit-user-dropdown" id="clockit-user-dropdown">
+              <span class="dropdown-user-name">Ashay (Alex Chen)</span>
+              <button class="dropdown-item" id="app-exit-view-btn" type="button">&larr; Back to Website</button>
+              <button class="dropdown-item danger" id="app-signout-action-btn" type="button">Sign Out</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ClockIt Main Home Dashboard View Wrapper -->
+      <div class="clockit-home-view" id="clockit-home-view">
+        <!-- ClockIt Greeting / Banner -->
+        <section class="clockit-banner-card">
+        <div class="clockit-banner-left">
+          <div class="clockit-date-badge" id="clockit-live-date">WED, 15 OCT 2026</div>
+          <h1 class="clockit-greeting-title font-serif">Make today count.</h1>
+          <p class="clockit-greeting-sub">A little progress each day adds up to big results.</p>
+        </div>
+
+        <div class="clockit-banner-right">
+          <div class="clockit-digital-clock" id="clockit-live-clock">
+            <span class="clock-digits" id="clockit-time-digits">08 : 24</span>
+            <span class="clock-ampm" id="clockit-time-ampm">PM</span>
+          </div>
+          <div class="clockit-greeting-user">
+            <span class="greeting-sun-icon">&#9728;&#65039;</span>
+            <span id="clockit-greeting-text">Good evening, Ashay.</span>
+          </div>
+        </div>
+        
+        <!-- Mountain sunset graphic backdrop -->
+        <div class="clockit-mountain-backdrop" aria-hidden="true">
+          <svg class="mountain-backdrop-svg" viewBox="0 0 800 240" preserveAspectRatio="xMaxYMid meet">
+            <defs>
+              <linearGradient id="sunGlow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f8bfa2" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#f5a480" stop-opacity="0.6" />
+              </linearGradient>
+              <linearGradient id="mtnBack" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f0e4dc" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#fdfbf8" stop-opacity="0.2" />
+              </linearGradient>
+              <linearGradient id="mtnMid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#e2d2c7" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#f9f6f2" stop-opacity="0.3" />
+              </linearGradient>
+              <linearGradient id="mtnFront" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#cfbbb0" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#f5efe9" stop-opacity="0.4" />
+              </linearGradient>
+            </defs>
+            <!-- Rising / setting peach sun -->
+            <circle cx="680" cy="100" r="48" fill="url(#sunGlow)" />
+            <!-- Distant flying birds -->
+            <path d="M410,118 Q414,115 418,118 Q422,115 426,118" fill="none" stroke="#ba8c7b" stroke-width="1.2" opacity="0.55" />
+            <path d="M432,125 Q436,122 440,125 Q444,122 448,125" fill="none" stroke="#ba8c7b" stroke-width="1" opacity="0.45" />
+            <!-- Distant mountains -->
+            <path d="M300,240 L380,185 L460,205 L550,165 L650,195 L740,150 L800,180 L800,240 Z" fill="url(#mtnBack)" />
+            <!-- Midground mountains -->
+            <path d="M370,240 L470,192 L560,218 L660,172 L750,198 L800,165 L800,240 Z" fill="url(#mtnMid)" />
+            <!-- Foreground ridge with pine trees on far right -->
+            <path d="M450,240 L550,215 L640,228 L730,192 L800,212 L800,240 Z" fill="url(#mtnFront)" />
+            <!-- Silhouetted pine trees on far right ridge -->
+            <g fill="#43342d" opacity="0.82">
+              <!-- Pine 1 -->
+              <polygon points="772,240 769,205 775,205" />
+              <polygon points="772,165 766,180 778,180" />
+              <polygon points="772,175 764,192 780,192" />
+              <polygon points="772,188 762,206 782,206" />
+              <!-- Pine 2 -->
+              <polygon points="786,240 783,210 789,210" />
+              <polygon points="786,152 779,168 793,168" />
+              <polygon points="786,164 777,182 795,182" />
+              <polygon points="786,178 775,198 797,198" />
+              <polygon points="786,194 773,212 799,212" />
+              <!-- Pine 3 -->
+              <polygon points="756,240 754,215 758,215" />
+              <polygon points="756,182 751,194 761,194" />
+              <polygon points="756,191 749,205 763,205" />
+              <polygon points="756,202 747,217 765,217" />
+              <!-- Pine 4 small -->
+              <polygon points="742,240 740,225 744,225" />
+              <polygon points="742,198 738,208 746,208" />
+              <polygon points="742,206 736,218 748,218" />
+              <!-- Pine 5 edge -->
+              <polygon points="798,240 795,210 801,210" />
+              <polygon points="798,170 792,185 804,185" />
+              <polygon points="798,182 790,200 806,200" />
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Top Row 3 Summary Cards -->
+      <section class="clockit-summary-row">
+        <!-- Card 1: Today's Progress -->
+        <div class="clockit-summary-card">
+          <div class="summary-card-header">
+            <div class="summary-card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+              <span>Today's Progress</span>
+            </div>
+            <button class="summary-more-btn" type="button" aria-label="More options">&bull;&bull;&bull;</button>
+          </div>
+          <div class="summary-card-body progress-body">
+            <div class="donut-ring-wrap">
+              <svg class="donut-svg" viewBox="0 0 36 36">
+                <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="3.5" />
+                <path class="donut-fill" id="clockit-donut-fill" stroke-dasharray="60, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ba6542" stroke-width="3.5" stroke-linecap="round" />
+              </svg>
+              <span class="donut-center-text" id="clockit-progress-pct">60%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-ratio" id="clockit-progress-ratio">3 / 5</div>
+              <div class="progress-sub">tasks completed</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Focus Timer (Peach Card) -->
+        <div class="clockit-summary-card timer-card" id="clockit-dashboard-timer-card">
+          <div class="summary-card-header">
+            <div class="summary-card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span>Focus Timer</span>
+              <span class="timer-card-mode-badge" id="clockit-card-mode-badge">Focus</span>
+            </div>
+            <button class="summary-more-btn timer-expand-icon-btn" id="clockit-timer-expand-btn" type="button" aria-label="Open Full Pomodoro Timer" title="Open Full Pomodoro Timer">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+            </button>
+          </div>
+          <div class="summary-card-body timer-body">
+            <div class="timer-left">
+              <div class="timer-digits font-serif" id="clockit-timer-display">25 : 00</div>
+              <div class="timer-sub" id="clockit-timer-sub">Get things done.</div>
+            </div>
+            <div class="timer-card-right-group">
+              <div class="timer-mini-progress-wrap" title="Session progress">
+                <svg class="timer-mini-progress-svg" viewBox="0 0 48 48">
+                  <circle class="mini-progress-bg" cx="24" cy="24" r="20" fill="none" stroke="rgba(186, 101, 66, 0.16)" stroke-width="3.5" />
+                  <circle class="mini-progress-fill" id="clockit-card-progress-fill" cx="24" cy="24" r="20" fill="none" stroke="#ba6542" stroke-width="3.5" stroke-dasharray="125.66" stroke-dashoffset="0" stroke-linecap="round" />
+                </svg>
+                <button class="timer-play-btn" id="clockit-timer-btn" type="button" aria-label="Start Focus Timer" title="Start Focus Timer">
+                  <svg class="timer-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+                  <svg class="timer-pause-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Backlog -->
+        <div class="clockit-summary-card">
+          <div class="summary-card-header">
+            <div class="summary-card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+              <span>Backlog</span>
+            </div>
+            <button class="summary-more-btn" type="button" aria-label="More options">&bull;&bull;&bull;</button>
+          </div>
+          <div class="summary-card-body backlog-body">
+            <div class="backlog-left">
+              <div class="backlog-number" id="clockit-backlog-count">4</div>
+              <div class="backlog-sub">ideas for later</div>
+            </div>
+            <button class="backlog-arrow-btn" type="button" aria-label="View backlog ideas" title="View backlog ideas">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Lower Grid: 4-Column Kanban Task Board (Left) + Quick Notes (Right) -->
+      <section class="clockit-main-grid">
+        <!-- 4-Column Kanban Board -->
+        <div class="clockit-board-card">
+          <div class="board-card-header">
+            <div class="board-card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+              <span>Task Board</span>
+            </div>
+            <div class="board-card-actions">
+              <button class="clockit-add-task-btn" id="app-new-task-btn" type="button">+ Add Task</button>
+              <button class="summary-more-btn" type="button" aria-label="Board options">&bull;&bull;&bull;</button>
+            </div>
+          </div>
+
+          <!-- The Four Columns (Horizontally scrollable on smaller screens) -->
+          <div class="clockit-kanban-scroll-wrap">
+            <div class="clockit-kanban-columns" id="app-kanban-board">
+              <!-- Col 1: Backlog -->
+              <div class="app-board-col" data-col="todo">
+                <div class="clockit-col-header">
+                  <div class="col-indicator-wrap">
+                    <span class="status-dot dot-todo"></span>
+                    <span class="col-title-text">Backlog</span>
+                  </div>
+                  <span class="col-count-bubble" id="app-count-todo">2</span>
+                </div>
+                <div class="app-cards-container" id="app-cards-todo"></div>
+              </div>
+
+              <!-- Col 2: In Progress -->
+              <div class="app-board-col" data-col="inprogress">
+                <div class="clockit-col-header">
+                  <div class="col-indicator-wrap">
+                    <span class="status-dot dot-inprogress"></span>
+                    <span class="col-title-text">In Progress</span>
+                  </div>
+                  <span class="col-count-bubble" id="app-count-inprogress">2</span>
+                </div>
+                <div class="app-cards-container" id="app-cards-inprogress"></div>
+              </div>
+
+              <!-- Col 3: In Review -->
+              <div class="app-board-col" data-col="review">
+                <div class="clockit-col-header">
+                  <div class="col-indicator-wrap">
+                    <span class="status-dot dot-review"></span>
+                    <span class="col-title-text">In Review</span>
+                  </div>
+                  <span class="col-count-bubble" id="app-count-review">2</span>
+                </div>
+                <div class="app-cards-container" id="app-cards-review"></div>
+              </div>
+
+              <!-- Col 4: Done & Merged -->
+              <div class="app-board-col" data-col="done">
+                <div class="clockit-col-header">
+                  <div class="col-indicator-wrap">
+                    <span class="status-dot dot-done"></span>
+                    <span class="col-title-text">Done &amp; Merged</span>
+                  </div>
+                  <span class="col-count-bubble" id="app-count-done">2</span>
+                </div>
+                <div class="app-cards-container" id="app-cards-done"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Notes Card (Right Column) -->
+        <aside class="clockit-notes-card">
+          <div class="notes-card-header">
+            <div class="notes-card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span>Quick Notes</span>
+            </div>
+            <button class="notes-expand-btn" type="button" aria-label="Expand notes" title="Open notes page">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </button>
+          </div>
+
+          <form class="notes-input-form" id="clockit-notes-form">
+            <input type="text" class="notes-text-input" id="clockit-new-note-input" placeholder="Write something..." autocomplete="off">
+          </form>
+
+          <div class="notes-items-list" id="clockit-notes-list">
+            <!-- Note 1: Ideas -->
+            <div class="quick-note-item border-yellow">
+              <div class="note-item-header">
+                <span class="note-item-tag">&#128161; Ideas</span>
+                <span class="note-item-time">7:30 PM</span>
+              </div>
+              <ul class="note-bullets">
+                <li>Dashboard animations</li>
+                <li>Music widget</li>
+                <li>Local storage instead of DB</li>
+              </ul>
+            </div>
+
+            <!-- Note 2: Important -->
+            <div class="quick-note-item border-red">
+              <div class="note-item-header">
+                <span class="note-item-tag">&#128204; Important</span>
+                <span class="note-item-time">5:20 PM</span>
+              </div>
+              <ul class="note-bullets">
+                <li>PBL submission next week</li>
+                <li>Talk to team about SIH</li>
+              </ul>
+            </div>
+
+            <!-- Note 3: Random -->
+            <div class="quick-note-item border-purple">
+              <div class="note-item-header">
+                <span class="note-item-tag">&#128172; Random</span>
+                <span class="note-item-time">Yesterday</span>
+              </div>
+              <ul class="note-bullets">
+                <li>Learn GSAP</li>
+                <li>Try new UI ideas</li>
+              </ul>
+            </div>
+          </div>
+      </div><!-- /clockit-home-view -->
+
+      <!-- ========================================================================
+           FULL CLOCKIT POMODORO TIMER VIEW
+           Warm cream background, peach accents, elegant serif typography, rounded surfaces, soft shadows
+           ======================================================================== -->
+      <section class="clockit-timer-view" id="clockit-timer-view" style="display: none;">
+        <!-- Top bar with Back button and Quick Actions -->
+        <div class="timer-view-topbar">
+          <button class="timer-back-btn" id="timer-back-to-home-btn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>Back to Dashboard</span>
+          </button>
+          
+          <div class="timer-top-actions">
+            <button class="timer-icon-action-btn" id="timer-sound-toggle-btn" type="button" aria-label="Toggle chime sound" title="Sound: Chime enabled">
+              <svg class="sound-on-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              <svg class="sound-off-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+            </button>
+            <button class="timer-icon-action-btn" id="timer-settings-btn" type="button" aria-label="Timer settings" title="Configure durations">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+            <button class="timer-icon-action-btn" id="timer-zen-btn" type="button" aria-label="Zen focus mode" title="Zen Fullscreen Focus Mode">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Centered Stage Card -->
+        <div class="pomodoro-stage-card" id="pomodoro-stage-card">
+          <!-- Modes Segmented Control -->
+          <div class="timer-mode-selector" role="tablist" aria-label="Timer modes">
+            <button class="timer-mode-pill active" data-mode="focus" role="tab" aria-selected="true" type="button">
+              <span>Focus</span>
+              <span class="mode-pill-time" id="mode-pill-time-focus">25m</span>
+            </button>
+            <button class="timer-mode-pill" data-mode="shortBreak" role="tab" aria-selected="false" type="button">
+              <span>Short Break</span>
+              <span class="mode-pill-time" id="mode-pill-time-short">5m</span>
+            </button>
+            <button class="timer-mode-pill" data-mode="longBreak" role="tab" aria-selected="false" type="button">
+              <span>Long Break</span>
+              <span class="mode-pill-time" id="mode-pill-time-long">15m</span>
+            </button>
+            <button class="timer-mode-pill" data-mode="custom" role="tab" aria-selected="false" type="button">
+              <span>Custom</span>
+              <span class="mode-pill-time" id="mode-pill-time-custom">30m</span>
+            </button>
+          </div>
+
+          <!-- Circular Timer Interactive Arena with Landscape Backdrop & Progress Ring -->
+          <div class="pomodoro-circle-arena" id="pomodoro-circle-arena">
+            <!-- Ripple celebration ring container -->
+            <div class="pomodoro-completion-ripple" id="pomodoro-completion-ripple" aria-hidden="true"></div>
+
+            <!-- SVG Container for Landscape + Progress Ring -->
+            <svg class="pomodoro-svg-stage" viewBox="0 0 360 360" id="pomodoro-svg-stage" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <!-- Clip path for circular mountain landscape -->
+                <clipPath id="pomodoroCircleClip">
+                  <circle cx="180" cy="180" r="150" />
+                </clipPath>
+
+                <!-- Peach Sun Glow Gradient -->
+                <radialGradient id="pomoSunGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#fff0e6" stop-opacity="1" />
+                  <stop offset="40%" stop-color="#f8bfa2" stop-opacity="0.9" />
+                  <stop offset="75%" stop-color="#f5a480" stop-opacity="0.4" />
+                  <stop offset="100%" stop-color="#fdfbf8" stop-opacity="0" />
+                </radialGradient>
+
+                <!-- Ambient Sunlight Shifting Gradient -->
+                <linearGradient id="pomoSkyGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#fff8f2" />
+                  <stop offset="45%" stop-color="#fbeade" />
+                  <stop offset="100%" stop-color="#f4e4d8" />
+                </linearGradient>
+
+                <!-- Mountain Gradients matching ClockIt palette -->
+                <linearGradient id="pomoMtnBack" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ecd9ce" stop-opacity="0.95" />
+                  <stop offset="100%" stop-color="#fdfbf9" stop-opacity="0.3" />
+                </linearGradient>
+                <linearGradient id="pomoMtnMid" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#dfc7b8" stop-opacity="0.98" />
+                  <stop offset="100%" stop-color="#f7f1ec" stop-opacity="0.4" />
+                </linearGradient>
+                <linearGradient id="pomoMtnFront" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#caaead" stop-opacity="1" />
+                  <stop offset="100%" stop-color="#eee4dd" stop-opacity="0.5" />
+                </linearGradient>
+
+                <!-- Center Soft Frosted Vignette for supreme text readability -->
+                <radialGradient id="pomoCenterVignette" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#fffcf9" stop-opacity="0.95" />
+                  <stop offset="65%" stop-color="#fff8f2" stop-opacity="0.84" />
+                  <stop offset="100%" stop-color="#fff5ee" stop-opacity="0.45" />
+                </radialGradient>
+
+                <!-- Dynamic Circular Progress Stroke Gradient (Focus peach) -->
+                <linearGradient id="pomoRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f8a27d" />
+                  <stop offset="60%" stop-color="#ba6542" />
+                  <stop offset="100%" stop-color="#8f4427" />
+                </linearGradient>
+
+                <!-- Break Mode Ring Gradient (Soothing sage-peach) -->
+                <linearGradient id="pomoRingBreakGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#72b595" />
+                  <stop offset="100%" stop-color="#3d8262" />
+                </linearGradient>
+              </defs>
+
+              <!-- Layered Landscape clipped to circle -->
+              <g clip-path="url(#pomodoroCircleClip)" class="pomodoro-landscape-group" id="pomodoro-landscape-group">
+                <!-- Sky backdrop -->
+                <rect x="0" y="0" width="360" height="360" fill="url(#pomoSkyGradient)" />
+
+                <!-- Ambient Sunlight Glow Layer (slow drifting / pulsing) -->
+                <circle class="ambient-sunlight-pulse" cx="240" cy="120" r="120" fill="url(#pomoSunGlow)" id="pomo-sunlight-glow" />
+
+                <!-- Rising / Setting Peach Sun (responds to parallax) -->
+                <g class="pomo-parallax-sun" id="pomo-parallax-sun">
+                  <circle cx="240" cy="120" r="38" fill="url(#pomoSunGlow)" />
+                  <circle cx="240" cy="120" r="24" fill="#f8bfa2" opacity="0.9" />
+                </g>
+
+                <!-- Distant Birds -->
+                <g class="pomo-parallax-birds" id="pomo-parallax-birds" opacity="0.6">
+                  <path d="M120,132 Q124,128 128,132 Q132,128 136,132" fill="none" stroke="#ba8c7b" stroke-width="1.3" />
+                  <path d="M142,140 Q146,136 150,140 Q154,136 158,140" fill="none" stroke="#ba8c7b" stroke-width="1.1" />
+                </g>
+
+                <!-- Distant Mountain Peaks -->
+                <path class="pomo-parallax-mtn-back" id="pomo-parallax-mtn-back"
+                  d="M0,360 L0,250 L60,205 L130,230 L210,185 L280,215 L330,175 L360,195 L360,360 Z"
+                  fill="url(#pomoMtnBack)" />
+
+                <!-- Midground Mountain Peaks -->
+                <path class="pomo-parallax-mtn-mid" id="pomo-parallax-mtn-mid"
+                  d="M0,360 L0,268 L80,225 L160,248 L240,200 L310,232 L360,192 L360,360 Z"
+                  fill="url(#pomoMtnMid)" />
+
+                <!-- Foreground Ridge with Pine Trees -->
+                <path class="pomo-parallax-mtn-front" id="pomo-parallax-mtn-front"
+                  d="M0,360 L0,295 L90,260 L180,278 L260,235 L330,255 L360,238 L360,360 Z"
+                  fill="url(#pomoMtnFront)" />
+
+                <!-- Pine Trees on Ridge -->
+                <g class="pomo-parallax-trees" id="pomo-parallax-trees" fill="#43342d" opacity="0.85">
+                  <polygon points="305,360 303,265 307,265" /><polygon points="305,230 300,244 310,244" /><polygon points="305,240 298,255 312,255" /><polygon points="305,251 296,268 314,268" />
+                  <polygon points="320,360 318,255 322,255" /><polygon points="320,218 314,233 326,233" /><polygon points="320,229 312,246 328,246" /><polygon points="320,242 310,260 330,260" />
+                  <polygon points="288,360 286,280 290,280" /><polygon points="288,248 284,260 292,260" /><polygon points="288,257 282,270 294,270" /><polygon points="288,267 280,282 296,282" />
+                  <polygon points="274,360 273,292 275,292" /><polygon points="274,266 271,276 277,276" /><polygon points="274,274 269,285 279,285" />
+                  <polygon points="338,360 336,260 340,260" /><polygon points="338,225 333,239 343,239" /><polygon points="338,236 331,252 345,252" /><polygon points="338,248 329,266 347,266" />
+                </g>
+
+                <!-- Center Soft Frosted Vignette for clean readability -->
+                <circle cx="180" cy="180" r="120" fill="url(#pomoCenterVignette)" />
+              </g>
+
+              <!-- Circular Progress Rings -->
+              <!-- Background ring track -->
+              <circle class="pomodoro-ring-track" cx="180" cy="180" r="158" fill="none" stroke="rgba(186, 101, 66, 0.14)" stroke-width="8" />
+
+              <!-- Active Animated Progress Ring (Circumference ≈ 992.74) -->
+              <circle class="pomodoro-ring-fill" id="pomodoro-ring-fill"
+                cx="180" cy="180" r="158"
+                fill="none"
+                stroke="url(#pomoRingGradient)"
+                stroke-width="8"
+                stroke-dasharray="992.74"
+                stroke-dashoffset="0"
+                stroke-linecap="round"
+                transform="rotate(-90 180 180)" />
+            </svg>
+
+            <!-- Center Countdown Content (Layered over the circle) -->
+            <div class="pomodoro-clock-face">
+              <!-- Mode Tag / Pill -->
+              <div class="pomodoro-status-pill" id="pomodoro-status-pill">
+                <span class="status-pulse-dot" id="pomodoro-status-dot"></span>
+                <span id="pomodoro-status-label">Focus Session</span>
+              </div>
+
+              <!-- Huge Serif Countdown Digits (25:00) -->
+              <div class="pomodoro-digits font-serif" id="pomodoro-digits" aria-live="polite">25 : 00</div>
+
+              <!-- Motivational subtitle -->
+              <div class="pomodoro-motto" id="pomodoro-motto">Make today count. Stay in flow.</div>
+            </div>
+          </div>
+
+          <!-- Primary Timer Controls Row -->
+          <div class="pomodoro-controls-row">
+            <!-- Reset Button -->
+            <button class="timer-control-btn reset-btn" id="pomodoro-reset-btn" type="button" aria-label="Reset timer" title="Reset session (R)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+            </button>
+
+            <!-- Prominent Play / Pause Button -->
+            <button class="timer-control-btn play-btn" id="pomodoro-play-btn" type="button" aria-label="Start Focus Timer" title="Start Timer (Space)">
+              <svg class="pomo-play-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+              <svg class="pomo-pause-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+            </button>
+
+            <!-- Skip Button -->
+            <button class="timer-control-btn skip-btn" id="pomodoro-skip-btn" type="button" aria-label="Skip to next session" title="Skip to next (S)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            </button>
+          </div>
+
+          <!-- Completed Focus Sessions Tracker -->
+          <div class="pomodoro-tracker-footer">
+            <div class="tracker-dots-row" id="pomodoro-dots-row" aria-label="Focus cycle progress">
+              <span class="session-dot current" data-index="0" title="Session 1"></span>
+              <span class="session-dot" data-index="1" title="Session 2"></span>
+              <span class="session-dot" data-index="2" title="Session 3"></span>
+              <span class="session-dot" data-index="3" title="Session 4"></span>
+            </div>
+            <div class="tracker-meta-text">
+              <span id="pomodoro-cycle-text">Session 1 of 4</span>
+              <span class="tracker-meta-divider">&bull;</span>
+              <span id="pomodoro-total-completed">0 completed today</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Duration Configuration Popover / Modal -->
+        <div class="timer-settings-modal" id="timer-settings-modal" hidden>
+          <div class="timer-settings-card">
+            <div class="settings-card-header">
+              <h3 class="font-serif" style="font-size: 20px; margin: 0; color: #17191c;">Timer Preferences</h3>
+              <button class="settings-close-btn" id="timer-settings-close-btn" type="button" aria-label="Close settings">&times;</button>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-field-group">
+                <label for="setting-focus-dur">Focus Duration (minutes)</label>
+                <div class="number-input-row">
+                  <input type="number" id="setting-focus-dur" min="1" max="120" value="25" class="timer-number-input">
+                  <span class="unit-label">min</span>
+                </div>
+              </div>
+              <div class="settings-field-group">
+                <label for="setting-short-dur">Short Break Duration (minutes)</label>
+                <div class="number-input-row">
+                  <input type="number" id="setting-short-dur" min="1" max="60" value="5" class="timer-number-input">
+                  <span class="unit-label">min</span>
+                </div>
+              </div>
+              <div class="settings-field-group">
+                <label for="setting-long-dur">Long Break Duration (minutes)</label>
+                <div class="number-input-row">
+                  <input type="number" id="setting-long-dur" min="1" max="90" value="15" class="timer-number-input">
+                  <span class="unit-label">min</span>
+                </div>
+              </div>
+              <div class="settings-field-group">
+                <label for="setting-custom-dur">Custom Session (minutes)</label>
+                <div class="number-input-row">
+                  <input type="number" id="setting-custom-dur" min="1" max="180" value="30" class="timer-number-input">
+                  <span class="unit-label">min</span>
+                </div>
+              </div>
+              <div class="settings-field-checkbox">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="setting-sound-enabled" checked>
+                  <span>Play gentle harmonic chime on session completion</span>
+                </label>
+              </div>
+              <div class="settings-field-checkbox">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="setting-notifs-enabled">
+                  <span>Send desktop notification on completion</span>
+                </label>
+              </div>
+            </div>
+            <div class="settings-card-footer">
+              <button class="pill-btn-ghost-sm" id="timer-settings-reset-defaults" type="button">Reset Defaults</button>
+              <button class="pill-btn-primary" id="timer-settings-save-btn" type="button" style="height: 36px; padding: 0 18px;">Save Settings</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Completion Overlay / Banner -->
+        <div class="pomodoro-completion-banner" id="pomodoro-completion-banner" hidden>
+          <div class="completion-banner-card">
+            <div class="completion-icon-badge">&#127881;</div>
+            <h3 class="font-serif completion-title" id="completion-banner-title">Focus Session Complete!</h3>
+            <p class="completion-sub" id="completion-banner-sub">Outstanding focus. Step back and recharge with a 5-minute break.</p>
+            <div class="completion-actions">
+              <button class="pill-btn-primary" id="completion-next-action-btn" type="button">Start Short Break (5m)</button>
+              <button class="pill-btn-ghost-sm" id="completion-dismiss-btn" type="button">Dismiss</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Quick Create Task Modal inside App -->
+    <div class="modal-backdrop" id="app-create-task-modal" role="dialog" aria-modal="true" hidden>
+      <div class="modal-card" style="max-width: 480px;">
+        <div class="modal-header">
+          <h3 class="modal-title font-serif" style="font-size: 22px;">Create New Sprint Task</h3>
+          <button class="modal-close-btn" data-close="app-create-task-modal" type="button" aria-label="Close dialog">&times;</button>
+        </div>
+        <form id="app-create-task-form" style="padding: 20px 24px;">
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px;">Task Title</label>
+            <input type="text" id="new-task-title" required class="auth-text-input" placeholder="e.g. Implement WebSocket heartbeat reconnection" style="width: 100%; height: 42px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; padding: 0 14px; font-size: 14px;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px;">
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px;">Squad</label>
+              <select id="new-task-squad" style="width: 100%; height: 40px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; padding: 0 10px; font-size: 13.5px; background: #fff;">
+                <option value="Platform">Platform</option>
+                <option value="Frontend">Frontend</option>
+                <option value="Security">Security</option>
+                <option value="DevOps">DevOps</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px;">Estimate (Story Pts)</label>
+              <select id="new-task-points" style="width: 100%; height: 40px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; padding: 0 10px; font-size: 13.5px; background: #fff;">
+                <option value="1">1 pt (Trivial)</option>
+                <option value="2">2 pts (Small)</option>
+                <option value="3" selected>3 pts (Medium)</option>
+                <option value="5">5 pts (Large)</option>
+                <option value="8">8 pts (Complex)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="pill-btn-ghost-sm" data-close="app-create-task-modal" type="button">Cancel</button>
+            <button class="pill-btn-primary" type="submit" style="height: 38px;">Create Issue</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky CTA for Mobile Viewports -->
+  <aside class="mobile-sticky-cta" id="mobile-sticky-bar">
+    <div class="mobile-cta-text">Tracker : Governed work tracking</div>
+    <a href="#demo-board" class="pill-btn-primary" style="height: 36px; padding: 0 16px; font-size: 13px;">Get started</a>
+  </aside>
+
+  <!-- ========================================================================
+       ACCESSIBLE MODALS (Auth / Socials Drawer, Terms, Privacy, 404, Empty State)
+       ======================================================================== -->
+  
+  <!-- Social Sign In / Family-Style Auth Drawer -->
+  <div class="modal-backdrop" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" hidden>
+    <div class="auth-modal-card">
+      <div class="auth-modal-header">
+        <h2 id="auth-modal-title" class="auth-modal-title">Sign In</h2>
+        <button class="auth-close-btn" data-close="auth-modal" type="button" aria-label="Close dialog">&times;</button>
+      </div>
+
+
+      <!-- Socials Row (Chrome, Discord, GitHub, Apple, X) -->
+      <div class="auth-socials-row">
+        <button class="auth-social-btn" data-provider="Google" type="button" title="Sign in with Google" aria-label="Sign in with Google">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="4"></circle>
+            <line x1="21.17" y1="8" x2="12" y2="8"></line>
+            <line x1="3.95" y1="6.06" x2="8.54" y2="14"></line>
+            <line x1="10.88" y1="21.94" x2="15.46" y2="14"></line>
+          </svg>
+        </button>
+        <button class="auth-social-btn" data-provider="Discord" type="button" title="Sign in with Discord" aria-label="Sign in with Discord">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+        </button>
+        <button class="auth-social-btn" data-provider="GitHub" type="button" title="Sign in with GitHub" aria-label="Sign in with GitHub">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+          </svg>
+        </button>
+        <button class="auth-social-btn" data-provider="Apple" type="button" title="Sign in with Apple" aria-label="Sign in with Apple">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.93-2.85-.9.04-1.99.6-2.63 1.35-.56.65-1.05 1.72-.92 2.74 1 .08 2.01-.49 2.62-1.24z"/>
+          </svg>
+        </button>
+        <button class="auth-social-btn" data-provider="X" type="button" title="Sign in with X" aria-label="Sign in with X">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Segmented Tabs Nav -->
+      <div class="auth-tabs-nav" role="tablist">
+        <button class="auth-tab-btn active" data-tab="email" role="tab" aria-selected="true" type="button">Email</button>
+        <button class="auth-tab-btn" data-tab="phone" role="tab" aria-selected="false" type="button">Phone</button>
+        <button class="auth-tab-btn" data-tab="passkey" role="tab" aria-selected="false" type="button">Passkey</button>
+      </div>
+
+      <!-- Tab View: Email -->
+      <div class="auth-view-content" id="auth-view-email">
+        <form id="auth-email-form" class="auth-input-container">
+          <input type="email" id="auth-email-input" class="auth-text-input" placeholder="alex.chen@acme.engineering" value="alex.chen@acme.engineering" required autocomplete="email">
+          <button class="auth-action-arrow-btn" type="submit" aria-label="Submit Email">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Tab View: Phone -->
+      <div class="auth-view-content" id="auth-view-phone" style="display: none;">
+        <form id="auth-phone-form" class="auth-input-container">
+          <input type="tel" id="auth-phone-input" class="auth-text-input" placeholder="+1 555 234 5678" required autocomplete="tel">
+          <button class="auth-action-arrow-btn" type="submit" aria-label="Submit Phone Number">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Tab View: Passkey -->
+      <div class="auth-view-content" id="auth-view-passkey" style="display: none;">
+        <div class="passkey-view-card">
+          <div class="passkey-scanner-wrap">
+            <svg class="passkey-scanner-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <rect class="passkey-scan-stroke" x="2" y="2" width="96" height="96" rx="18" ry="18" fill="none" stroke="#2563eb" stroke-width="2.5" />
+            </svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#17191c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"></path>
+              <path d="M14 13.12c0 2.38 0 6.38-1 8.88"></path>
+              <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"></path>
+              <path d="M2 12a10 10 0 0 1 18-6"></path>
+              <path d="M2 16h.01"></path>
+              <path d="M21.8 16c.2-2 .131-5.354 0-6"></path>
+              <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"></path>
+              <path d="M8.65 22c.21-.66.45-1.32.57-2"></path>
+              <path d="M9 6.8a6 6 0 0 1 9 5.2v2"></path>
+            </svg>
+          </div>
+          <p style="font-size: 13px; color: var(--color-slate-gray); margin: 0;">Touch your device biometric sensor to authenticate</p>
+          <button class="pill-btn-primary" id="verify-passkey-btn" style="width: 100%; height: 40px; font-size: 13.5px;" type="button">Verify with Touch ID / Windows Hello</button>
+        </div>
+      </div>
+
+      <div class="auth-divider-row">
+        <span>OR</span>
+      </div>
+
+      <button class="auth-connect-git-btn" id="connect-git-btn" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+        <span>Connect GitHub Workspace</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Terms of Service Modal -->
+  <div class="modal-backdrop" id="tos-modal" role="dialog" aria-modal="true" aria-labelledby="tos-title" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="tos-title" class="modal-title font-serif">Terms of Service</h3>
+        <button class="modal-close-btn" data-close="tos-modal" type="button" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body font-sans">
+        <p><strong>Last Updated: October 2026</strong></p>
+        <p>By using Tracker ("Service"), you agree to these Terms. Tracker is provided by Tracker App Inc. on a subscription basis for professional software teams.</p>
+        <h4>1. Account Registration</h4>
+        <p>You must provide accurate information when creating an organization workspace. You are responsible for safeguarding your credentials.</p>
+        <h4>2. Data Ownership</h4>
+        <p>You retain 100% intellectual property ownership of all issues, code repositories, comments, and task data stored in your workspace.</p>
+        <h4>3. SLA & Availability</h4>
+        <p>We guarantee 99.99% monthly service uptime under our Enterprise Agreement. Scheduled maintenance is communicated at least 48 hours in advance.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="pill-btn-primary" data-close="tos-modal" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Policy Modal -->
+  <div class="modal-backdrop" id="privacy-modal" role="dialog" aria-modal="true" aria-labelledby="privacy-title" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="privacy-title" class="modal-title font-serif">Privacy Policy</h3>
+        <button class="modal-close-btn" data-close="privacy-modal" type="button" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body font-sans">
+        <p><strong>Last Updated: October 2026</strong></p>
+        <p>We do not sell customer data or use private repositories to train machine learning models.</p>
+        <h4>1. Data We Collect</h4>
+        <p>We collect account email addresses, workspace metadata, and git webhook event payloads necessary to provide issue synchronization.</p>
+        <h4>2. SOC 2 & GDPR Compliance</h4>
+        <p>All data is processed in secure ISO 27001-certified data centers with automated encryption at rest and in transit.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="pill-btn-primary" data-close="privacy-modal" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 404 Simulation Modal -->
+  <div class="modal-backdrop" id="notfound-modal" role="dialog" aria-modal="true" aria-labelledby="notfound-title" hidden>
+    <div class="modal-card" style="text-align: center; max-width: 440px;">
+      <div class="modal-body font-sans" style="padding-top: 32px;">
+        <div style="font-family: var(--font-signifier); font-size: 56px; color: var(--color-ink-black); margin-bottom: 8px;">404</div>
+        <h3 id="notfound-title" style="font-size: 20px; font-weight: 500; margin-bottom: 8px;">Issue or Page Not Found</h3>
+        <p style="font-size: 14px; color: var(--color-slate-gray); line-height: 1.5; margin-bottom: 24px;">
+          The requested task identifier does not exist or may have been pruned during sprint archiving.
+        </p>
+        <button class="pill-btn-primary" data-close="notfound-modal" type="button">Return to Active Sprint</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State Demo Modal -->
+  <div class="modal-backdrop" id="empty-modal" role="dialog" aria-modal="true" aria-labelledby="empty-title" hidden>
+    <div class="modal-card" style="text-align: center; max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="empty-title" class="modal-title font-serif">Clean Sprint State</h3>
+        <button class="modal-close-btn" data-close="empty-modal" type="button" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body font-sans" style="padding: 24px 16px;">
+        <div class="empty-state-illustration">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#777b86" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+            <path d="M9 9h6M9 13h6M9 17h4"></path>
+          </svg>
+        </div>
+        <h4 style="font-size: 18px; font-weight: 500; margin: 12px 0 6px 0;">No issues in this view</h4>
+        <p style="font-size: 14px; color: var(--color-slate-gray); line-height: 1.45; margin-bottom: 20px;">
+          All sprint tasks have been completed and verified against production deployment.
+        </p>
+        <button class="pill-btn-primary" id="seed-sample-tasks-btn" type="button">+ Create Sample Issue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MUSIC WIDGET (Deep Focus Sprint Audio Engine & Controller)
+       ======================================================================== -->
+  <aside class="music-widget-container" id="music-widget" aria-label="Audio controller">
+    <!-- Collapsed Floating Dynamic Capsule Pill -->
+    <div class="music-pill-trigger" id="music-pill-trigger" role="region" aria-label="Background music mini player">
+      <button class="music-pulse-disc" id="music-disc-btn" type="button" aria-label="Expand soundstage player" title="Expand player">
+        <span class="disc-spindle-dot"></span>
+      </button>
+
+      <div class="music-pill-info" id="music-pill-info" role="button" tabindex="0" title="Click to expand soundstage">
+        <span class="music-pill-label">Sprint Lo-Fi Radio</span>
+        <span class="music-pill-status" id="music-pill-status">Paused • Tap to play</span>
+      </div>
+
+      <div class="music-eq-mini" id="music-eq-mini" aria-hidden="true">
+        <span class="eq-mini-bar"></span>
+        <span class="eq-mini-bar"></span>
+        <span class="eq-mini-bar"></span>
+        <span class="eq-mini-bar"></span>
+      </div>
+
+      <button class="music-pill-play-btn" id="music-pill-play-btn" type="button" aria-label="Play music" title="Play">
+        <svg class="pill-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+        <svg class="pill-pause-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+      </button>
+
+      <button class="music-pill-expand-btn" id="music-pill-expand-btn" type="button" aria-label="Expand soundstage deck" title="Expand deck">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+      </button>
+    </div>
+
+    <!-- Expanded Soundstage Player Card -->
+    <div class="music-player-card" id="music-player-card" hidden>
+      <div class="player-card-header">
+        <div class="player-header-left">
+          <span class="player-badge">Focus Soundstage</span>
+          <span class="player-station">Sprint Beats</span>
+        </div>
+        <button class="player-minimize-btn" id="music-minimize-btn" type="button" aria-label="Minimize player" title="Minimize player">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- Provider tabs -->
+      <div class="music-provider-tabs" role="tablist" aria-label="Music source">
+        <button class="music-provider-tab active" data-provider="webaudio" role="tab" title="Built-in synthesizer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Lo-Fi
+        </button>
+        <button class="music-provider-tab" data-provider="youtube" role="tab" title="YouTube">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7s-.3-1.9-1.2-2.7c-1.1-1.2-2.4-1.2-3-.3C16.5 4 12 4 12 4s-4.5 0-6.8.1C4.4 5.1 3.1 5.1 2.2 6.3 1.3 7 1 9 1 9S.7 11.2.7 13.4v2C.7 17.6 1 19.6 1 19.6s.3 1.9 1.2 2.7c1.1 1.2 2.6 1.2 3.3 1.2C7.8 23.7 12 24 12 24s4.5 0 6.8-.5c.7-.1 1.9-.1 3-.3C22.7 22.5 23 20.5 23 20.5S23.3 18.2 23.3 16v-2c0-2.2-.3-4.4-.3-4.4z"/><polygon fill="white" points="9.75 15.02 15.5 11.99 9.75 8.98 9.75 15.02"/></svg>
+          YouTube
+        </button>
+        <button class="music-provider-tab" data-provider="spotify" role="tab" title="Spotify">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.52 17.28c-.24.36-.66.48-1.02.24-2.82-1.74-6.36-2.1-10.56-1.14-.42.12-.78-.18-.9-.54-.12-.42.18-.78.54-.9 4.56-1.02 8.52-.6 11.64 1.26.42.18.48.66.3 1.08zm1.44-3.3c-.3.42-.84.6-1.26.3-3.24-1.98-8.16-2.58-11.94-1.38-.48.12-.99-.12-1.14-.6-.12-.48.12-.99.6-1.14 4.38-1.32 9.78-.66 13.5 1.62.36.18.54.78.24 1.2zm.12-3.36c-3.84-2.28-10.2-2.52-13.86-1.38-.6.18-1.2-.18-1.38-.72-.18-.6.18-1.2.72-1.38 4.2-1.26 11.22-.96 15.66 1.62.54.3.72 1.02.42 1.56-.3.42-1.02.6-1.56.3z"/></svg>
+          Spotify
+        </button>
+      </div>
+
+      <!-- Error banner -->
+      <div class="music-error-banner" hidden></div>
+
+      <div class="player-track-row">
+        <!-- Vinyl Art / Waveform Visualizer -->
+        <div class="player-vinyl-wrap" id="player-vinyl">
+          <div class="player-sound-waves" id="player-waves" aria-hidden="true">
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+          </div>
+        </div>
+
+        <div class="player-track-details">
+          <div class="track-title-ticker">
+            <span class="track-title" id="music-track-title">01 • Deep Flow : Sprint Beats</span>
+          </div>
+          <span class="track-artist" id="music-track-artist">Tracker Lo-Fi • 48kHz Stereo</span>
+          <div class="track-genre-chip" id="music-track-genre">Lo-Fi Rhodes Chords</div>
+        </div>
+      </div>
+
+      <!-- WebAudio mood presets (shown when provider = webaudio) -->
+      <div class="provider-panel" data-provider-panel="webaudio">
+        <div class="player-presets-row" id="music-presets-row">
+          <button class="preset-pill active" data-track="0" type="button">Lo-Fi</button>
+          <button class="preset-pill" data-track="1" type="button">Dreamwave</button>
+          <button class="preset-pill" data-track="2" type="button">Focus Drone</button>
+        </div>
+      </div>
+
+      <!-- YouTube panel (shown when provider = youtube) -->
+      <div class="provider-panel music-input-panel" data-provider-panel="youtube" hidden>
+        <label class="music-input-label">YouTube Video / Playlist URL</label>
+        <div class="music-input-row">
+          <input class="music-input-field" id="yt-video-id-input" type="text" placeholder="https://youtu.be/jfKfPfyJRdk" autocomplete="off" spellcheck="false">
+          <button class="music-load-btn" id="yt-load-btn" type="button">Load</button>
+        </div>
+        <p class="music-input-hint">Paste any YouTube URL or 11-char video ID. Playback opens in the background.</p>
+        <!-- Hidden YT player target -->
+        <div id="yt-player-frame" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;"></div>
+      </div>
+
+      <!-- Spotify panel (shown when provider = spotify) -->
+      <div class="provider-panel music-input-panel" data-provider-panel="spotify" hidden>
+        <label class="music-input-label">Spotify Playlist / Track URL</label>
+        <div class="music-input-row">
+          <input class="music-input-field" id="spotify-uri-input" type="text" placeholder="https://open.spotify.com/playlist/37i9dQ..." autocomplete="off" spellcheck="false">
+          <button class="music-load-btn" id="spotify-load-btn" type="button">Load</button>
+        </div>
+        <p class="music-input-hint">Spotify requires an active account. Audio plays in the Spotify app or web player.</p>
+        <div id="spotify-embed-container" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;"></div>
+      </div>
+
+      <!-- Scrubber Progress Bar -->
+      <div class="player-progress-area">
+        <div class="player-progress-bar" id="music-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0" title="Seek">
+          <div class="progress-fill" id="music-progress-fill" style="width: 0%;"></div>
+        </div>
+        <div class="player-time-labels">
+          <span id="music-current-time">0:00</span>
+          <span id="music-duration-time">3:20</span>
+        </div>
+      </div>
+
+      <!-- Controls Row: Prev, Play/Pause, Next, Volume -->
+      <div class="player-controls-row">
+        <button class="player-ctrl-btn" id="music-prev-btn" type="button" aria-label="Previous track" title="Previous Track">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5"></line></svg>
+        </button>
+
+        <button class="player-main-play-btn" id="music-main-play-btn" type="button" aria-label="Play or pause" title="Play">
+          <svg class="main-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+          <svg class="main-pause-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        </button>
+
+        <button class="player-ctrl-btn" id="music-next-btn" type="button" aria-label="Next track" title="Next Track">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"></line></svg>
+        </button>
+
+        <!-- Volume slider -->
+        <div class="player-volume-wrap">
+          <button class="player-volume-btn" id="music-mute-btn" type="button" aria-label="Toggle mute" title="Mute / Unmute">
+            <svg class="vol-high-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <svg class="vol-muted-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+          </button>
+          <input type="range" class="player-vol-slider" id="music-vol-slider" min="0" max="1" step="0.05" value="0.7" aria-label="Volume slider">
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Toast Notification element -->
+  <div class="toast-notification" id="toast" role="status" aria-live="polite" hidden>
+    <span class="toast-dot"></span>
+    <span class="toast-msg" id="toast-msg">Task updated successfully</span>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+

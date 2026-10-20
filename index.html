@@ -61,6 +61,17 @@
     gtag('js', new Date());
     gtag('config', 'G-TRACKER2026', { 'anonymize_ip': true });
   </script>
+
+  <!-- Theme initialization: Default to light mode first -->
+  <script>
+    try {
+      if (localStorage.getItem('tracker-theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <!-- Breadcrumbs for SEO & Accessibility -->

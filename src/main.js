@@ -716,21 +716,19 @@ function initAuthDrawer() {
 function initThemeToggle() {
   const toggleBtn = document.getElementById('theme-toggle-btn');
   const storedTheme = localStorage.getItem('tracker-theme');
-  const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initialDark = storedTheme === 'dark' || (!storedTheme && systemPrefersDark);
-  if (initialDark) document.documentElement.classList.add('dark');
-  else             document.documentElement.classList.remove('dark');
+  // Default to light mode on first visit; only activate dark if explicitly set by the user
+  const initialDark = storedTheme === 'dark';
+  if (initialDark) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
 
   if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('tracker-theme', isDark ? 'dark' : 'light');
       showToast(isDark ? 'Switched to Dark mode' : 'Switched to Light mode', 2000);
-    });
-  }
-  if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-      if (!localStorage.getItem('tracker-theme')) document.documentElement.classList.toggle('dark', e.matches);
     });
   }
 }

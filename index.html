@@ -1616,117 +1616,252 @@
             </div>
           </div><!-- /tracker-view-tasks -->
 
-          <!-- ==================================================================
-               VIEW 3: CALENDAR (Weekly View Displaying Tasks and Deadlines)
+                    <!-- ==================================================================
+               VIEW 3: CALENDAR (Subscription & Sprint Calendar - watermelon.sh)
                ================================================================== -->
           <div class="tracker-view" id="tracker-view-calendar" hidden>
             <div class="tracker-view-header">
               <div class="header-titles">
-                <h1 class="tracker-page-title font-serif">Sprint Calendar</h1>
-                <p class="tracker-page-subtitle">Weekly view of scheduled tasks, deadlines, and milestones.</p>
+                <h1 class="tracker-page-title font-serif">Subscription &amp; Sprint Calendar</h1>
+                <p class="tracker-page-subtitle">Track recurring payments, service subscriptions, and sprint delivery milestones.</p>
               </div>
               <div class="header-right-tools">
-                <div class="calendar-nav-buttons">
-                  <button class="pill-btn-ghost-sm" id="cal-prev-btn" type="button">&larr; Prev</button>
-                  <span class="cal-week-badge">19 Oct &ndash; 25 Oct 2026 (Active)</span>
-                  <button class="pill-btn-ghost-sm" id="cal-next-btn" type="button">Next &rarr;</button>
-                </div>
+                <span class="sub-cal-badge-pill">Sprint 12 &bull; Active</span>
               </div>
             </div>
 
-            <!-- Calendar Weekly Columns Grid -->
-            <div class="tracker-calendar-grid" id="tracker-calendar-grid">
-              <!-- Monday -->
-              <div class="cal-day-col" data-day="Mon">
-                <div class="cal-day-header">
-                  <span class="cal-day-name">Monday</span>
-                  <span class="cal-day-date">19 Oct</span>
+            <div class="tracker-calendar-layout">
+              <!-- Left / Main Card: Subscription Calendar -->
+              <div class="sub-cal-widget-card" id="subscription-calendar-widget">
+                <!-- Header -->
+                <div class="sub-cal-top-bar">
+                  <div class="sub-cal-meta-group">
+                    <h2 class="sub-cal-month-heading" id="sub-cal-month-year">October, 2026</h2>
+                    <button class="sub-cal-today-pill" id="sub-cal-today-btn" type="button">Today</button>
+                    <div class="sub-cal-arrow-controls">
+                      <button class="sub-cal-icon-nav" id="sub-cal-prev-month" title="Previous Month" type="button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                      </button>
+                      <button class="sub-cal-icon-nav" id="sub-cal-next-month" title="Next Month" type="button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <button class="sub-cal-plus-cta" id="sub-cal-quick-add-btn" title="Quick Add Subscription" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  </button>
                 </div>
-                <div class="cal-tasks-list" id="cal-tasks-Mon"></div>
-                <button class="cal-add-deadline-btn" data-day="Mon" type="button">+ Add deadline</button>
-              </div>
 
-              <!-- Tuesday -->
-              <div class="cal-day-col" data-day="Tue">
-                <div class="cal-day-header">
-                  <span class="cal-day-name">Tuesday</span>
-                  <span class="cal-day-date">20 Oct</span>
-                </div>
-                <div class="cal-tasks-list" id="cal-tasks-Tue"></div>
-                <button class="cal-add-deadline-btn" data-day="Tue" type="button">+ Add deadline</button>
-              </div>
+                <!-- Days Container with embedded overlay modals -->
+                <div class="sub-cal-viewport-container">
+                  <!-- Quick Add Modal Overlay -->
+                  <div class="sub-cal-modal-overlay" id="sub-cal-add-modal" hidden>
+                    <button class="sub-cal-modal-close-btn" id="sub-cal-add-close" type="button">&times;</button>
+                    <div class="sub-cal-modal-icon-wrap bg-peach-light">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fa6a2e" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </div>
+                    <h3 class="sub-cal-modal-title font-serif">Quick Add Subscription</h3>
+                    <p class="sub-cal-modal-desc">Enter the details of your new recurring payment or deadline.</p>
+                    <div class="sub-cal-form-fields">
+                      <input type="text" class="sub-cal-input-field" id="sub-add-name" placeholder="Service Name (e.g. Netflix, AWS, Figma)">
+                      <div class="sub-cal-input-split">
+                        <input type="text" class="sub-cal-input-field" id="sub-add-amount" placeholder="Amount (e.g. $15.99)">
+                        <input type="number" class="sub-cal-input-field input-day-num" id="sub-add-date" placeholder="Date (1-31)" min="1" max="31">
+                      </div>
+                      <button class="sub-cal-primary-submit-btn" id="sub-add-submit-btn" type="button">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Add Subscription</span>
+                      </button>
+                    </div>
+                  </div>
 
-              <!-- Wednesday (Today) -->
-              <div class="cal-day-col is-today" data-day="Wed">
-                <div class="cal-day-header">
-                  <span class="cal-day-name">Wednesday</span>
-                  <span class="cal-day-date">21 Oct <span class="today-chip">Today</span></span>
-                </div>
-                <div class="cal-tasks-list" id="cal-tasks-Wed"></div>
-                <button class="cal-add-deadline-btn" data-day="Wed" type="button">+ Add deadline</button>
-              </div>
+                  <!-- Search Modal Overlay -->
+                  <div class="sub-cal-modal-overlay" id="sub-cal-search-modal" hidden>
+                    <button class="sub-cal-modal-close-btn" id="sub-cal-search-close" type="button">&times;</button>
+                    <div class="sub-cal-modal-icon-wrap bg-gray-light">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                    <h3 class="sub-cal-modal-title font-serif">Search Subscriptions</h3>
+                    <div class="sub-cal-search-box-wrap">
+                      <input type="text" class="sub-cal-input-field" id="sub-cal-search-input" placeholder="Type to search...">
+                    </div>
+                    <div class="sub-cal-search-results-list" id="sub-cal-search-results">
+                      <p class="sub-cal-empty-hint">Start typing to see results</p>
+                    </div>
+                  </div>
 
-              <!-- Thursday -->
-              <div class="cal-day-col" data-day="Thu">
-                <div class="cal-day-header">
-                  <span class="cal-day-name">Thursday</span>
-                  <span class="cal-day-date">22 Oct</span>
-                </div>
-                <div class="cal-tasks-list" id="cal-tasks-Thu"></div>
-                <button class="cal-add-deadline-btn" data-day="Thu" type="button">+ Add deadline</button>
-              </div>
+                  <!-- Monthly Summary Modal Overlay -->
+                  <div class="sub-cal-modal-overlay" id="sub-cal-summary-modal" hidden>
+                    <button class="sub-cal-modal-close-btn" id="sub-cal-summary-close" type="button">&times;</button>
+                    <div class="sub-cal-modal-icon-wrap bg-purple-light">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+                    </div>
+                    <h3 class="sub-cal-modal-title font-serif">Monthly Summary</h3>
+                    <div class="sub-cal-summary-cards-grid">
+                      <div class="sub-stat-tile">
+                        <span class="sub-tile-label">Active</span>
+                        <span class="sub-tile-val" id="summary-active-count">14</span>
+                      </div>
+                      <div class="sub-stat-tile">
+                        <span class="sub-tile-label">New</span>
+                        <span class="sub-tile-val" id="summary-new-count">3</span>
+                      </div>
+                      <div class="sub-stat-tile tile-total-spend">
+                        <span class="sub-tile-label text-peach">Total Spend</span>
+                        <span class="sub-tile-val text-peach" id="summary-total-spend">$148.50</span>
+                      </div>
+                    </div>
+                  </div>
 
-              <!-- Friday -->
-              <div class="cal-day-col" data-day="Fri">
-                <div class="cal-day-header">
-                  <span class="cal-day-name">Friday</span>
-                  <span class="cal-day-date">23 Oct</span>
-                </div>
-                <div class="cal-tasks-list" id="cal-tasks-Fri"></div>
-                <button class="cal-add-deadline-btn" data-day="Fri" type="button">+ Add deadline</button>
-              </div>
+                  <!-- Weekdays Header Row -->
+                  <div class="sub-cal-weekday-labels">
+                    <span class="weekday-pill">MON</span>
+                    <span class="weekday-pill">TUE</span>
+                    <span class="weekday-pill">WED</span>
+                    <span class="weekday-pill">THU</span>
+                    <span class="weekday-pill">FRI</span>
+                    <span class="weekday-pill">SAT</span>
+                    <span class="weekday-pill">SUN</span>
+                  </div>
 
-              <!-- Saturday -->
-              <div class="cal-day-col is-weekend" data-day="Sat">
-                <div class="cal-day-header">
-                  <span class="cal-day-name">Saturday</span>
-                  <span class="cal-day-date">24 Oct</span>
+                  <!-- 7-column Calendar Day Grid (Filled by JS) -->
+                  <div class="sub-cal-days-matrix" id="sub-cal-days-matrix">
+                    <!-- Day cell elements -->
+                  </div>
                 </div>
-                <div class="cal-tasks-list" id="cal-tasks-Sat"></div>
-                <button class="cal-add-deadline-btn" data-day="Sat" type="button">+ Add deadline</button>
-              </div>
 
-              <!-- Sunday -->
-              <div class="cal-day-col is-weekend" data-day="Sun">
-                <div class="cal-day-header">
-                  <span class="cal-day-name">Sunday</span>
-                  <span class="cal-day-date">25 Oct</span>
+                <!-- Footer Info -->
+                <div class="sub-cal-footer-meta">
+                  <div class="sub-cal-legend-group">
+                    <span class="sub-legend-dot-label">
+                      <span class="sub-bullet dot-purple"></span>
+                      MONTHLY
+                    </span>
+                    <span class="sub-legend-dot-label">
+                      <span class="sub-bullet dot-yellow"></span>
+                      YEARLY
+                    </span>
+                  </div>
+                  <span class="sub-cal-subs-counter" id="sub-cal-counts-label">14 SUBS / 3 NEW</span>
                 </div>
-                <div class="cal-tasks-list" id="cal-tasks-Sun"></div>
-                <button class="cal-add-deadline-btn" data-day="Sun" type="button">+ Add deadline</button>
+
+                <!-- Bottom Action Bar -->
+                <div class="sub-cal-bottom-toolbar">
+                  <div class="sub-cal-tool-icons">
+                    <button class="sub-tool-btn" id="sub-tool-search-trigger" title="Search Subscriptions" type="button">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </button>
+                    <button class="sub-tool-btn" id="sub-tool-download-btn" title="Export schedule" type="button">
+                      <svg class="icon-download-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      <span class="sub-tool-spinner" id="sub-download-spinner" hidden></span>
+                    </button>
+                    <button class="sub-tool-btn" id="sub-tool-cube-trigger" title="Monthly Summary" type="button">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+                    </button>
+                  </div>
+                  <div class="sub-cal-total-readout">
+                    MONTHLY TOTAL : <span class="sub-cal-total-figure" id="sub-cal-total-display">$148.50</span>
+                  </div>
+                </div>
+              </div><!-- /sub-cal-widget-card -->
+
+              <!-- Right: Selected Day Schedule & Linked Subscriptions/Tasks -->
+              <div class="sub-cal-detail-card" id="sub-cal-detail-card">
+                <div class="detail-card-header">
+                  <div>
+                    <h3 class="detail-card-date font-serif" id="sub-selected-date-title">Wednesday, October 28</h3>
+                    <p class="detail-card-subtitle" id="sub-selected-date-subtitle">Scheduled billing &amp; sprint milestones</p>
+                  </div>
+                  <span class="detail-selected-badge" id="sub-selected-status-badge">Selected</span>
+                </div>
+                <div class="detail-items-feed" id="sub-selected-items-feed">
+                  <!-- Injected by JS -->
+                </div>
+                <button class="detail-add-event-btn" id="sub-detail-add-event-btn" type="button">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  <span>Add event for this day</span>
+                </button>
               </div>
-            </div>
+            </div><!-- /tracker-calendar-layout -->
           </div><!-- /tracker-view-calendar -->
 
-          <!-- ==================================================================
-               VIEW 4: NOTES (Notes List, Editor, & Obsidian Knowledge Graph)
+                    <!-- ==================================================================
+               VIEW 4: NOTES (Dated Short Notes Journal + Obsidian Knowledge Graph)
                ================================================================== -->
           <div class="tracker-view" id="tracker-view-notes" hidden>
             <div class="tracker-view-header">
               <div class="header-titles">
-                <h1 class="tracker-page-title font-serif">Project Notes &amp; Knowledge Graph</h1>
-                <p class="tracker-page-subtitle">Obsidian-style interconnected documentation with straight graph connections.</p>
+                <h1 class="tracker-page-title font-serif">Dated Notes &amp; Knowledge Graph</h1>
+                <p class="tracker-page-subtitle">Dated daily journal navigation with Obsidian-style interconnected documentation.</p>
               </div>
               <div class="header-right-tools">
+                <div class="notes-mode-pills-wrap" id="notes-view-mode-pills">
+                  <button class="notes-mode-pill-tab active" data-mode="journal" type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span>Dated Journal</span>
+                  </button>
+                  <button class="notes-mode-pill-tab" data-mode="graph" type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    <span>Knowledge Graph &amp; Docs</span>
+                  </button>
+                </div>
                 <button class="tracker-new-issue-btn" id="notes-new-btn" type="button">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  <span>New note</span>
+                  <span>New entry</span>
                 </button>
               </div>
             </div>
 
-            <!-- Notes 3-Panel Split Workspace -->
-            <div class="tracker-notes-container">
+            <!-- MODE 1: DATED SHORT NOTES (JournalNavigation - watermelon.sh) -->
+            <div class="journal-navigation-outer-frame" id="journal-navigation-view">
+              <div class="journal-navigation-card">
+                <!-- Left Vertical Date Tape Column -->
+                <div class="journal-date-tape-col">
+                  <div class="tape-gradient-top" aria-hidden="true"></div>
+                  <div class="journal-tape-reel-track" id="journal-tape-track">
+                    <!-- Day buttons 01-31 dynamically rendered and scrolled -->
+                  </div>
+                  <div class="tape-gradient-bottom" aria-hidden="true"></div>
+                </div>
+
+                <!-- Right Journal Entry Content Area -->
+                <div class="journal-entry-viewport">
+                  <!-- Header: Animated Month & Day + Nav Chevrons -->
+                  <div class="journal-entry-top-bar">
+                    <div class="journal-entry-date-digits">
+                      <span class="journal-entry-month" id="journal-entry-month-label">OCTOBER</span>
+                      <span class="journal-entry-day-number font-serif" id="journal-entry-day-label">15</span>
+                      <span class="journal-entry-year" id="journal-entry-year-label">2026</span>
+                    </div>
+
+                    <div class="journal-entry-arrow-btns">
+                      <button class="journal-chevron-btn" id="journal-prev-btn" title="Previous entry" type="button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                      </button>
+                      <button class="journal-chevron-btn" id="journal-next-btn" title="Next entry" type="button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Entry Content Display (Staggered Animation) -->
+                  <div class="journal-entry-body" id="journal-entry-body">
+                    <!-- Text paragraphs, interactive checklists, tables -->
+                  </div>
+
+                  <!-- Quick Log Entry Input Bar -->
+                  <div class="journal-entry-bottom-bar">
+                    <div class="journal-quick-input-group">
+                      <input type="text" class="journal-log-input" id="journal-quick-input" placeholder="Add a log entry, checklist (- [ ] task), or note for this day...">
+                      <button class="journal-log-submit-btn" id="journal-log-submit-btn" type="button">Log Entry</button>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- /journal-navigation-card -->
+            </div><!-- /journal-navigation-outer-frame -->
+
+            <!-- MODE 2: OBSIDIAN KNOWLEDGE GRAPH & 3-PANEL MARKDOWN DOCS -->
+            <div class="tracker-notes-container" id="tracker-notes-graph-view" hidden>
               <!-- Panel 1: Notes List (Left) -->
               <aside class="notes-list-col">
                 <div class="notes-search-wrap">
@@ -1802,7 +1937,7 @@
                   <span class="legend-text">Straight lines connect related notes. Click any node to open.</span>
                 </div>
               </aside>
-            </div>
+            </div><!-- /tracker-notes-graph-view -->
           </div><!-- /tracker-view-notes -->
 
           <!-- ==================================================================

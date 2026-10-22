@@ -3550,6 +3550,11 @@ body.in-app-mode > #hero-scroll-container {
   display: none !important;
 }
 
+#actual-app-view[hidden],
+body:not(.in-app-mode) #actual-app-view {
+  display: none !important;
+}
+
 body.in-app-mode #actual-app-view {
   display: block !important;
 }

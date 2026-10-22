@@ -35,12 +35,14 @@ function initSteepHeroAnimation() {
     pinkBlock.style.cursor = 'pointer';
     pinkBlock.setAttribute('title', 'Click to open Pomodoro Focus Timer');
     pinkBlock.addEventListener('click', () => {
-      localStorage.setItem('tracker-demo-auth', 'true');
       document.body.classList.add('in-app-mode');
       const actualAppView = document.getElementById('actual-app-view');
-      if (actualAppView) actualAppView.hidden = false;
+      if (actualAppView) {
+        actualAppView.hidden = false;
+        actualAppView.classList.add('active');
+      }
       window.scrollTo({ top: 0, behavior: 'instant' });
-      if (window.switchClockitView) window.switchClockitView('timer');
+      if (window.navigateToTrackerView) window.navigateToTrackerView('timer');
     });
   }
 
@@ -54,7 +56,7 @@ function initSteepHeroAnimation() {
     // Smooth adaptive scale factor for various desktop resolutions
     const scaleFactor = (width === 0 || width >= 1440) 
       ? 1 
-      : Math.max((width - 80) / 1360, 0.72);
+      : Math.max((width - 80) / 1360, 0.58);
       
     const a = Math.max(0, Math.min(1, (height - 800) / 400));
     
@@ -79,8 +81,8 @@ function initSteepHeroAnimation() {
     transformOrigin: "top center"
   });
 
-  // Mobile/tablet fallback for small viewports
-  if (width < 1024) {
+  // Mobile fallback for small viewports (< 768px phones)
+  if (width < 768) {
     gsap.set(stage, { position: "relative", left: "auto", xPercent: 0, x: 0, scale: 1, width: "100%" });
     gsap.set(textBlock, { position: "relative", top: "auto", left: "auto", transform: "none", width: "100%", padding: "120px 20px 40px" });
     gsap.set(appFrame, { width: "100%", maxWidth: "100%", margin: "0 auto", height: "auto", opacity: 1, y: 0, scale: 1 });
@@ -194,11 +196,16 @@ function initSteepHeroAnimation() {
   // Handle window resizing
   window.addEventListener('resize', () => {
     const updated = getMeasurements();
-    if (updated.width >= 1024) {
+    if (updated.width >= 768) {
       gsap.set(container, { height: updated.containerHeight });
       gsap.set(stage, { xPercent: -50, x: 0, scale: updated.scaleFactor });
       ScrollTrigger.refresh();
     }
+  });
+
+  // Ensure perfect layout measurement after fonts & images finish loading
+  window.addEventListener('load', () => {
+    ScrollTrigger.refresh();
   });
 }
 
@@ -2413,42 +2420,56 @@ function initAppDashboard() {
 }
 
 // ============================================================================
-// AUTH & PERSISTENT SESSION SYSTEM (Defaults directly to Tracker app)
+// AUTH & VIEW NAVIGATION SYSTEM
+// Default: Shows Home page with full GSAP Hero Scrolling Animation
+// App Dashboard: Opened on Sign In, Start Free, Focus Timer card, or #app/#dashboard hash
 // ============================================================================
 
 function initAuthSystem() {
   const actualAppView = document.getElementById('actual-app-view');
   const navUserPill = document.getElementById('nav-user-pill');
   const navCtaBtn = document.getElementById('nav-cta-btn');
+  const heroStartBtn = document.getElementById('hero-start-btn');
   const navSignoutBtn = document.getElementById('nav-signout-btn');
   const appExitBtn = document.getElementById('app-exit-view-btn');
   const appSignoutBtn = document.getElementById('app-signout-action-btn');
+  const trackerBrandHomeBtn = document.getElementById('tracker-brand-home-btn');
 
   function updateAuthUI(isLoggedIn) {
     if (navUserPill) navUserPill.hidden = !isLoggedIn;
     if (navCtaBtn) navCtaBtn.hidden = isLoggedIn;
   }
 
-  function enterAppDashboard() {
-    localStorage.removeItem('tracker-mode');
+  function enterAppDashboard(targetView = 'dashboard') {
     document.body.classList.add('in-app-mode');
-    if (actualAppView) actualAppView.hidden = false;
+    if (actualAppView) {
+      actualAppView.hidden = false;
+      actualAppView.classList.add('active');
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
-    renderAppDashboard();
-    renderCalendarView();
-    renderNotesList();
+    navigateToTrackerView(targetView);
+    updateAuthUI(true);
   }
 
   function exitAppDashboard() {
-    localStorage.setItem('tracker-mode', 'website');
     document.body.classList.remove('in-app-mode');
-    if (actualAppView) actualAppView.hidden = true;
-    ScrollTrigger.refresh();
+    if (actualAppView) {
+      actualAppView.hidden = true;
+      actualAppView.classList.remove('active');
+    }
+    if (window.location.hash && !window.location.hash.includes('website')) {
+      try {
+        history.pushState(null, null, window.location.pathname);
+      } catch (e) {}
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 150);
   }
 
-  function signInAsDemo(suppressToast = false) {
-    enterAppDashboard();
-    updateAuthUI(true);
+  function signInAsDemo(targetView = 'dashboard', suppressToast = false) {
+    enterAppDashboard(targetView);
     closeModal('auth-modal');
     if (!suppressToast) {
       showToast('Signed in as Alex Chen &bull; Sprint 12 Active', 3000);
@@ -2461,24 +2482,38 @@ function initAuthSystem() {
     showToast('Signed out of Tracker workspace');
   }
 
-  // Default to App View so Tracker Dashboard opens immediately
-  const isWebsiteMode = localStorage.getItem('tracker-mode') === 'website';
-  if (!isWebsiteMode) {
-    enterAppDashboard();
-    updateAuthUI(true);
-  } else {
-    updateAuthUI(false);
-  }
-
-  // Website sign in button
+  // Website topbar "Sign in" button
   if (navCtaBtn) {
     navCtaBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      signInAsDemo();
+      signInAsDemo('dashboard');
     });
   }
 
-  // Back to website button
+  // Hero section "Start tracking free" CTA button
+  if (heroStartBtn) {
+    heroStartBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      signInAsDemo('dashboard');
+    });
+  }
+
+  // Website logged-in user pill click (jump straight to app dashboard)
+  if (navUserPill) {
+    navUserPill.addEventListener('click', (e) => {
+      if (e.target.closest('#nav-signout-btn')) return;
+      enterAppDashboard('dashboard');
+    });
+  }
+
+  // App Top Bar brand logo -> return to Website Home Page with scroll animation
+  if (trackerBrandHomeBtn) {
+    trackerBrandHomeBtn.addEventListener('click', () => {
+      exitAppDashboard();
+    });
+  }
+
+  // Back to website button inside User Menu dropdown
   if (appExitBtn) {
     appExitBtn.addEventListener('click', () => {
       exitAppDashboard();
@@ -2489,23 +2524,32 @@ function initAuthSystem() {
   if (navSignoutBtn) navSignoutBtn.addEventListener('click', signOut);
   if (appSignoutBtn) appSignoutBtn.addEventListener('click', signOut);
 
-  // URL hash navigation support (#tasks, #calendar, #notes, #timer)
+  // URL hash navigation support (#tasks, #calendar, #notes, #timer, #dashboard, #app)
   function handleUrlHash() {
     const hash = window.location.hash.toLowerCase();
-    if (hash.includes('website')) {
-      exitAppDashboard();
+    const isAppTarget = hash.includes('app') || hash.includes('dashboard') || hash.includes('task') || hash.includes('calendar') || hash.includes('note') || hash.includes('timer') || hash.includes('report');
+
+    if (isAppTarget) {
+      let target = 'dashboard';
+      if (hash.includes('task')) target = 'tasks';
+      else if (hash.includes('calendar')) target = 'calendar';
+      else if (hash.includes('note')) target = 'notes';
+      else if (hash.includes('timer')) target = 'timer';
+      else if (hash.includes('report')) target = 'reports';
+      enterAppDashboard(target);
     } else {
-      enterAppDashboard();
-      if (hash.includes('task')) navigateToTrackerView('tasks');
-      else if (hash.includes('calendar')) navigateToTrackerView('calendar');
-      else if (hash.includes('note')) navigateToTrackerView('notes');
-      else if (hash.includes('timer')) navigateToTrackerView('timer');
-      else if (hash.includes('report')) navigateToTrackerView('reports');
+      // Default: Root home page with full GSAP Hero Scrolling Animation
+      exitAppDashboard();
     }
   }
 
   window.addEventListener('hashchange', handleUrlHash);
-  if (window.location.hash) handleUrlHash();
+  if (window.location.hash) {
+    handleUrlHash();
+  } else {
+    // Show Home Page on root URL
+    exitAppDashboard();
+  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {

@@ -367,6 +367,9 @@ export class PomodoroEngine {
 
 // Global Singleton Engine
 export const pomodoroEngine = new PomodoroEngine();
+if (typeof window !== 'undefined') {
+  window.pomodoroEngine = pomodoroEngine;
+}
 
 /**
  * Initializes DOM interactions, listeners, and views for the Pomodoro Timer
@@ -442,6 +445,10 @@ export function initPomodoroTimer(showToastFn) {
    * View Switcher: switches between 'home' dashboard and 'timer' full view
    */
   function switchView(viewName) {
+    if (typeof window.navigateToTrackerView === 'function') {
+      window.navigateToTrackerView(viewName);
+      return;
+    }
     navPills.forEach(p => {
       p.classList.toggle('active', p.getAttribute('data-view') === viewName);
     });
@@ -705,6 +712,16 @@ export function initPomodoroTimer(showToastFn) {
     cardBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       pomodoroEngine.toggle();
+    });
+  }
+
+  const cardResetBtn = document.getElementById('clockit-timer-card-reset-btn');
+  if (cardResetBtn) {
+    cardResetBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pomodoroEngine.reset();
+      gsap.fromTo(cardResetBtn, { rotation: -180 }, { rotation: 0, duration: 0.35, ease: 'power2.out' });
+      if (typeof showToastFn === 'function') showToastFn('Pomodoro timer reset');
     });
   }
 

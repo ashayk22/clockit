@@ -3542,23 +3542,31 @@ body.in-app-mode {
   background: #fbf9f5 !important;
 }
 
-body.in-app-mode > header,
-body.in-app-mode > main,
-body.in-app-mode > footer,
-body.in-app-mode > .mobile-sticky-cta,
-body.in-app-mode > #hero-scroll-container {
+/* In app/workspace mode: hide home landing section and show workspace */
+body.in-app-mode #clockit-home-section,
+body.in-app-mode .clockit-home-section {
   display: none !important;
 }
 
-#actual-app-view[hidden],
-body:not(.in-app-mode) #actual-app-view {
-  display: none !important;
-}
-
-body.in-app-mode #actual-app-view {
+body.in-app-mode #clockit-app-main,
+body.in-app-mode .clockit-app-main,
+body.in-app-mode #actual-app-view,
+body.in-app-mode .actual-app-view {
   display: block !important;
 }
 
+/* In home/marketing mode: hide workspace and show home landing section */
+body:not(.in-app-mode) #clockit-app-main,
+body:not(.in-app-mode) .clockit-app-main,
+body:not(.in-app-mode) #actual-app-view,
+body:not(.in-app-mode) .actual-app-view {
+  display: none !important;
+}
+
+body:not(.in-app-mode) #clockit-home-section,
+body:not(.in-app-mode) .clockit-home-section {
+  display: block !important;
+}
 
 /* ============================================================================
    CLOCKIT PRODUCTIVITY DASHBOARD (Reference Design)
@@ -8275,4 +8283,879 @@ html.dark .journal-log-input {
 
 .journal-log-submit-btn:hover {
   opacity: 0.9;
+}
+
+
+/* ==========================================================================
+   CLOCKIT UNIFIED DASHBOARD & LIQUID ANIMATION SYSTEM
+   Signature liquid navigation, fluid cards, liquid wave orb timer,
+   warm off-white background (#fbf9f5), and responsive tactile interactions.
+   ========================================================================== */
+
+body.clockit-body {
+  background-color: #fbf9f5 !important;
+  color: #17191c;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sohne);
+  overflow-x: clip;
+}
+
+/* 1. PRIMARY TOP NAVIGATION BAR */
+#clockit-top-header,
+.clockit-top-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(251, 249, 245, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+}
+
+.clockit-top-header-inner {
+  width: 100%;
+  max-width: 1360px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Brand Group */
+.clockit-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+}
+
+.clockit-logo-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.clockit-logo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e07a5f;
+  box-shadow: 0 0 8px rgba(224, 122, 95, 0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clockit-brand-group:hover .clockit-logo-dot {
+  transform: scale(1.2);
+  box-shadow: 0 0 12px rgba(224, 122, 95, 0.8);
+}
+
+.clockit-brand-title {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #17191c;
+}
+
+/* Center Pill Tabs Navigation */
+.clockit-pill-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: #ece8e1;
+  padding: 4px;
+  border-radius: 9999px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  user-select: none;
+}
+
+.liquid-pill-glider {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: 9999px;
+  background: #17191c;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, left, width;
+}
+
+.clockit-pill-tab {
+  position: relative;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  padding: 7px 20px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #71717a;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: color 0.25s ease, transform 0.15s ease;
+}
+
+.clockit-pill-tab:hover {
+  color: #17191c;
+}
+
+.clockit-pill-tab.active {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.clockit-pill-tab:active {
+  transform: scale(0.96);
+}
+
+/* Right Header Actions */
+.clockit-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clockit-header-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: #52525b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.clockit-header-icon-btn:hover {
+  background: #f4f1ea;
+  color: #17191c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.clockit-header-icon-btn:active {
+  transform: scale(0.94);
+}
+
+.clockit-user-pill-wrap {
+  position: relative;
+}
+
+.clockit-user-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 4px 14px 4px 5px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.clockit-user-pill-btn:hover {
+  background: #f4f1ea;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.user-avatar-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #17191c;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-name-tag {
+  font-size: 13px;
+  font-weight: 500;
+  color: #17191c;
+}
+
+/* User Dropdown */
+.clockit-user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 200px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 110;
+}
+
+.clockit-user-dropdown.open {
+  display: flex;
+  animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 2. APP CONTAINER & VIEWS */
+.clockit-app-main {
+  width: 100%;
+}
+
+.clockit-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 28px 24px 60px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tracker-view {
+  display: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tracker-view.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 3. FLUID CARDS WITH MAGNETIC TILT & SPECULAR HIGHLIGHT */
+.clockit-fluid-card {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, box-shadow 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.clockit-fluid-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle 280px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.42), transparent 70%);
+  transition: opacity 0.3s ease;
+  z-index: 5;
+}
+
+.clockit-fluid-card:hover::after {
+  opacity: 1;
+}
+
+/* 4. BANNER CARD ENHANCEMENTS */
+.clockit-banner-card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  padding: 34px 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 165px;
+}
+
+.clockit-mountain-backdrop {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 580px;
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+/* 5. SUMMARY ROW & CARDS */
+.clockit-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.clockit-summary-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 22px 24px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 148px;
+}
+
+/* Card 2: Focus Timer (Soft Peach Card) */
+.clockit-summary-card.timer-card {
+  background: #fdf0e9;
+  border-color: #f7ded3;
+}
+
+.timer-mode-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(224, 122, 95, 0.16);
+  color: #ba6542;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.timer-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timer-expand-btn {
+  background: transparent;
+  border: none;
+  color: #ba6542;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.timer-expand-btn:hover {
+  background: rgba(224, 122, 95, 0.14);
+  transform: scale(1.1);
+}
+
+/* SIGNATURE LIQUID TIMER ORB COMPONENT */
+.liquid-timer-orb-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #ffffff;
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(224, 122, 95, 0.18);
+  flex-shrink: 0;
+}
+
+.liquid-timer-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.liquid-timer-glass-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 3;
+  text-align: center;
+}
+
+.liquid-timer-glass-badge .timer-digits {
+  font-family: var(--font-signifier), Georgia, serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: #17191c;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.95), 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.liquid-timer-glass-badge .timer-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: #6d473b;
+  margin-top: 3px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.timer-controls-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.timer-play-btn.liquid-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #17191c;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.timer-play-btn.liquid-btn:hover {
+  background: #000000;
+  transform: scale(1.06);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
+}
+
+.timer-play-btn.liquid-btn:active {
+  transform: scale(0.94);
+}
+
+.timer-reset-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(224, 122, 95, 0.12);
+  color: #ba6542;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.timer-reset-btn:hover {
+  background: rgba(224, 122, 95, 0.22);
+  color: #17191c;
+  transform: rotate(-45deg);
+}
+
+.timer-reset-btn:active {
+  transform: scale(0.92);
+}
+
+.liquid-mode-pill-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(224, 122, 95, 0.18);
+}
+
+.liquid-mode-pill {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid transparent;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #7c4f42;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.liquid-mode-pill:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #17191c;
+}
+
+.liquid-mode-pill.active {
+  background: #17191c;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Today's Progress Smooth Ring */
+.donut-fill {
+  transition: stroke-dasharray 0.8s cubic-bezier(0.16, 1, 0.3, 1), stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Backlog Arrow Button */
+.backlog-arrow-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f6eee8;
+  color: #17191c;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease;
+}
+
+.backlog-arrow-btn:hover {
+  background: #f0e3da;
+  transform: translateX(4px);
+}
+
+.backlog-arrow-btn:active {
+  transform: scale(0.94);
+}
+
+/* 6. MAIN GRID (TASK BOARD + QUICK NOTES) */
+.clockit-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+.clockit-board-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 24px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  min-width: 0;
+}
+
+.board-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.clockit-add-task-btn {
+  background: #17191c;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  padding: 7px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.clockit-add-task-btn:hover {
+  background: #2e3138;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.clockit-add-task-btn:active {
+  transform: scale(0.96);
+}
+
+/* Kanban column and cards smooth transitions */
+.app-board-col {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.app-board-col.drag-over {
+  background-color: #fdf5f0;
+  border-color: #e07a5f;
+}
+
+.app-task-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.app-task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: #dcdce0;
+}
+
+.app-task-card:active {
+  transform: scale(0.98);
+}
+
+/* Quick Notes Card */
+.clockit-notes-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 22px 20px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 7. DARK MODE PALETTE (WARM SLATE & ESPRESSO) */
+html.dark body.clockit-body {
+  background-color: #121316 !important;
+  color: #f4f4f5;
+}
+
+html.dark .clockit-top-header {
+  background: rgba(18, 19, 22, 0.92);
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+html.dark .clockit-pill-tabs {
+  background: #1e2025;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+html.dark .liquid-pill-glider {
+  background: #f4f4f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .clockit-pill-tab {
+  color: #a1a1aa;
+}
+
+html.dark .clockit-pill-tab:hover {
+  color: #ffffff;
+}
+
+html.dark .clockit-pill-tab.active {
+  color: #17191c !important;
+}
+
+html.dark .clockit-brand-title {
+  color: #f4f4f5;
+}
+
+html.dark .clockit-logo-circle {
+  background: #191b20;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .clockit-header-icon-btn,
+html.dark .clockit-user-pill-btn {
+  background: #191b20;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #d4d4d8;
+}
+
+html.dark .clockit-header-icon-btn:hover,
+html.dark .clockit-user-pill-btn:hover {
+  background: #23262d;
+  color: #ffffff;
+}
+
+html.dark .clockit-user-dropdown {
+  background: #191b20;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+}
+
+html.dark .clockit-user-dropdown .dropdown-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+}
+
+html.dark .clockit-user-dropdown .dropdown-item {
+  color: #f4f4f5;
+}
+
+html.dark .clockit-user-dropdown .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+html.dark .user-name-tag {
+  color: #f4f4f5;
+}
+
+html.dark .user-avatar-badge {
+  background: #2a2e38;
+}
+
+html.dark .clockit-banner-card,
+html.dark .clockit-summary-card,
+html.dark .clockit-board-card,
+html.dark .clockit-notes-card {
+  background: #17191e;
+  border-color: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .clockit-greeting-title,
+html.dark .clock-digits,
+html.dark .summary-card-title,
+html.dark .progress-ratio,
+html.dark .backlog-number,
+html.dark .board-card-title,
+html.dark .notes-card-title,
+html.dark .donut-center-text,
+html.dark .col-title-text,
+html.dark .app-card-title,
+html.dark .app-card-pts {
+  color: #f4f4f5;
+}
+
+html.dark .clockit-summary-card.timer-card {
+  background: #221a17;
+  border-color: rgba(245, 155, 107, 0.22);
+}
+
+html.dark .liquid-timer-orb-container {
+  background: #1a1716;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(224, 122, 95, 0.12);
+}
+
+html.dark .liquid-timer-glass-badge .timer-digits {
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+}
+
+html.dark .liquid-timer-glass-badge .timer-sub {
+  color: #e2b4a5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+html.dark .liquid-mode-pill {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2b4a5;
+}
+
+html.dark .liquid-mode-pill.active {
+  background: #f4f4f5;
+  color: #17191c;
+}
+
+html.dark .timer-play-btn.liquid-btn {
+  background: #f4f4f5;
+  color: #17191c;
+}
+
+html.dark .backlog-arrow-btn {
+  background: #23262d;
+  color: #f4f4f5;
+}
+
+html.dark .backlog-arrow-btn:hover {
+  background: #2c3039;
+}
+
+html.dark .app-board-col {
+  background: #14151a;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark .app-task-card {
+  background: #1c1e24;
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+html.dark .app-task-card:hover {
+  border-color: rgba(245, 155, 107, 0.4);
+}
+
+html.dark .notes-text-input {
+  background: #14151a;
+  color: #f4f4f5;
+}
+
+html.dark .quick-note-item {
+  background: #14151a;
+}
+
+html.dark .note-item-tag {
+  color: #f4f4f5;
+}
+
+html.dark .clockit-add-task-btn {
+  background: #f4f4f5;
+  color: #17191c;
+}
+
+html.dark .clockit-add-task-btn:hover {
+  background: #ffffff;
+}
+
+/* 8. REDUCED MOTION SUPPORT */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-pill-glider,
+  .clockit-fluid-card,
+  .tracker-view,
+  .donut-fill,
+  .app-task-card {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* 9. RESPONSIVE BREAKPOINTS */
+@media (max-width: 1120px) {
+  .clockit-main-grid {
+    grid-template-columns: 1fr;
+  }
+  .clockit-summary-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .clockit-top-header {
+    padding: 0 16px;
+    height: 60px;
+  }
+  .clockit-container {
+    padding: 16px 12px;
+    gap: 16px;
+  }
+  .clockit-pill-tabs {
+    padding: 2px;
+  }
+  .clockit-pill-tab {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .clockit-banner-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px 20px;
+    gap: 20px;
+  }
+  .clockit-mountain-backdrop {
+    width: 320px;
+    opacity: 0.5;
+  }
+  .clockit-summary-row {
+    grid-template-columns: 1fr;
+  }
+  .user-name-tag {
+    display: none;
+  }
 }

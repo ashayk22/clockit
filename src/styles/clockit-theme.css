@@ -1,0 +1,1743 @@
+/* ==========================================================================
+   ClockIt Design System - Master Stylesheet
+   Warm Cream / Deep Charcoal with Restrained Sage & Mint Green Accents
+   ========================================================================== */
+
+:root {
+  /* Warm Cream Light Theme Tokens */
+  --bg-primary: #fbf9f5;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f5f2eb;
+  --bg-surface-hover: #ece8df;
+  
+  --border-subtle: #eae5dc;
+  --border-strong: #d5cfc2;
+  
+  --text-primary: #18191c;
+  --text-secondary: #5e646e;
+  --text-muted: #8c929d;
+  
+  --accent-green: #244b36;
+  --accent-green-hover: #1b3d2b;
+  --accent-green-subtle: #e6ede8;
+  --accent-green-text: #193828;
+  --accent-mint: #34d399;
+  
+  --tag-college: #3b82f6;
+  --tag-club: #a855f7;
+  --tag-personal: #22c55e;
+  --tag-freelance: #f97316;
+  --tag-development: #10b981;
+  
+  --badge-critical-bg: #fee2e2;
+  --badge-critical-text: #dc2626;
+  --badge-high-bg: #ffedd5;
+  --badge-high-text: #ea580c;
+  --badge-medium-bg: #fef3c7;
+  --badge-medium-text: #d97706;
+  --badge-low-bg: #dcfce7;
+  --badge-low-text: #16a34a;
+
+  --sidebar-width: 220px;
+  --header-height: 56px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+  
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.dark {
+  /* Deep Charcoal Dark Theme Tokens */
+  --bg-primary: #0e1114;
+  --bg-surface: #17191e;
+  --bg-surface-subtle: #1e2128;
+  --bg-surface-hover: #262a34;
+  
+  --border-subtle: #242832;
+  --border-strong: #333845;
+  
+  --text-primary: #f0f2f5;
+  --text-secondary: #9da3af;
+  --text-muted: #6b7280;
+  
+  --accent-green: #34d399;
+  --accent-green-hover: #4ade80;
+  --accent-green-subtle: #162820;
+  --accent-green-text: #a7f3d0;
+  --accent-mint: #34d399;
+  
+  --badge-critical-bg: rgba(239, 68, 68, 0.16);
+  --badge-critical-text: #f87171;
+  --badge-high-bg: rgba(249, 115, 22, 0.16);
+  --badge-high-text: #fb923c;
+  --badge-medium-bg: rgba(245, 158, 11, 0.16);
+  --badge-medium-text: #fbbf24;
+  --badge-low-bg: rgba(34, 197, 94, 0.16);
+  --badge-low-text: #4ade80;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+/* Universal Box Sizing & Clean Resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Base Body Application Reset */
+body.clockit-app-active,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Button Resets — Eliminate Browser Default Styles */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-mint);
+  outline-offset: 1px;
+}
+
+/* ==========================================================================
+   GLOBAL LAYOUT SHELL (Sidebar + Main Viewport)
+   ========================================================================== */
+
+.clockit-layout-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Left Sidebar */
+.clockit-sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background-color: var(--bg-primary);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  z-index: 40;
+}
+
+.clockit-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 18px;
+  cursor: pointer;
+}
+
+.clockit-brand-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg-primary);
+}
+
+.clockit-brand-name {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.clockit-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.clockit-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 11px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.clockit-nav-item:hover {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-nav-item.active {
+  background-color: var(--accent-green-subtle);
+  color: var(--accent-green-text);
+  font-weight: 600;
+}
+
+.dark .clockit-nav-item.active {
+  background-color: var(--accent-green-subtle);
+  color: var(--accent-green);
+}
+
+.clockit-sidebar-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 16px 11px 6px;
+}
+
+.clockit-workspace-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 11px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.clockit-workspace-item:hover {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-workspace-dot {
+  width: 7.5px;
+  height: 7.5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.clockit-add-space-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 11px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.clockit-add-space-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Sidebar Motivational Box */
+.clockit-sidebar-motivational {
+  margin-top: auto;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  height: 105px;
+  background: linear-gradient(180deg, #9ca3af 0%, #4b5563 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.clockit-sidebar-motivational-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20,25,22,0.1) 0%, rgba(15,18,16,0.78) 100%);
+  z-index: 1;
+}
+
+.clockit-sidebar-motivational p {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* Sidebar User Footer */
+.clockit-sidebar-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 2px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+}
+
+.clockit-sidebar-user-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.clockit-user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.clockit-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Main Content Area */
+.clockit-main-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--bg-primary);
+}
+
+/* Header */
+.clockit-topbar {
+  height: var(--header-height);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-primary);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.clockit-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 5px 14px;
+  width: 310px;
+  color: var(--text-muted);
+  box-shadow: var(--shadow-card);
+}
+
+.clockit-search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.clockit-kbd-pill {
+  font-size: 10px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.clockit-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.clockit-live-date-pill {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.clockit-icon-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+
+.clockit-icon-action-btn:hover {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   PAGE LEVEL COMMON STYLES
+   ========================================================================== */
+
+.clockit-page-container,
+.clockit-home-container {
+  padding: 24px 32px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.clockit-page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.clockit-page-title {
+  font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  font-size: 32px;
+  font-weight: 500;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.clockit-page-subtitle {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin: 3px 0 0;
+}
+
+/* Primary Action Buttons */
+.clockit-primary-btn {
+  background: var(--accent-green);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dark .clockit-primary-btn {
+  background: var(--accent-mint);
+  color: #0f1115;
+}
+
+.clockit-primary-btn:hover {
+  opacity: 0.92;
+}
+
+/* Sub-tabs Row */
+.clockit-subtabs-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clockit-subtab-pill {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.clockit-subtab-pill:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-subtab-pill.active {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+/* Common Card Base */
+.clockit-card,
+.clockit-tasks-card,
+.clockit-widget-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  box-sizing: border-box;
+}
+
+.clockit-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.clockit-widget-title {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   HOME PAGE (HERO & 2-COLUMN LAYOUT)
+   ========================================================================== */
+
+.clockit-hero-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 32px;
+  box-shadow: var(--shadow-card);
+  background: linear-gradient(135deg, #ede7de 0%, #d8ccbd 50%, #c8b9a5 100%);
+}
+
+.dark .clockit-hero-card {
+  background: linear-gradient(135deg, #1b1e24 0%, #14171c 100%);
+}
+
+.clockit-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(251, 249, 245, 0.94) 0%, rgba(251, 249, 245, 0.78) 55%, rgba(251, 249, 245, 0.25) 100%);
+  z-index: 1;
+}
+
+.dark .clockit-hero-overlay {
+  background: linear-gradient(90deg, rgba(14, 17, 20, 0.95) 0%, rgba(14, 17, 20, 0.8) 55%, rgba(14, 17, 20, 0.35) 100%);
+}
+
+.clockit-hero-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.clockit-hero-greeting-sub {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 450;
+}
+
+.clockit-hero-greeting-title {
+  font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  font-size: 38px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 2px 0 6px;
+  color: var(--text-primary);
+}
+
+.clockit-hero-greeting-matters {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.clockit-hero-quote {
+  font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-strong);
+  padding-bottom: 4px;
+}
+
+.clockit-hero-cards-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.clockit-hero-next-card {
+  flex: 1.5;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.clockit-hero-next-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.clockit-badge-next {
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ea580c;
+  background: #ffedd5;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.clockit-badge-critical {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+}
+
+.clockit-hero-next-title {
+  font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text-primary);
+}
+
+.clockit-hero-next-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.clockit-hero-next-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.clockit-hero-arrow-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clockit-hero-arrow-btn:hover {
+  background: var(--bg-surface-hover);
+}
+
+.clockit-hero-focus-card {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.clockit-focus-title {
+  font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: var(--text-primary);
+}
+
+.clockit-focus-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+}
+
+.clockit-focus-btn {
+  background: var(--accent-green);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dark .clockit-focus-btn {
+  background: var(--accent-mint);
+  color: #0f1115;
+}
+
+.clockit-focus-btn:hover {
+  opacity: 0.92;
+}
+
+.clockit-focus-est {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin: 6px 0 0;
+}
+
+/* Home 2-Column Grid */
+.clockit-home-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .clockit-home-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tasks 2-Column Grid */
+.clockit-tasks-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .clockit-tasks-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   TASKS LIST & COMPONENT ROWS (Used in Home & Tasks Page)
+   ========================================================================== */
+
+.clockit-tasks-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.clockit-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.clockit-filter-pill {
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clockit-filter-pill:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-filter-pill.active {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+.clockit-tasks-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.clockit-sort-select {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  font-size: 12.5px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Individual Task Row */
+.clockit-task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background 0.12s ease;
+  gap: 16px;
+  min-width: 0;
+}
+
+.clockit-task-row:last-child {
+  border-bottom: none;
+}
+
+.clockit-task-row:hover {
+  background: var(--bg-surface-subtle);
+}
+
+.clockit-task-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.clockit-task-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.clockit-task-checkbox.checked {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #fff;
+}
+
+.dark .clockit-task-checkbox.checked {
+  background: var(--accent-mint);
+  border-color: var(--accent-mint);
+  color: #0f1115;
+}
+
+.clockit-task-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clockit-task-title.completed {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.clockit-task-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.clockit-task-workspace-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface-subtle);
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.clockit-task-deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.clockit-priority-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.clockit-priority-badge.Critical {
+  background: var(--badge-critical-bg);
+  color: var(--badge-critical-text);
+}
+
+.clockit-priority-badge.High {
+  background: var(--badge-high-bg);
+  color: var(--badge-high-text);
+}
+
+.clockit-priority-badge.Medium {
+  background: var(--badge-medium-bg);
+  color: var(--badge-medium-text);
+}
+
+.clockit-priority-badge.Low {
+  background: var(--badge-low-bg);
+  color: var(--badge-low-text);
+}
+
+/* ==========================================================================
+   WIDGETS COLUMN (Mini Calendar, Today Tasks, Focus Stats, Quick Notes)
+   ========================================================================== */
+
+.clockit-widgets-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.clockit-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.clockit-calendar-day-header {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding-bottom: 6px;
+}
+
+.clockit-calendar-day {
+  font-size: 12px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.clockit-calendar-day:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-calendar-day.active {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-weight: 700;
+}
+
+.clockit-today-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.clockit-today-item:last-of-type {
+  border-bottom: none;
+}
+
+.clockit-quick-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: 10px;
+}
+
+.clockit-quick-add-input {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12.5px;
+  outline: none;
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.clockit-focus-stats-body {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.clockit-focus-donut-wrap {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.clockit-focus-donut-text {
+  position: absolute;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.clockit-focus-stats-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.clockit-focus-stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.clockit-focus-stat-row strong {
+  color: var(--text-primary);
+}
+
+.clockit-notes-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+}
+
+.clockit-notes-input-wrap input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 12.5px;
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   FOCUS PAGE STYLING
+   ========================================================================== */
+
+.clockit-focus-dial-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 16px 0 24px;
+}
+
+.clockit-focus-dial-stage {
+  position: relative;
+  width: 340px;
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clockit-dial-digits {
+  font-size: 62px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1;
+  margin: 6px 0;
+}
+
+.clockit-focus-side-quote {
+  position: absolute;
+  right: 14%;
+  top: 14%;
+  font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-strong);
+  padding-bottom: 3px;
+}
+
+.clockit-timer-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.clockit-timer-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.clockit-timer-icon-btn:hover {
+  background: var(--bg-surface-subtle);
+}
+
+.clockit-timer-start-btn {
+  height: 44px;
+  padding: 0 28px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-green);
+  color: #ffffff;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dark .clockit-timer-start-btn {
+  background: #c6ebd9;
+  color: #0f1115;
+}
+
+/* 4-Stat Cards Row */
+.clockit-stats-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.clockit-stat-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-card);
+}
+
+.clockit-stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 3px 0 2px;
+}
+
+.clockit-stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.clockit-stat-change {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* ==========================================================================
+   NOTES PAGE (3-PANEL LAYOUT)
+   ========================================================================== */
+.clockit-notes-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 210px) minmax(0, 1fr) minmax(220px, 280px);
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  height: calc(100vh - var(--header-height) - 48px);
+  max-height: calc(100vh - var(--header-height) - 48px);
+  box-sizing: border-box;
+}
+
+.clockit-notes-layout.collapsed-right {
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .clockit-notes-layout {
+    grid-template-columns: minmax(170px, 200px) minmax(0, 1fr) minmax(200px, 250px);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 980px) {
+  .clockit-notes-layout {
+    grid-template-columns: minmax(170px, 200px) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .clockit-notes-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: none;
+  }
+}
+
+.clockit-notes-sidebar {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.clockit-notes-editor-pane {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.clockit-notes-graph-pane {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.clockit-editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-surface-subtle);
+  padding: 5px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.clockit-toolbar-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+
+.clockit-toolbar-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.clockit-toolbar-btn.active {
+  background: var(--bg-surface-hover);
+  color: var(--accent-mint);
+  font-weight: 600;
+}
+
+/* Tiptap Prose Editor Styling */
+.clockit-editor-content-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
+.clockit-prose-editor {
+  outline: none;
+  min-height: 240px;
+  font-family: inherit;
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.clockit-prose-editor p {
+  margin: 8px 0;
+}
+
+.clockit-prose-editor h1 {
+  font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  margin: 16px 0 8px;
+  color: var(--text-primary);
+}
+
+.clockit-prose-editor h2 {
+  font-size: 18px;
+  font-weight: 650;
+  margin: 14px 0 8px;
+  color: var(--text-primary);
+}
+
+.clockit-prose-editor h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 12px 0 6px;
+  color: var(--text-primary);
+}
+
+.clockit-prose-editor ul,
+.clockit-prose-editor ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.clockit-prose-editor li {
+  margin: 4px 0;
+}
+
+/* Checklist / Task Items */
+.clockit-editor-task-list {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 8px 0;
+}
+
+.clockit-editor-task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.clockit-editor-task-item > label {
+  user-select: none;
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+.clockit-editor-task-item > label input[type="checkbox"] {
+  accent-color: var(--accent-mint);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.clockit-editor-task-item > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.clockit-editor-task-item[data-checked="true"] > div > p {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Internal Note Links [[Title]] */
+.clockit-editor-link,
+.internal-note-link {
+  color: var(--accent-green);
+  text-decoration: none;
+  background: var(--accent-green-subtle);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.dark .clockit-editor-link,
+.dark .internal-note-link {
+  color: var(--accent-mint);
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.clockit-editor-link:hover,
+.internal-note-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+/* Tiptap Tables */
+.clockit-prose-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  font-size: 13px;
+  min-width: 280px;
+}
+
+.clockit-prose-editor th,
+.clockit-prose-editor td {
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.clockit-prose-editor th {
+  background: var(--bg-surface-subtle);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.clockit-prose-editor td {
+  color: var(--text-primary);
+}
+
+/* Code block in editor */
+.clockit-editor-code-block {
+  background: #111418;
+  color: #e5e7eb;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin: 10px 0;
+  overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.dark .clockit-editor-code-block {
+  background: #0d0f12;
+  border: 1px solid var(--border-subtle);
+}
+
+.clockit-toolbar-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.clockit-code-block-card {
+  background: #111418;
+  color: #e5e7eb;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  position: relative;
+}
+
+.dark .clockit-code-block-card {
+  background: #0d0f12;
+  border: 1px solid var(--border-subtle);
+}
+
+.clockit-ideas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.clockit-ideas-table th {
+  background: var(--bg-surface-subtle);
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.clockit-ideas-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   HABITS PAGE STYLING
+   ========================================================================== */
+
+.clockit-habit-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.clockit-habit-ring-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  cursor: pointer;
+}
+
+.clockit-habit-ring-svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* ==========================================================================
+   CALENDAR PAGE STYLING (Generous Responsive Grid & Timeline)
+   ========================================================================== */
+
+.clockit-calendar-main-grid {
+  display: grid;
+  grid-template-columns: minmax(540px, 1fr) 220px 280px;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+@media (max-width: 1380px) {
+  .clockit-calendar-main-grid {
+    grid-template-columns: minmax(480px, 1fr) 240px;
+  }
+  .clockit-calendar-today-col {
+    grid-column: span 2;
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 980px) {
+  .clockit-calendar-main-grid {
+    grid-template-columns: 1fr;
+  }
+  .clockit-calendar-today-col {
+    grid-column: span 1;
+  }
+}
+
+.clockit-month-calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  min-width: 540px;
+}
+
+.clockit-month-calendar-table th {
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: left;
+  background: var(--bg-surface-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.clockit-month-calendar-table td {
+  height: 92px;
+  vertical-align: top;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  transition: background 0.12s ease;
+  box-sizing: border-box;
+}
+
+.clockit-month-calendar-table td:hover {
+  background: var(--bg-surface-subtle);
+}
+
+.clockit-cal-cell-active {
+  border: 1.5px solid var(--accent-mint) !important;
+  background: rgba(52, 211, 153, 0.04);
+}
+
+.clockit-cal-event-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.clockit-timeline-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.clockit-timeline-time {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.clockit-timeline-content {
+  border-left: 3px solid var(--accent-green);
+  padding-left: 10px;
+  flex: 1;
+}
+
+.clockit-timeline-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.clockit-timeline-sub {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  margin: 2px 0 0;
+}

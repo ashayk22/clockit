@@ -489,7 +489,7 @@ export function initPomodoroTimer(showToastFn) {
 
   // Back to home button
   if (backToHomeBtn) {
-    backToHomeBtn.addEventListener('click', () => switchView('home'));
+    backToHomeBtn.addEventListener('click', () => switchView('dashboard'));
   }
 
   // Expand button on dashboard card

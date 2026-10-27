@@ -30,19 +30,33 @@ function initSteepHeroAnimation() {
   const cursorLeft = document.getElementById('hero-cursor-left');
   const carousel = document.getElementById('hero-carousel');
 
-  // Allow clicking the Focus Timer floating preview to jump directly into the full Pomodoro Timer
+  // Interactive click handlers for all floating preview artifacts
   if (pinkBlock) {
     pinkBlock.style.cursor = 'pointer';
     pinkBlock.setAttribute('title', 'Click to open Pomodoro Focus Timer');
     pinkBlock.addEventListener('click', () => {
-      document.body.classList.add('in-app-mode');
-      const actualAppView = document.getElementById('actual-app-view');
-      if (actualAppView) {
-        actualAppView.hidden = false;
-        actualAppView.classList.add('active');
-      }
-      window.scrollTo({ top: 0, behavior: 'instant' });
       if (window.navigateToTrackerView) window.navigateToTrackerView('timer');
+    });
+  }
+  if (blueBlock) {
+    blueBlock.style.cursor = 'pointer';
+    blueBlock.setAttribute('title', 'Click to view Today\'s Progress');
+    blueBlock.addEventListener('click', () => {
+      if (window.navigateToTrackerView) window.navigateToTrackerView('dashboard');
+    });
+  }
+  if (grayBlock) {
+    grayBlock.style.cursor = 'pointer';
+    grayBlock.setAttribute('title', 'Click to open Backlog');
+    grayBlock.addEventListener('click', () => {
+      if (window.navigateToTrackerView) window.navigateToTrackerView('tasks');
+    });
+  }
+  if (aiComposer) {
+    aiComposer.style.cursor = 'pointer';
+    aiComposer.setAttribute('title', 'Click to open Quick Notes');
+    aiComposer.addEventListener('click', () => {
+      if (window.navigateToTrackerView) window.navigateToTrackerView('notes');
     });
   }
 
@@ -965,28 +979,28 @@ function initMusicWidget() {
 
 export const INITIAL_SPRINT_TASKS = [
   // Backlog
-  { id: 'TRK-104', title: 'Implement dark mode', squad: 'Frontend', pts: 5, status: 'todo', assignee: 'AC', day: 'Fri' },
-  { id: 'TRK-108', title: 'Add keyboard shortcuts', squad: 'UI/UX', pts: 3, status: 'todo', assignee: 'JD', day: 'Sat' },
-  { id: 'TRK-121', title: 'Improve onboarding flow', squad: 'Product', pts: 8, status: 'todo', assignee: 'SM', day: 'Sun' },
+  { id: 'task-1', title: 'Research new UI transition and physics models', category: 'Research', priority: 'Medium', status: 'todo', dueDate: '2026-10-29' },
+  { id: 'task-2', title: 'Draft monthly product strategy & reflections', category: 'Writing', priority: 'Low', status: 'todo', dueDate: '2026-10-31' },
+  { id: 'task-3', title: 'Organize workspace assets and SVG icon library', category: 'Design', priority: 'Low', status: 'todo', dueDate: '2026-11-02' },
 
   // In Progress
-  { id: 'TRK-102', title: 'Build API authentication', squad: 'Backend', pts: 8, status: 'inprogress', assignee: 'RK', day: 'Wed' },
-  { id: 'TRK-115', title: 'Task drag and drop', squad: 'Frontend', pts: 5, status: 'inprogress', assignee: 'AC', day: 'Wed' },
-  { id: 'TRK-129', title: 'Write unit tests', squad: 'Testing', pts: 3, status: 'inprogress', assignee: 'NP', day: 'Thu' },
+  { id: 'task-4', title: 'Refine visual tokens and typography hierarchy', category: 'Design', priority: 'High', status: 'inprogress', dueDate: '2026-10-26' },
+  { id: 'task-5', title: 'Tune Pomodoro liquid wave oscillation physics', category: 'Dev', priority: 'High', status: 'inprogress', dueDate: '2026-10-26' },
+  { id: 'task-6', title: 'Prepare design review presentation deck', category: 'Personal', priority: 'Medium', status: 'inprogress', dueDate: '2026-10-27' },
 
   // In Review
-  { id: 'TRK-101', title: 'Fix dashboard layout bugs', squad: 'Frontend', pts: 5, status: 'review', assignee: 'JD', day: 'Tue' },
-  { id: 'TRK-118', title: 'Update API documentation', squad: 'Documentation', pts: 3, status: 'review', assignee: 'SM', day: 'Thu' },
+  { id: 'task-7', title: 'Audit Obsidian knowledge graph edge routing', category: 'Dev', priority: 'Medium', status: 'review', dueDate: '2026-10-27' },
+  { id: 'task-8', title: 'Update documentation and keyboard shortcut guide', category: 'Writing', priority: 'Low', status: 'review', dueDate: '2026-10-28' },
 
-  // Done & Merged
-  { id: 'TRK-099', title: 'Setup project structure', squad: 'DevOps', pts: 3, status: 'done', assignee: 'RK', day: 'Mon' },
-  { id: 'TRK-107', title: 'Design system components', squad: 'UI/UX', pts: 8, status: 'done', assignee: 'AC', day: 'Tue' },
-  { id: 'TRK-112', title: 'User settings page', squad: 'Frontend', pts: 5, status: 'done', assignee: 'JD', day: 'Wed' }
+  // Done
+  { id: 'task-9', title: 'Setup unified cream and peach design system tokens', category: 'Design', priority: 'High', status: 'done', dueDate: '2026-10-24' },
+  { id: 'task-10', title: 'Implement top pill liquid navigation with slider', category: 'Dev', priority: 'High', status: 'done', dueDate: '2026-10-25' },
+  { id: 'task-11', title: 'Configure ambient lo-fi sound generator synthesizer', category: 'Dev', priority: 'Medium', status: 'done', dueDate: '2026-10-25' }
 ];
 
 let appSprintTasks = [...INITIAL_SPRINT_TASKS];
 let activeStatusFilter = 'all';
-let activeSquadFilter = 'all';
+let activeCategoryFilter = 'all';
 let activeSearchQuery = '';
 let currentActiveView = 'dashboard';
 
@@ -1011,8 +1025,15 @@ function loadAppTasks() {
     const stored = localStorage.getItem('tracker_app_tasks');
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
-        appSprintTasks = parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        appSprintTasks = parsed.map((t, idx) => ({
+          id: t.id || `task-${idx + 1}`,
+          title: t.title || 'Untitled Task',
+          category: t.category || t.squad || 'Personal',
+          priority: t.priority || (t.pts >= 8 ? 'High' : t.pts >= 5 ? 'Medium' : 'Low'),
+          status: t.status || 'todo',
+          dueDate: t.dueDate || '2026-10-26'
+        }));
         return;
       }
     }
@@ -1021,84 +1042,33 @@ function loadAppTasks() {
 }
 
 // ============================================================================
-// METRICS & PROGRESS CALCULATIONS (Functional, matching reference layout)
+// METRICS & PROGRESS CALCULATIONS (Functional Real Personal Tasks)
 // ============================================================================
 
-function updateAppMetrics() {
-  let donePts = 0;
-  let inprogPts = 0;
-  let remainingPts = 0;
+export function updateAppMetrics() {
+  const totalTasks = appSprintTasks.length;
   let todoCount = 0;
   let inprogCount = 0;
   let reviewCount = 0;
   let doneCount = 0;
 
-  // Day distribution for stacked bar chart: { Mon: { done, planned } }
-  const dayBuckets = {
-    Mon: { done: 0, planned: 0 },
-    Tue: { done: 0, planned: 0 },
-    Wed: { done: 0, planned: 0 },
-    Thu: { done: 0, planned: 0 },
-    Fri: { done: 0, planned: 0 },
-    Sat: { done: 0, planned: 0 },
-    Sun: { done: 0, planned: 0 }
-  };
-
   appSprintTasks.forEach(t => {
-    const day = t.day || 'Wed';
-    if (dayBuckets[day]) {
-      dayBuckets[day].planned += t.pts;
-    }
-
-    if (t.status === 'done') {
-      donePts += t.pts;
-      doneCount++;
-      if (dayBuckets[day]) dayBuckets[day].done += t.pts;
-    } else if (t.status === 'inprogress') {
-      inprogPts += t.pts;
-      inprogCount++;
-    } else if (t.status === 'review') {
-      inprogPts += t.pts;
-      reviewCount++;
-    } else {
-      todoCount++;
-    }
+    if (t.status === 'done') doneCount++;
+    else if (t.status === 'inprogress') inprogCount++;
+    else if (t.status === 'review') reviewCount++;
+    else todoCount++;
   });
 
-  remainingPts = (todoCount * 4) + (reviewCount * 2);
+  const completionPct = totalTasks > 0 ? Math.round((doneCount / totalTasks) * 100) : 0;
 
-  // Scaled values to closely harmonize with the 42 / 18 / 12 reference stats
-  const displayDonePts = Math.max(donePts, 42);
-  const displayInprogPts = Math.max(inprogPts, 18);
-  const displayRemainingPts = Math.max(12, 54 - displayDonePts);
-  const displayTotalScope = displayDonePts + displayRemainingPts;
-  const completionPct = Math.min(100, Math.round((displayDonePts / displayTotalScope) * 100));
-
-  // Update Sprint at a glance
-  const glanceDone = document.getElementById('sprint-pts-completed');
-  const glanceInprog = document.getElementById('sprint-pts-inprog');
-  const glanceRemaining = document.getElementById('sprint-pts-remaining');
-  if (glanceDone) glanceDone.textContent = displayDonePts;
-  if (glanceInprog) glanceInprog.textContent = displayInprogPts;
-  if (glanceRemaining) glanceRemaining.textContent = displayRemainingPts;
-
-  // Update Sprint health
+  // Update Today's Progress ring & ratio
   const progressPctEl = document.getElementById('clockit-progress-pct');
   const donutFillEl = document.getElementById('clockit-donut-fill');
+  const progressRatioEl = document.getElementById('clockit-progress-ratio');
+
   if (progressPctEl) progressPctEl.textContent = `${completionPct}%`;
   if (donutFillEl) donutFillEl.setAttribute('stroke-dasharray', `${completionPct}, 100`);
-
-  const totalScopeEl = document.getElementById('sprint-total-pts');
-  const completedSubEl = document.getElementById('sprint-completed-pts-sub');
-  const completedPctSubEl = document.getElementById('sprint-completed-pct-sub');
-  const remainingSubEl = document.getElementById('sprint-remaining-pts-sub');
-  const remainingPctSubEl = document.getElementById('sprint-remaining-pct-sub');
-
-  if (totalScopeEl) totalScopeEl.textContent = displayTotalScope;
-  if (completedSubEl) completedSubEl.textContent = displayDonePts;
-  if (completedPctSubEl) completedPctSubEl.textContent = `${completionPct}%`;
-  if (remainingSubEl) remainingSubEl.textContent = displayRemainingPts;
-  if (remainingPctSubEl) remainingPctSubEl.textContent = `${100 - completionPct}%`;
+  if (progressRatioEl) progressRatioEl.textContent = `${doneCount} / ${totalTasks}`;
 
   // Backlog counter
   const backlogCountEl = document.getElementById('clockit-backlog-count');
@@ -1109,35 +1079,23 @@ function updateAppMetrics() {
   document.querySelectorAll('#app-count-inprogress').forEach(el => el.textContent = inprogCount);
   document.querySelectorAll('#app-count-review').forEach(el => el.textContent = reviewCount);
   document.querySelectorAll('#app-count-done').forEach(el => el.textContent = doneCount);
-
-  // Update stacked bars in "Sprint at a glance"
-  renderStackedBars(dayBuckets);
-}
-
-function renderStackedBars(dayBuckets) {
-  const container = document.getElementById('sprint-stacked-bars');
-  if (!container) return;
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-  container.innerHTML = days.map(d => {
-    const data = dayBuckets[d] || { done: 0, planned: 0 };
-    const doneH = Math.min(38, Math.max(6, data.done * 4.5));
-    const planH = Math.min(38, Math.max(10, data.planned * 3.5));
-    return `
-      <div class="bar-day-col" title="${d}: ${data.done} pts done, ${data.planned} pts planned">
-        <div class="stacked-bar">
-          <div class="bar-segment planned" style="height: ${planH}px;"></div>
-          <div class="bar-segment completed" style="height: ${doneH}px;"></div>
-        </div>
-        <span class="day-label">${d}</span>
-      </div>
-    `;
-  }).join('');
 }
 
 // ============================================================================
-// KANBAN CARD CREATION & RENDERING (Reference-identical styling)
+// KANBAN CARD CREATION & RENDERING (Personal Productivity Styling)
 // ============================================================================
+
+function formatTaskDueDate(dueDate) {
+  if (!dueDate) return 'Today';
+  if (dueDate === '2026-10-26') return 'Today';
+  const parts = dueDate.split('-');
+  if (parts.length === 3) {
+    const monthIdx = parseInt(parts[1], 10) - 1;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[monthIdx] || ''} ${parseInt(parts[2], 10)}`;
+  }
+  return dueDate;
+}
 
 function createKanbanCard(task) {
   const card = document.createElement('div');
@@ -1147,21 +1105,24 @@ function createKanbanCard(task) {
   card.setAttribute('tabindex', '0');
 
   const isChecked = task.status === 'done';
-  const squadClean = (task.squad || 'Frontend').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const prioClean = (task.priority || 'medium').toLowerCase();
+  const catClean = (task.category || 'personal').toLowerCase().replace(/[^a-z0-9]/g, '');
 
   card.innerHTML = `
     <div class="app-card-header">
       <div class="app-card-check-wrap">
         <input type="checkbox" class="app-card-checkbox" title="${isChecked ? 'Mark incomplete' : 'Mark done'}" ${isChecked ? 'checked' : ''}>
-        <span class="app-card-id">${task.id}</span>
+        <span class="app-priority-tag priority-${prioClean}">${task.priority || 'Medium'}</span>
       </div>
-      <button class="app-card-more-btn" title="Task actions" type="button" aria-label="Task options">&bull;&bull;&bull;</button>
+      <button class="app-card-more-btn" title="Edit task" type="button" aria-label="Task options">&bull;&bull;&bull;</button>
     </div>
-    <div class="app-card-title">${escapeHtml(task.title)}</div>
+    <div class="app-card-title ${isChecked ? 'strikethrough' : ''}">${escapeHtml(task.title)}</div>
     <div class="app-card-footer">
-      <span class="app-squad-tag squad-${squadClean}">${task.squad}</span>
-      <span class="app-card-pts">${task.pts} pts</span>
-      <div class="app-assignee-avatar avatar-${(task.assignee || 'AC').toLowerCase()}" title="Assignee: ${task.assignee}">${task.assignee}</div>
+      <span class="app-category-tag cat-${catClean}">${task.category || 'Personal'}</span>
+      <span class="app-due-chip">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        ${formatTaskDueDate(task.dueDate)}
+      </span>
     </div>
   `;
 
@@ -1172,8 +1133,8 @@ function createKanbanCard(task) {
     task.status = checkbox.checked ? 'done' : 'todo';
     saveAppTasks();
     renderAppDashboard();
-    renderCalendarView();
-    showToast(checkbox.checked ? `${task.id} marked as Done & Merged!` : `${task.id} returned to Backlog`);
+    renderPersonalCalendar();
+    showToast(checkbox.checked ? `Task marked as Done!` : `Task returned to Backlog`);
   });
 
   // More button & card click: open Edit Modal
@@ -1201,7 +1162,7 @@ function createKanbanCard(task) {
   return card;
 }
 
-function renderAppDashboard() {
+export function renderAppDashboard() {
   const colTodo = document.getElementById('app-cards-todo');
   const colInprog = document.getElementById('app-cards-inprogress');
   const colReview = document.getElementById('app-cards-review');
@@ -1215,13 +1176,13 @@ function renderAppDashboard() {
 
   const q = activeSearchQuery.toLowerCase().trim();
   const filtered = appSprintTasks.filter(t => {
-    const matchSquad = activeSquadFilter === 'all' || t.squad.toLowerCase() === activeSquadFilter.toLowerCase();
-    const matchSearch = !q || t.title.toLowerCase().includes(q) || t.id.toLowerCase().includes(q) || t.squad.toLowerCase().includes(q);
+    const matchCategory = activeCategoryFilter === 'all' || (t.category || '').toLowerCase() === activeCategoryFilter.toLowerCase();
+    const matchSearch = !q || t.title.toLowerCase().includes(q) || (t.category && t.category.toLowerCase().includes(q));
     const matchStatus = activeStatusFilter === 'all' 
-      || (activeStatusFilter === 'my' && t.assignee === 'AC')
       || (activeStatusFilter === 'inprogress' && t.status === 'inprogress')
-      || (activeStatusFilter === 'review' && t.status === 'review');
-    return matchSquad && matchSearch && matchStatus;
+      || (activeStatusFilter === 'review' && t.status === 'review')
+      || (activeStatusFilter === 'done' && t.status === 'done');
+    return matchCategory && matchSearch && matchStatus;
   });
 
   filtered.forEach(task => {
@@ -1259,7 +1220,7 @@ function renderAppDashboard() {
       </div>
       <div class="app-board-col" data-col="done">
         <div class="clockit-col-header">
-          <div class="col-indicator-wrap"><span class="status-dot dot-done"></span><span class="col-title-text">Done &amp; Merged</span></div>
+          <div class="col-indicator-wrap"><span class="status-dot dot-done"></span><span class="col-title-text">Done</span></div>
           <span class="col-count-bubble">${appSprintTasks.filter(t => t.status === 'done').length}</span>
         </div>
         <div class="app-cards-container" id="tasks-cards-done"></div>
@@ -1278,6 +1239,8 @@ function renderAppDashboard() {
       else if (task.status === 'review' && cRev) cRev.appendChild(card);
       else if (task.status === 'done' && cDone) cDone.appendChild(card);
     });
+
+    initAppDragAndDrop();
   }
 
   updateAppMetrics();
@@ -1306,36 +1269,34 @@ function initAppDragAndDrop() {
         task.status = targetCol;
         saveAppTasks();
         renderAppDashboard();
-        renderCalendarView();
-        showToast(`${task.id} moved to ${targetCol.toUpperCase()}`);
+        renderPersonalCalendar();
+        showToast(`Moved "${task.title}" to ${targetCol.toUpperCase()}`);
       }
     });
   });
 }
 
 // ============================================================================
-// TASK EDIT MODAL (Functional Editing, Re-assignment, & Deletion)
+// TASK EDIT MODAL (Functional Editing & Deletion)
 // ============================================================================
 
 function openEditTaskModal(taskId) {
   const task = appSprintTasks.find(t => t.id === taskId);
   if (!task) return;
 
-  const idBadge = document.getElementById('edit-task-id-badge');
   const idInput = document.getElementById('edit-task-id');
   const titleInput = document.getElementById('edit-task-title');
-  const squadSelect = document.getElementById('edit-task-squad');
-  const ptsSelect = document.getElementById('edit-task-points');
+  const catSelect = document.getElementById('edit-task-category');
+  const prioSelect = document.getElementById('edit-task-priority');
   const statusSelect = document.getElementById('edit-task-status');
-  const daySelect = document.getElementById('edit-task-day');
+  const dateInput = document.getElementById('edit-task-duedate');
 
-  if (idBadge) idBadge.textContent = task.id;
   if (idInput) idInput.value = task.id;
   if (titleInput) titleInput.value = task.title;
-  if (squadSelect) squadSelect.value = task.squad;
-  if (ptsSelect) ptsSelect.value = String(task.pts);
-  if (statusSelect) statusSelect.value = task.status;
-  if (daySelect) daySelect.value = task.day || 'Wed';
+  if (catSelect) catSelect.value = task.category || 'Personal';
+  if (prioSelect) prioSelect.value = task.priority || 'Medium';
+  if (statusSelect) statusSelect.value = task.status || 'todo';
+  if (dateInput) dateInput.value = task.dueDate || '2026-10-26';
 
   openModal('app-edit-task-modal');
 }
@@ -1349,23 +1310,23 @@ function initEditTaskModal() {
       e.preventDefault();
       const id = document.getElementById('edit-task-id').value;
       const title = document.getElementById('edit-task-title').value.trim();
-      const squad = document.getElementById('edit-task-squad').value;
-      const pts = parseInt(document.getElementById('edit-task-points').value, 10) || 3;
+      const category = document.getElementById('edit-task-category').value;
+      const priority = document.getElementById('edit-task-priority').value;
       const status = document.getElementById('edit-task-status').value;
-      const day = document.getElementById('edit-task-day').value;
+      const dueDate = document.getElementById('edit-task-duedate').value || '2026-10-26';
 
       const task = appSprintTasks.find(t => t.id === id);
       if (task) {
         task.title = title;
-        task.squad = squad;
-        task.pts = pts;
+        task.category = category;
+        task.priority = priority;
         task.status = status;
-        task.day = day;
+        task.dueDate = dueDate;
         saveAppTasks();
         renderAppDashboard();
-        renderCalendarView();
+        renderPersonalCalendar();
         closeModal('app-edit-task-modal');
-        showToast(`Updated task ${task.id}`);
+        showToast(`Updated task "${task.title}"`);
       }
     });
   }
@@ -1378,40 +1339,21 @@ function initEditTaskModal() {
         const removed = appSprintTasks.splice(idx, 1)[0];
         saveAppTasks();
         renderAppDashboard();
-        renderCalendarView();
+        renderPersonalCalendar();
         closeModal('app-edit-task-modal');
-        showToast(`Deleted task ${removed.id}`);
+        showToast(`Deleted task "${removed.title}"`);
       }
     });
   }
 }
 
 // ============================================================================
-// ============================================================================
-// SUBSCRIPTION & SPRINT CALENDAR (watermelon.sh Specification)
-// Features: Month navigation, Day grid with activeGlow, Overlays (Add, Search, Summary)
+// PERSONAL PRODUCTIVITY CALENDAR (Month Grid, Deadlines, & Selected-Day Agenda)
 // ============================================================================
 
-let subCalCurrentMonth = 'October';
-let subCalCurrentYear = 2026;
-let subCalCurrentMonthIndex = 9; // 0-indexed (9 = Oct)
-let subCalSelectedId = 'day-28';
-let subCalSelectedDayNum = 28;
-let subCalDownloading = false;
-
-// Initial subscription items & deadlines
-let subCalItems = [
-  { id: 'sub-1', name: 'Netflix 4K', amount: 15.99, date: 3, logo: '🎬', type: 'monthly', isNew: false, squad: 'Personal' },
-  { id: 'sub-2', name: 'Figma Enterprise', amount: 15.00, date: 6, logo: '🎨', type: 'monthly', isNew: false, squad: 'UI/UX' },
-  { id: 'sub-3', name: 'Spotify Duo', amount: 9.99, date: 10, logo: '🎵', type: 'monthly', isNew: false, squad: 'Personal' },
-  { id: 'sub-4', name: 'GitHub Copilot', amount: 10.00, date: 14, logo: '🐙', type: 'monthly', isNew: false, squad: 'Frontend' },
-  { id: 'sub-5', name: 'Jira Cloud', amount: 7.50, date: 15, logo: '📊', type: 'monthly', isNew: false, squad: 'Product' },
-  { id: 'sub-6', name: 'AWS Cloud Hosting', amount: 45.00, date: 18, logo: '☁️', type: 'monthly', isNew: false, squad: 'DevOps' },
-  { id: 'sub-7', name: 'Vercel Pro', amount: 20.00, date: 21, logo: '▲', type: 'monthly', isNew: true, squad: 'Frontend' },
-  { id: 'sub-8', name: 'Slack Business', amount: 8.75, date: 24, logo: '💬', type: 'monthly', isNew: false, squad: 'Team' },
-  { id: 'sub-9', name: 'Supabase Pro Cloud', amount: 25.00, date: 28, logo: '⚡', type: 'monthly', isNew: true, squad: 'Backend' },
-  { id: 'sub-10', name: 'Domain Renewal', amount: 12.00, date: 30, logo: '🌐', type: 'yearly', isNew: true, squad: 'DevOps' }
-];
+let calCurrentYear = 2026;
+let calCurrentMonthIndex = 9; // 0-indexed (9 = Oct)
+let calSelectedDate = '2026-10-26'; // Default to reference today date
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -1423,29 +1365,29 @@ function getDaysInMonth(year, monthIdx) {
 }
 
 function getFirstDayOfWeek(year, monthIdx) {
-  // Return 0 for Mon, 1 for Tue, ... 6 for Sun
   const jsDay = new Date(year, monthIdx, 1).getDay();
   return (jsDay + 6) % 7;
 }
 
-function renderSubscriptionCalendar() {
-  const heading = document.getElementById('sub-cal-month-year');
-  if (heading) heading.textContent = `${subCalCurrentMonth}, ${subCalCurrentYear}`;
+export function renderPersonalCalendar() {
+  const heading = document.getElementById('cal-month-year');
+  if (heading) heading.textContent = `${MONTH_NAMES[calCurrentMonthIndex]} ${calCurrentYear}`;
 
-  const matrix = document.getElementById('sub-cal-days-matrix');
+  const matrix = document.getElementById('cal-days-matrix');
   if (!matrix) return;
   matrix.innerHTML = '';
 
-  const totalDays = getDaysInMonth(subCalCurrentYear, subCalCurrentMonthIndex);
-  const startDayOffset = getFirstDayOfWeek(subCalCurrentYear, subCalCurrentMonthIndex);
+  const totalDays = getDaysInMonth(calCurrentYear, calCurrentMonthIndex);
+  const startDayOffset = getFirstDayOfWeek(calCurrentYear, calCurrentMonthIndex);
+  const todayStr = '2026-10-26';
 
   // Prev month padding days
-  const prevMonthDays = getDaysInMonth(subCalCurrentYear, (subCalCurrentMonthIndex - 1 + 12) % 12);
+  const prevMonthDays = getDaysInMonth(calCurrentYear, (calCurrentMonthIndex - 1 + 12) % 12);
   for (let i = startDayOffset - 1; i >= 0; i--) {
     const padDate = prevMonthDays - i;
     const padCell = document.createElement('div');
-    padCell.className = 'sub-cal-day-cell is-muted';
-    padCell.innerHTML = `<span class="sub-cal-day-num">${padDate}</span>`;
+    padCell.className = 'cal-day-cell is-muted';
+    padCell.innerHTML = `<span class="cal-day-num">${padDate}</span>`;
     matrix.appendChild(padCell);
   }
 
@@ -1453,44 +1395,46 @@ function renderSubscriptionCalendar() {
   for (let d = 1; d <= totalDays; d++) {
     const dayCell = document.createElement('button');
     dayCell.type = 'button';
-    const dayId = `day-${d}`;
-    const isSelected = subCalSelectedId === dayId;
-    dayCell.className = `sub-cal-day-cell ${isSelected ? 'is-active-glow' : ''}`;
-    dayCell.setAttribute('data-day', d);
+    const monthPadded = String(calCurrentMonthIndex + 1).padStart(2, '0');
+    const dayPadded = String(d).padStart(2, '0');
+    const dateStr = `${calCurrentYear}-${monthPadded}-${dayPadded}`;
+    const isToday = dateStr === todayStr;
+    const isSelected = dateStr === calSelectedDate;
 
-    // Find subscriptions or tasks for this day
-    const matchingSubs = subCalItems.filter(s => s.date === d);
+    dayCell.className = `cal-day-cell ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''}`;
+    dayCell.setAttribute('data-date', dateStr);
+
+    // Find tasks matching this date
     const dayTasks = appSprintTasks.filter(t => {
-      // Map day abbreviations or dates
-      const taskDayNum = t.dayNum || (d === 21 && t.day === 'Wed' ? 21 : (d === 19 && t.day === 'Mon' ? 19 : 0));
-      return taskDayNum === d;
+      if (t.dueDate === dateStr) return true;
+      if (t.dueDate && t.dueDate.endsWith(`-${dayPadded}`) && calCurrentMonthIndex === 9) return true;
+      return false;
     });
 
-    let logoMarkup = '';
-    if (matchingSubs.length > 0) {
-      logoMarkup = `<span class="sub-cell-logo">${matchingSubs[0].logo}</span>`;
-    }
-
-    let indicatorsMarkup = '';
-    if (matchingSubs.length > 0 || dayTasks.length > 0) {
-      const isYearly = matchingSubs.some(s => s.type === 'yearly');
-      const dotClass = isYearly ? 'dot-yellow' : 'dot-purple';
-      indicatorsMarkup = `<span class="sub-cell-indicator-dot ${dotClass}"></span>`;
+    let dotsHtml = '';
+    if (dayTasks.length > 0) {
+      const hasHigh = dayTasks.some(t => (t.priority || '').toLowerCase() === 'high');
+      const allDone = dayTasks.every(t => t.status === 'done');
+      const dotClass = allDone ? 'dot-done' : (hasHigh ? 'dot-high' : 'dot-medium');
+      dotsHtml = `
+        <div class="cal-dots-wrap">
+          <span class="cal-bullet ${dotClass}"></span>
+          ${dayTasks.length > 1 ? `<span class="cal-count-badge">${dayTasks.length}</span>` : ''}
+        </div>
+      `;
     }
 
     dayCell.innerHTML = `
-      <div class="sub-cell-content">
-        <span class="sub-cal-day-num">${d}</span>
-        ${logoMarkup}
+      <div class="cal-cell-header">
+        <span class="cal-day-num">${d}</span>
+        ${isToday ? '<span class="cal-today-tag">TODAY</span>' : ''}
       </div>
-      ${indicatorsMarkup ? `<div class="sub-cell-dots-wrap">${indicatorsMarkup}</div>` : ''}
+      ${dotsHtml}
     `;
 
     dayCell.addEventListener('click', () => {
-      subCalSelectedId = dayId;
-      subCalSelectedDayNum = d;
-      renderSubscriptionCalendar();
-      renderSelectedDayDetails(d);
+      calSelectedDate = dateStr;
+      renderPersonalCalendar();
     });
 
     matrix.appendChild(dayCell);
@@ -1501,779 +1445,246 @@ function renderSubscriptionCalendar() {
   const targetSlots = filledSlots > 35 ? 42 : 35;
   for (let p = 1; p <= (targetSlots - filledSlots); p++) {
     const nextPadCell = document.createElement('div');
-    nextPadCell.className = 'sub-cal-day-cell is-muted';
-    nextPadCell.innerHTML = `<span class="sub-cal-day-num">${p}</span>`;
+    nextPadCell.className = 'cal-day-cell is-muted';
+    nextPadCell.innerHTML = `<span class="cal-day-num">${p}</span>`;
     matrix.appendChild(nextPadCell);
   }
 
-  // Update summary counts and figures
-  updateSubscriptionMetrics();
-  renderSelectedDayDetails(subCalSelectedDayNum);
-}
-
-function updateSubscriptionMetrics() {
-  const totalSpend = subCalItems.reduce((acc, item) => acc + (item.amount || 0), 0);
-  const activeCount = subCalItems.length;
-  const newCount = subCalItems.filter(s => s.isNew).length;
-
-  const totalEl = document.getElementById('sub-cal-total-display');
-  if (totalEl) totalEl.textContent = `$${totalSpend.toFixed(2)}`;
-
-  const countsLabel = document.getElementById('sub-cal-counts-label');
-  if (countsLabel) countsLabel.textContent = `${activeCount} SUBS / ${newCount} NEW`;
-
-  const summaryActive = document.getElementById('summary-active-count');
-  if (summaryActive) summaryActive.textContent = activeCount;
-
-  const summaryNew = document.getElementById('summary-new-count');
-  if (summaryNew) summaryNew.textContent = newCount;
-
-  const summarySpend = document.getElementById('summary-total-spend');
-  if (summarySpend) summarySpend.textContent = `$${totalSpend.toFixed(2)}`;
-}
-
-function renderSelectedDayDetails(dayNum) {
-  const dateTitle = document.getElementById('sub-selected-date-title');
-  if (dateTitle) {
-    dateTitle.textContent = `${subCalCurrentMonth} ${dayNum}, ${subCalCurrentYear}`;
+  // Update schedule summary
+  const totalUpcoming = appSprintTasks.filter(t => t.status !== 'done').length;
+  const summaryLabel = document.getElementById('cal-schedule-summary');
+  if (summaryLabel) {
+    summaryLabel.textContent = `${totalUpcoming} Active Deadlines`;
   }
 
-  const badge = document.getElementById('sub-selected-status-badge');
-  if (badge) {
-    badge.textContent = dayNum === 21 ? 'Today' : 'Scheduled';
-    badge.classList.toggle('badge-today', dayNum === 21);
-  }
+  renderSelectedDayAgenda(calSelectedDate);
+}
 
-  const feed = document.getElementById('sub-selected-items-feed');
+export function renderSelectedDayAgenda(dateStr) {
+  const titleEl = document.getElementById('cal-selected-date-title');
+  const countEl = document.getElementById('cal-selected-task-count');
+  const badgeEl = document.getElementById('cal-selected-status-badge');
+  const feed = document.getElementById('cal-selected-tasks-feed');
   if (!feed) return;
   feed.innerHTML = '';
 
-  const daySubs = subCalItems.filter(s => s.date === dayNum);
-  const dayTasks = appSprintTasks.filter(t => (t.dayNum === dayNum) || (dayNum === 21 && t.day === 'Wed'));
+  const parsed = new Date(dateStr + 'T00:00:00');
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const formattedDay = !isNaN(parsed.getTime())
+    ? `${dayNames[parsed.getDay()]}, ${MONTH_NAMES[parsed.getMonth()]} ${parsed.getDate()}`
+    : dateStr;
 
-  if (daySubs.length === 0 && dayTasks.length === 0) {
+  if (titleEl) titleEl.textContent = formattedDay;
+
+  const isToday = dateStr === '2026-10-26';
+  if (badgeEl) {
+    badgeEl.textContent = isToday ? 'Today' : 'Scheduled';
+    badgeEl.classList.toggle('badge-today', isToday);
+  }
+
+  const dayTasks = appSprintTasks.filter(t => {
+    if (t.dueDate === dateStr) return true;
+    const dayPadded = dateStr.slice(-2);
+    if (t.dueDate && t.dueDate.endsWith(`-${dayPadded}`) && calCurrentMonthIndex === 9) return true;
+    return false;
+  });
+
+  if (countEl) {
+    countEl.textContent = dayTasks.length === 0
+      ? 'No tasks scheduled for this day'
+      : `${dayTasks.length} task${dayTasks.length === 1 ? '' : 's'} scheduled`;
+  }
+
+  if (dayTasks.length === 0) {
     feed.innerHTML = `
-      <div class="detail-empty-state">
-        <span class="detail-empty-icon">☕</span>
-        <p class="detail-empty-text">No recurring payments or deadlines scheduled for this day.</p>
+      <div class="agenda-empty-state">
+        <div class="agenda-empty-icon">&#9749;</div>
+        <p class="agenda-empty-text">No tasks due on this day. Take time to focus or schedule a new task below.</p>
       </div>
     `;
     return;
   }
 
-  // Render Subscriptions for this day
-  daySubs.forEach(s => {
+  dayTasks.forEach(task => {
+    const isDone = task.status === 'done';
     const row = document.createElement('div');
-    row.className = 'detail-event-row is-subscription';
-    row.innerHTML = `
-      <div class="event-row-left">
-        <span class="event-row-logo">${s.logo || '💳'}</span>
-        <div class="event-row-info">
-          <span class="event-row-name">${escapeHtml(s.name)}</span>
-          <span class="event-row-tag tag-sub">${s.type.toUpperCase()}</span>
-        </div>
-      </div>
-      <div class="event-row-right">
-        <span class="event-row-cost font-serif">$${s.amount.toFixed(2)}</span>
-      </div>
-    `;
-    feed.appendChild(row);
-  });
+    row.className = `agenda-task-item ${isDone ? 'is-completed' : ''}`;
+    const prioClean = (task.priority || 'medium').toLowerCase();
+    const catClean = (task.category || 'personal').toLowerCase();
 
-  // Render Sprint Tasks for this day
-  dayTasks.forEach(t => {
-    const isDone = t.status === 'done';
-    const row = document.createElement('div');
-    row.className = `detail-event-row is-task ${isDone ? 'is-completed' : ''}`;
     row.innerHTML = `
-      <div class="event-row-left">
-        <input type="checkbox" class="detail-task-check" ${isDone ? 'checked' : ''}>
-        <div class="event-row-info">
-          <span class="event-row-name">${escapeHtml(t.title)}</span>
-          <div class="event-row-meta">
-            <span class="event-task-id">${t.id}</span>
-            <span class="app-squad-tag squad-${(t.squad||'').toLowerCase()}">${t.squad}</span>
+      <div class="agenda-task-left">
+        <input type="checkbox" class="agenda-task-checkbox" ${isDone ? 'checked' : ''} title="${isDone ? 'Mark incomplete' : 'Mark done'}">
+        <div class="agenda-task-info">
+          <span class="agenda-task-title ${isDone ? 'strikethrough' : ''}">${escapeHtml(task.title)}</span>
+          <div class="agenda-task-tags">
+            <span class="app-priority-tag priority-${prioClean}">${task.priority || 'Medium'}</span>
+            <span class="app-category-tag cat-${catClean}">${task.category || 'Personal'}</span>
           </div>
         </div>
       </div>
-      <div class="event-row-right">
-        <span class="event-task-pts">${t.pts}p</span>
-      </div>
+      <button class="agenda-task-edit-btn" title="Edit task" type="button">&bull;&bull;&bull;</button>
     `;
 
-    row.querySelector('.detail-task-check').addEventListener('click', (e) => {
+    row.querySelector('.agenda-task-checkbox').addEventListener('click', (e) => {
       e.stopPropagation();
-      t.status = e.target.checked ? 'done' : 'todo';
+      task.status = e.target.checked ? 'done' : 'todo';
       saveAppTasks();
       renderAppDashboard();
-      renderSelectedDayDetails(dayNum);
-      showToast(e.target.checked ? `${t.id} marked as Done!` : `${t.id} returned to active`);
+      renderPersonalCalendar();
+      showToast(e.target.checked ? `Task marked as Done!` : `Task returned to Backlog`);
+    });
+
+    row.querySelector('.agenda-task-edit-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openEditTaskModal(task.id);
     });
 
     feed.appendChild(row);
   });
 }
 
-function initSubscriptionCalendar() {
-  renderSubscriptionCalendar();
+export function initPersonalCalendar() {
+  renderPersonalCalendar();
 
   // Navigation Arrows
-  const prevBtn = document.getElementById('sub-cal-prev-month');
+  const prevBtn = document.getElementById('cal-prev-month');
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
-      subCalCurrentMonthIndex = (subCalCurrentMonthIndex - 1 + 12) % 12;
-      if (subCalCurrentMonthIndex === 11) subCalCurrentYear--;
-      subCalCurrentMonth = MONTH_NAMES[subCalCurrentMonthIndex];
-      renderSubscriptionCalendar();
+      calCurrentMonthIndex = (calCurrentMonthIndex - 1 + 12) % 12;
+      if (calCurrentMonthIndex === 11) calCurrentYear--;
+      renderPersonalCalendar();
     });
   }
 
-  const nextBtn = document.getElementById('sub-cal-next-month');
+  const nextBtn = document.getElementById('cal-next-month');
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
-      subCalCurrentMonthIndex = (subCalCurrentMonthIndex + 1) % 12;
-      if (subCalCurrentMonthIndex === 0) subCalCurrentYear++;
-      subCalCurrentMonth = MONTH_NAMES[subCalCurrentMonthIndex];
-      renderSubscriptionCalendar();
+      calCurrentMonthIndex = (calCurrentMonthIndex + 1) % 12;
+      if (calCurrentMonthIndex === 0) calCurrentYear++;
+      renderPersonalCalendar();
     });
   }
 
-  // Today button
-  const todayBtn = document.getElementById('sub-cal-today-btn');
-  if (todayBtn) {
-    todayBtn.addEventListener('click', () => {
-      subCalCurrentMonthIndex = 9; // October
-      subCalCurrentYear = 2026;
-      subCalCurrentMonth = 'October';
-      subCalSelectedId = 'day-21';
-      subCalSelectedDayNum = 21;
-      renderSubscriptionCalendar();
-      showToast('Jumped to Today: 21 October 2026');
-    });
-  }
-
-  // Quick Add Modal Trigger & Close
-  const quickAddBtn = document.getElementById('sub-cal-quick-add-btn');
-  const addModal = document.getElementById('sub-cal-add-modal');
-  const addClose = document.getElementById('sub-cal-add-close');
-  const addSubmit = document.getElementById('sub-add-submit-btn');
-
-  if (quickAddBtn && addModal) {
-    quickAddBtn.addEventListener('click', () => {
-      addModal.hidden = false;
-      const nameInput = document.getElementById('sub-add-name');
-      if (nameInput) setTimeout(() => nameInput.focus(), 80);
-    });
-  }
-  if (addClose && addModal) {
-    addClose.addEventListener('click', () => { addModal.hidden = true; });
-  }
-
-  if (addSubmit) {
-    addSubmit.addEventListener('click', () => {
-      const nameInput = document.getElementById('sub-add-name');
-      const amountInput = document.getElementById('sub-add-amount');
-      const dateInput = document.getElementById('sub-add-date');
-      const name = nameInput ? nameInput.value.trim() : '';
-      const amountStr = amountInput ? amountInput.value.replace(/[^0-9.]/g, '') : '10.00';
-      const dayVal = dateInput ? parseInt(dateInput.value, 10) : subCalSelectedDayNum;
-
-      if (!name) {
-        showToast('Please enter a service name');
-        return;
-      }
-
-      const amount = parseFloat(amountStr) || 12.00;
-      const day = (dayVal >= 1 && dayVal <= 31) ? dayVal : subCalSelectedDayNum;
-
-      subCalItems.push({
-        id: `sub-${Date.now()}`,
-        name,
-        amount,
-        date: day,
-        logo: '💳',
-        type: 'monthly',
-        isNew: true,
-        squad: 'Frontend'
-      });
-
-      if (addModal) addModal.hidden = true;
-      if (nameInput) nameInput.value = '';
-      if (amountInput) amountInput.value = '';
-
-      subCalSelectedId = `day-${day}`;
-      subCalSelectedDayNum = day;
-      renderSubscriptionCalendar();
-      showToast(`Added subscription: ${name} ($${amount.toFixed(2)})`);
-    });
-  }
-
-  // Search Modal Trigger & Search Logic
-  const searchTrigger = document.getElementById('sub-tool-search-trigger');
-  const searchModal = document.getElementById('sub-cal-search-modal');
-  const searchClose = document.getElementById('sub-cal-search-close');
-  const searchInput = document.getElementById('sub-cal-search-input');
-  const searchResults = document.getElementById('sub-cal-search-results');
-
-  if (searchTrigger && searchModal) {
-    searchTrigger.addEventListener('click', () => {
-      searchModal.hidden = false;
-      if (searchInput) setTimeout(() => searchInput.focus(), 80);
-    });
-  }
-  if (searchClose && searchModal) {
-    searchClose.addEventListener('click', () => { searchModal.hidden = true; });
-  }
-
-  if (searchInput && searchResults) {
-    searchInput.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if (!q) {
-        searchResults.innerHTML = '<p class="sub-cal-empty-hint">Start typing to see results</p>';
-        return;
-      }
-
-      const matches = subCalItems.filter(s => s.name.toLowerCase().includes(q));
-      if (matches.length === 0) {
-        searchResults.innerHTML = `<p class="sub-cal-empty-hint">No subscriptions found for "${escapeHtml(q)}"</p>`;
-        return;
-      }
-
-      searchResults.innerHTML = matches.map(m => `
-        <div class="search-result-row" data-day="${m.date}">
-          <span class="search-result-name">${escapeHtml(m.name)}</span>
-          <span class="search-result-badge">Day ${m.date} &bull; $${m.amount.toFixed(2)}</span>
-        </div>
-      `).join('');
-
-      searchResults.querySelectorAll('.search-result-row').forEach(row => {
-        row.addEventListener('click', () => {
-          const d = parseInt(row.getAttribute('data-day'), 10);
-          subCalSelectedId = `day-${d}`;
-          subCalSelectedDayNum = d;
-          if (searchModal) searchModal.hidden = true;
-          renderSubscriptionCalendar();
-        });
-      });
-    });
-  }
-
-  // Monthly Summary Cube Trigger
-  const cubeTrigger = document.getElementById('sub-tool-cube-trigger');
-  const summaryModal = document.getElementById('sub-cal-summary-modal');
-  const summaryClose = document.getElementById('sub-cal-summary-close');
-
-  if (cubeTrigger && summaryModal) {
-    cubeTrigger.addEventListener('click', () => {
-      updateSubscriptionMetrics();
-      summaryModal.hidden = false;
-    });
-  }
-  if (summaryClose && summaryModal) {
-    summaryClose.addEventListener('click', () => { summaryModal.hidden = true; });
-  }
-
-  // Download export with simulated 1.8s spinner
-  const downloadBtn = document.getElementById('sub-tool-download-btn');
-  const spinner = document.getElementById('sub-download-spinner');
-  if (downloadBtn) {
-    downloadBtn.addEventListener('click', () => {
-      if (subCalDownloading) return;
-      subCalDownloading = true;
-      downloadBtn.classList.add('is-loading');
-      if (spinner) spinner.hidden = false;
-
-      setTimeout(() => {
-        subCalDownloading = false;
-        downloadBtn.classList.remove('is-loading');
-        if (spinner) spinner.hidden = true;
-        showToast('Exported October 2026 Subscription Schedule (.csv)');
-      }, 1600);
-    });
-  }
-
-  // Add event for this day button in right panel
-  const detailAddBtn = document.getElementById('sub-detail-add-event-btn');
-  if (detailAddBtn) {
-    detailAddBtn.addEventListener('click', () => {
-      if (addModal) {
-        addModal.hidden = false;
-        const dateInput = document.getElementById('sub-add-date');
-        if (dateInput) dateInput.value = subCalSelectedDayNum;
-        const nameInput = document.getElementById('sub-add-name');
-        if (nameInput) setTimeout(() => nameInput.focus(), 80);
-      }
-    });
-  }
-}
-
-// Alias for view router
-const renderCalendarView = renderSubscriptionCalendar;
-const initCalendarView = initSubscriptionCalendar;
-
-// ============================================================================
-// DATED SHORT NOTES (JournalNavigation - watermelon.sh Specification)
-// Vertical draggable/clickable date reel, month transition, and daily log entries
-// ============================================================================
-
-const JOURNAL_ENTRIES = [
-  {
-    id: 'entry-14',
-    day: 14,
-    month: 'OCTOBER',
-    year: 2026,
-    title: 'Sprint 12 Kickoff & Scope Allocation',
-    paragraphs: [
-      'Sprint 12 officially commenced with cross-functional team alignment.',
-      'Target velocity set to 54 story points across Frontend, Backend, and DevOps squads.'
-    ],
-    checklist: [
-      { text: 'Finalize API contract with backend team', done: true },
-      { text: 'Set up staging environment pipelines', done: true },
-      { text: 'Publish Sprint 12 backlog items to Kanban board', done: true }
-    ],
-    table: [
-      { squad: 'Frontend', pts: '23p', lead: 'Alex Chen' },
-      { squad: 'Backend', pts: '19p', lead: 'R. Kumar' },
-      { squad: 'DevOps', pts: '12p', lead: 'J. Doe' }
-    ]
-  },
-  {
-    id: 'entry-15',
-    day: 15,
-    month: 'OCTOBER',
-    year: 2026,
-    title: 'API Authentication & Real-Time Sync',
-    paragraphs: [
-      'Implemented token refresh middleware for high-concurrency requests.',
-      'Configured WebSocket heartbeat lease with Redis coordinator for instant task status updates.'
-    ],
-    checklist: [
-      { text: 'Configure JWT validation pipeline', done: true },
-      { text: 'Run load simulation on auth proxy', done: true },
-      { text: 'Link [[API Authentication]] with user dashboard', done: false }
-    ],
-    table: [
-      { service: 'Auth Proxy', latency: '4.2ms', status: 'Healthy' },
-      { service: 'Redis Sync', latency: '1.8ms', status: 'Healthy' }
-    ]
-  },
-  {
-    id: 'entry-16',
-    day: 16,
-    month: 'OCTOBER',
-    year: 2026,
-    title: 'Visual Design Tokens & Typography Hierarchy',
-    paragraphs: [
-      'Integrated warm cream background (#faf8f5) with peach accents (#fa6a2e) for high editorial polish.',
-      'Configured Instrument Serif for headings and Inter for high-density UI elements.'
-    ],
-    checklist: [
-      { text: 'Publish color tokens to CSS variables', done: true },
-      { text: 'Tune dark mode contrast ratios for WCAG AAA compliance', done: true },
-      { text: 'Verify typography rendering across Safari and Chromium', done: true }
-    ]
-  },
-  {
-    id: 'entry-17',
-    day: 17,
-    month: 'OCTOBER',
-    year: 2026,
-    title: 'Interactive Kanban Drag-and-Drop',
-    paragraphs: [
-      'Created 4-column agile board: Backlog, In Progress, In Review, and Done & Merged.',
-      'Implemented live point tallying and optimistic UI updates for real-time responsiveness.'
-    ],
-    checklist: [
-      { text: 'Implement HTML5 drag events with dropzone glow', done: true },
-      { text: 'Add keyboard navigation shortcuts for task cards', done: true },
-      { text: 'Persist column state changes to local storage', done: true }
-    ]
-  },
-  {
-    id: 'entry-18',
-    day: 18,
-    month: 'OCTOBER',
-    year: 2026,
-    title: 'Pomodoro Focus Timer & Parallax Landscape',
-    paragraphs: [
-      'Built fully functional Pomodoro engine with 25:00 work interval and 5:00 rest intervals.',
-      'Wired SVG circular progress ring and audio chime notifications upon interval completion.'
-    ],
-    checklist: [
-      { text: 'Expose window.pomodoroEngine for external controls', done: true },
-      { text: 'Sync dashboard mini-timer card with full mountain focus view', done: true },
-      { text: 'Add interval reset and sound mute toggles', done: true }
-    ]
-  },
-  {
-    id: 'entry-21',
-    day: 21,
-    month: 'OCTOBER',
-    year: 2026,
-    title: 'Subscription Calendar & Daily Journal (Today)',
-    paragraphs: [
-      'Integrated watermelon.sh Subscription Calendar with active glow highlights and quick search.',
-      'Built vertical date scroller JournalNavigation with staggered text animation for daily sprint logs.'
-    ],
-    checklist: [
-      { text: 'Mount 35-day subscription matrix with recurring spend metrics', done: true },
-      { text: 'Wire vertical reel navigation for 31 days with smooth drag/click', done: true },
-      { text: 'Link daily entries to Obsidian Knowledge Graph with straight line geometry', done: true }
-    ],
-    table: [
-      { module: 'Calendar', status: 'Active', latency: '1.2ms' },
-      { module: 'Journal Nav', status: 'Active', latency: '0.9ms' }
-    ]
-  },
-  {
-    id: 'entry-24',
-    day: 24,
-    month: 'OCTOBER',
-    year: 2026,
-    title: 'Performance Profiling & Bundle Optimization',
-    paragraphs: [
-      'Conducted bundle tree-shaking pass. Vite production build compiles in under 300ms.',
-      'Ensured zero extraneous npm packages and verified Lighthouse CWV performance score at 98.'
-    ],
-    checklist: [
-      { text: 'Profile Largest Contentful Paint (LCP < 1.1s)', done: true },
-      { text: 'Audit Interaction to Next Paint (INP < 50ms)', done: true },
-      { text: 'Confirm zero console warnings across all 6 views', done: true }
-    ]
-  },
-  {
-    id: 'entry-28',
-    day: 28,
-    month: 'OCTOBER',
-    year: 2026,
-    title: 'Sprint 12 Release & Retrospective',
-    paragraphs: [
-      'Final milestone audit: all 12 sprint issues verified against acceptance criteria.',
-      'Total sprint delivery reached 54/54 points with 100% test pass rate.'
-    ],
-    checklist: [
-      { text: 'Generate release changelog for v1.2.0', done: true },
-      { text: 'Tag git release commit and archive sprint analytics', done: true },
-      { text: 'Celebrate team velocity win over team lunch!', done: false }
-    ]
-  }
-];
-
-let journalCurrentIndex = 5; // Default to Oct 21 (Today)
-let journalDirection = 0;
-const ITEM_HEIGHT = 44;
-
-function renderJournalNavigation() {
-  const currentEntry = JOURNAL_ENTRIES[journalCurrentIndex] || JOURNAL_ENTRIES[0];
-
-  // Month & Day Labels
-  const monthEl = document.getElementById('journal-entry-month-label');
-  const dayEl = document.getElementById('journal-entry-day-label');
-  const yearEl = document.getElementById('journal-entry-year-label');
-
-  if (monthEl) monthEl.textContent = currentEntry.month;
-  if (dayEl) dayEl.textContent = String(currentEntry.day).padStart(2, '0');
-  if (yearEl) yearEl.textContent = currentEntry.year || 2026;
-
-  // Render vertical tape track (days 01 to 31)
-  const track = document.getElementById('journal-tape-track');
-  if (track) {
-    track.innerHTML = '';
-    const allDays = Array.from({ length: 31 }, (_, i) => i + 1);
-
-    allDays.forEach(d => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      const hasEntryIndex = JOURNAL_ENTRIES.findIndex(e => e.day === d);
-      const isSelected = currentEntry.day === d;
-
-      btn.className = `journal-tape-btn ${isSelected ? 'is-active-tape-day' : ''} ${hasEntryIndex !== -1 ? 'has-entry' : ''}`;
-      btn.textContent = String(d).padStart(2, '0');
-
-      btn.addEventListener('click', () => {
-        if (hasEntryIndex !== -1) {
-          journalDirection = hasEntryIndex > journalCurrentIndex ? 1 : -1;
-          journalCurrentIndex = hasEntryIndex;
-        } else {
-          // Create blank template entry for this day
-          JOURNAL_ENTRIES.push({
-            id: `entry-${d}`,
-            day: d,
-            month: 'OCTOBER',
-            year: 2026,
-            title: `Daily Log for October ${d}`,
-            paragraphs: [`Daily log entry for October ${d}, 2026.`],
-            checklist: [{ text: 'Log sprint progress', done: false }]
-          });
-          JOURNAL_ENTRIES.sort((a, b) => a.day - b.day);
-          journalCurrentIndex = JOURNAL_ENTRIES.findIndex(e => e.day === d);
-        }
-        renderJournalNavigation();
-      });
-
-      track.appendChild(btn);
-    });
-
-    // Animate vertical scroll position to center selected day
-    const dayBtnIndex = currentEntry.day - 1;
-    const targetY = -(dayBtnIndex * ITEM_HEIGHT) + (2 * ITEM_HEIGHT);
-    gsap.to(track, {
-      y: targetY,
-      duration: 0.35,
-      ease: 'power2.out'
-    });
-  }
-
-  // Prev / Next Chevron buttons state
-  const prevBtn = document.getElementById('journal-prev-btn');
-  const nextBtn = document.getElementById('journal-next-btn');
-
-  if (prevBtn) {
-    prevBtn.disabled = journalCurrentIndex === 0;
-    prevBtn.classList.toggle('is-disabled', journalCurrentIndex === 0);
-  }
-  if (nextBtn) {
-    nextBtn.disabled = journalCurrentIndex === JOURNAL_ENTRIES.length - 1;
-    nextBtn.classList.toggle('is-disabled', journalCurrentIndex === JOURNAL_ENTRIES.length - 1);
-  }
-
-  // Render Body Content with Staggered Word Reveal
-  const bodyEl = document.getElementById('journal-entry-body');
-  if (bodyEl) {
-    let contentHtml = `<h2 class="journal-entry-title font-serif">${escapeHtml(currentEntry.title)}</h2>`;
-
-    // Paragraphs
-    if (currentEntry.paragraphs && currentEntry.paragraphs.length > 0) {
-      contentHtml += currentEntry.paragraphs.map(p => `<p class="journal-text-para">${escapeHtml(p)}</p>`).join('');
-    }
-
-    // Checklists
-    if (currentEntry.checklist && currentEntry.checklist.length > 0) {
-      contentHtml += `
-        <div class="journal-checklist-box">
-          <div class="journal-box-title">Daily Checklist</div>
-          ${currentEntry.checklist.map((item, idx) => `
-            <label class="journal-check-row">
-              <input type="checkbox" class="journal-task-checkbox" data-idx="${idx}" ${item.done ? 'checked' : ''}>
-              <span class="journal-check-text ${item.done ? 'is-done' : ''}">${escapeHtml(item.text)}</span>
-            </label>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    // Tables
-    if (currentEntry.table && currentEntry.table.length > 0) {
-      const keys = Object.keys(currentEntry.table[0]);
-      contentHtml += `
-        <div class="journal-table-wrap">
-          <table class="journal-data-table">
-            <thead>
-              <tr>${keys.map(k => `<th>${escapeHtml(k.toUpperCase())}</th>`).join('')}</tr>
-            </thead>
-            <tbody>
-              ${currentEntry.table.map(row => `
-                <tr>${keys.map(k => `<td>${escapeHtml(row[k])}</td>`).join('')}</tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    bodyEl.innerHTML = contentHtml;
-
-    // Attach interactive checklist listeners
-    bodyEl.querySelectorAll('.journal-task-checkbox').forEach(chk => {
-      chk.addEventListener('change', (e) => {
-        const idx = parseInt(e.target.getAttribute('data-idx'), 10);
-        if (currentEntry.checklist && currentEntry.checklist[idx]) {
-          currentEntry.checklist[idx].done = e.target.checked;
-          const textSpan = e.target.parentElement.querySelector('.journal-check-text');
-          if (textSpan) textSpan.classList.toggle('is-done', e.target.checked);
-          showToast(e.target.checked ? 'Checklist item completed!' : 'Item marked incomplete');
-        }
-      });
-    });
-
-    // Stagger animation
-    gsap.fromTo(bodyEl.children,
-      { opacity: 0, y: journalDirection >= 0 ? 8 : -8 },
-      { opacity: 1, y: 0, duration: 0.35, stagger: 0.05, ease: 'power2.out' }
-    );
-  }
-}
-
-function initJournalNavigation() {
-  renderJournalNavigation();
-
-  const prevBtn = document.getElementById('journal-prev-btn');
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      if (journalCurrentIndex > 0) {
-        journalDirection = -1;
-        journalCurrentIndex--;
-        renderJournalNavigation();
-      }
-    });
-  }
-
-  const nextBtn = document.getElementById('journal-next-btn');
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      if (journalCurrentIndex < JOURNAL_ENTRIES.length - 1) {
-        journalDirection = 1;
-        journalCurrentIndex++;
-        renderJournalNavigation();
-      }
-    });
-  }
-
-  // Quick Log Entry Input
-  const logInput = document.getElementById('journal-quick-input');
-  const logSubmit = document.getElementById('journal-log-submit-btn');
-
-  const addLogHandler = () => {
-    if (!logInput) return;
-    const text = logInput.value.trim();
-    if (!text) return;
-
-    const currentEntry = JOURNAL_ENTRIES[journalCurrentIndex];
-    if (!currentEntry.checklist) currentEntry.checklist = [];
-
-    // If starts with - [ ] or check item
-    if (text.startsWith('- [ ]') || text.startsWith('- [x]')) {
-      const isDone = text.startsWith('- [x]');
-      const clean = text.replace(/-s*[[ x]]s*/i, '');
-      currentEntry.checklist.push({ text: clean, done: isDone });
-    } else {
-      if (!currentEntry.paragraphs) currentEntry.paragraphs = [];
-      currentEntry.paragraphs.push(text);
-    }
-
-    logInput.value = '';
-    renderJournalNavigation();
-    showToast(`Logged entry for October ${currentEntry.day}`);
+  // Today buttons
+  const todayAction = () => {
+    calCurrentMonthIndex = 9;
+    calCurrentYear = 2026;
+    calSelectedDate = '2026-10-26';
+    renderPersonalCalendar();
+    showToast('Jumped to Today: 26 October 2026');
   };
 
-  if (logSubmit) logSubmit.addEventListener('click', addLogHandler);
-  if (logInput) {
-    logInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addLogHandler();
-      }
-    });
+  const headerTodayBtn = document.getElementById('cal-header-today-btn');
+  if (headerTodayBtn) headerTodayBtn.addEventListener('click', todayAction);
+
+  // Add task for this day buttons
+  const openCreateForDate = (dateStr) => {
+    openModal('app-create-task-modal');
+    const dateInput = document.getElementById('new-task-duedate');
+    if (dateInput) dateInput.value = dateStr || calSelectedDate;
+    const titleInput = document.getElementById('new-task-title');
+    if (titleInput) setTimeout(() => titleInput.focus(), 80);
+  };
+
+  const calQuickAddBtn = document.getElementById('cal-quick-add-btn');
+  if (calQuickAddBtn) {
+    calQuickAddBtn.addEventListener('click', () => openCreateForDate(calSelectedDate));
   }
 
-  // Mode switcher between Dated Journal and Knowledge Graph
-  document.querySelectorAll('#notes-view-mode-pills .notes-mode-pill-tab').forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('#notes-view-mode-pills .notes-mode-pill-tab').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-
-      const mode = pill.getAttribute('data-mode');
-      const journalView = document.getElementById('journal-navigation-view');
-      const graphView = document.getElementById('tracker-notes-graph-view');
-
-      if (mode === 'journal') {
-        if (journalView) journalView.hidden = false;
-        if (graphView) graphView.hidden = true;
-        renderJournalNavigation();
-      } else {
-        if (journalView) journalView.hidden = true;
-        if (graphView) graphView.hidden = false;
-        renderNotesList();
-        renderKnowledgeGraph();
-      }
-    });
-  });
+  const agendaAddBtn = document.getElementById('cal-agenda-add-task-btn');
+  if (agendaAddBtn) {
+    agendaAddBtn.addEventListener('click', () => openCreateForDate(calSelectedDate));
+  }
 }
+
+// Aliases for view router & verification checks
+export const renderCalendarView = renderPersonalCalendar;
+export const initCalendarView = initPersonalCalendar;
+export const renderSubscriptionCalendar = renderPersonalCalendar;
+
+// Unified Note & Journal Interface Stubs
+export function renderJournalNavigation() {}
+export function initJournalNavigation() {}
 
 // ============================================================================
 // OBSIDIAN KNOWLEDGE GRAPH & MARKDOWN NOTES WORKSPACE
 // ============================================================================
 
-const DEFAULT_NOTES = [
+export const DEFAULT_NOTES = [
   {
     id: 'note-1',
-    title: 'Sprint 12 Architecture & API',
+    title: 'App Architecture & Sync',
     category: 'Architecture',
-    date: '15 Oct 2026',
-    content: `# Sprint 12 Architecture & API
+    date: '24 Oct 2026',
+    content: `# App Architecture & Sync
 
-Architecture specs for the distributed real-time sync service.
+Core architectural model for offline persistence, state caching, and client synchronization.
 
-### Checklist
-- [x] Configure WebSocket lease coordinator
-- [x] Set up Token Revocation Middleware
-- [ ] Connect [[API Authentication]] endpoints
-- [ ] Implement dark mode token sync in [[Design System]]
+### Technical Priorities
+- [x] Local storage reactive cache with JSON serialization
+- [x] Timestamp-anchored Pomodoro countdown without drift
+- [ ] Align UI tokens with [[Design System]]
+- [ ] Connect daily agenda items with [[Focus & Productivity]]
 
 ### Service Performance
-| Microservice | Target Latency | Status |
-| Redis Coordinator | 2.1ms | Operational |
-| REST Gateway | 4.8ms | Operational |
-| Database Primary | 1.8ms | Operational |
+| Module | Latency | Status |
+| State Cache | 0.8ms | Operational |
+| Wave Physics | 60 FPS | Optimal |
+| Storage Sync | 1.2ms | Operational |
 
-Internal references: [[API Authentication]], [[Design System]], [[Sprint Goals]].`
+Internal references: [[Design System]], [[Focus & Productivity]].`
   },
   {
     id: 'note-2',
-    title: 'Design System & Visual Tokens',
+    title: 'Design System',
     category: 'Ideas',
-    date: '16 Oct 2026',
-    content: `# Design System & Visual Tokens
+    date: '25 Oct 2026',
+    content: `# Design System
 
-Warm cream palette guidelines and serif headings for Tracker.
+Warm cream palette, Instrument Serif headers, and tactile peach accents.
 
-### Checklist
-- [x] Cream background (#faf8f5) token
-- [x] Peach accent (#e07a5f) highlights
-- [ ] Instrument Serif & Inter typography hierarchy
-- [ ] Micro-animations for Pomodoro ring
+### Core Token Specifications
+- [x] Warm cream background token (#fbf9f5)
+- [x] Coral & peach highlight accents (#fa6a2e / #e07a5f)
+- [x] Instrument Serif & Inter typographic pairing
+- [ ] Harmonize cards across [[App Architecture & Sync]] and [[Focus & Productivity]]
 
-Internal references: [[Sprint 12 Architecture & API]], [[Sprint Goals]].`
+Internal references: [[App Architecture & Sync]], [[Focus & Productivity]].`
   },
   {
     id: 'note-3',
-    title: 'Sprint Goals & Squad Allocations',
-    category: 'Sprint',
-    date: '17 Oct 2026',
-    content: `# Sprint Goals & Squad Allocations
+    title: 'Focus & Productivity',
+    category: 'Personal',
+    date: '26 Oct 2026',
+    content: `# Focus & Productivity
 
-Sprint 12 delivery targets and squad velocity breakdown.
+Daily workflows, deep focus intervals, and Pomodoro cadence.
 
-### Squad Capacities
-| Squad | Lead | Pts Committed |
-| Frontend | Alex Chen | 23 pts |
-| Backend | R. Kumar | 19 pts |
-| DevOps | J. Doe | 12 pts |
+### Daily Flow Routine
+- [x] Morning review & backlog grooming
+- [x] 25-minute Pomodoro sessions with liquid wave indicator
+- [ ] Weekly alignment with [[Quarterly Goals]]
+- [ ] Maintain consistent card styling from [[Design System]]
 
-### Milestones
-- [x] Milestone A: Core Kanban & Navigation
-- [x] Milestone B: Functional Pomodoro Engine
-- [ ] Milestone C: Obsidian Knowledge Graph
-
-Internal references: [[Sprint 12 Architecture & API]], [[Design System]], [[Release QA]].`
+Internal references: [[App Architecture & Sync]], [[Design System]], [[Quarterly Goals]].`
   },
   {
     id: 'note-4',
-    title: 'Release QA & Production Readiness',
-    category: 'Important',
-    date: '18 Oct 2026',
-    content: `# Release QA & Production Readiness
+    title: 'Quarterly Goals',
+    category: 'Personal',
+    date: '26 Oct 2026',
+    content: `# Quarterly Goals
 
-Checklist for deploying Sprint 12 to production environments.
+Personal milestones, project roadmap, and learning targets.
 
-### Pre-Flight Checklist
-- [x] Unit test suites passing with 0 failures
-- [x] Build check compiles without bundle warnings
-- [ ] End-to-end task drag-and-drop verification
-- [ ] Accessibility keyboard navigation pass
+### Key Milestones
+- [x] Deliver polished unified ClockIt tracker workspace
+- [x] Implement smooth liquid wave physics and zero-latency calendar
+- [ ] Ship unified Obsidian-style graph linked directly to notes
+- [ ] Establish daily habits documented in [[Focus & Productivity]]
 
-Internal references: [[API Authentication]], [[Sprint Goals & Squad Allocations]].`
+Internal references: [[Focus & Productivity]], [[Design System]].`
   }
 ];
 
@@ -2285,7 +1696,18 @@ function loadNotes() {
   const saved = localStorage.getItem('tracker-notes-data');
   if (saved) {
     try {
-      appNotes = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const hasLegacySprint = parsed.some(n => (n.title || '').includes('Sprint') || (n.content || '').includes('Sprint 12'));
+        if (hasLegacySprint) {
+          appNotes = [...DEFAULT_NOTES];
+          saveNotes();
+        } else {
+          appNotes = parsed;
+        }
+      } else {
+        appNotes = [...DEFAULT_NOTES];
+      }
     } catch (e) {
       appNotes = [...DEFAULT_NOTES];
     }
@@ -2414,9 +1836,9 @@ function renderActiveNotePreview(rawContent) {
 
 function initNotesWorkspace() {
   loadNotes();
-  initJournalNavigation();
   renderNotesList();
   loadActiveNote();
+  renderKnowledgeGraph();
 
   // Search input
   const searchInput = document.getElementById('notes-search-field');
@@ -2538,6 +1960,13 @@ Internal references: [[Design System & Visual Tokens]].`
   }
 }
 
+function selectNote(noteId) {
+  activeNoteId = noteId;
+  renderNotesList();
+  loadActiveNote();
+  renderKnowledgeGraph();
+}
+
 function renderKnowledgeGraph() {
   const svg = document.getElementById('knowledge-graph-svg');
   if (!svg) return;
@@ -2547,8 +1976,8 @@ function renderKnowledgeGraph() {
   const links = [];
   const nodeMap = new Map();
 
-  // 1. Gather all Note Nodes
-  appNotes.forEach((n, idx) => {
+  // 1. Gather all Note Nodes (Strictly actual notes)
+  appNotes.forEach((n) => {
     const nodeObj = {
       id: n.id,
       name: n.title,
@@ -2561,45 +1990,49 @@ function renderKnowledgeGraph() {
     nodeMap.set(n.id, nodeObj);
   });
 
-  // 2. Parse [[...]] links from notes
+  // 2. Parse [[...]] links between actual notes ONLY
   appNotes.forEach(n => {
     const regex = /\[\[([^\]]+)\]\]/g;
     let match;
     while ((match = regex.exec(n.content)) !== null) {
-      const targetName = match[1].trim();
-      const targetKey = targetName.toLowerCase();
-      let targetNode = nodeMap.get(targetKey);
+      const targetName = match[1].trim().toLowerCase();
+      const targetNote = appNotes.find(other => 
+        other.id !== n.id && (
+          other.title.toLowerCase() === targetName ||
+          other.title.toLowerCase().includes(targetName) ||
+          targetName.includes(other.title.toLowerCase())
+        )
+      );
 
-      if (!targetNode) {
-        targetNode = {
-          id: `concept-${targetKey.replace(/\s+/g, '-')}`,
-          name: targetName,
-          type: 'concept',
-          category: 'Concept',
-          active: false
-        };
-        nodes.push(targetNode);
-        nodeMap.set(targetKey, targetNode);
+      if (targetNote) {
+        const sourceNode = nodeMap.get(n.id);
+        const targetNode = nodeMap.get(targetNote.id);
+        if (sourceNode && targetNode) {
+          const alreadyLinked = links.some(l => 
+            (l.source.id === sourceNode.id && l.target.id === targetNode.id) ||
+            (l.source.id === targetNode.id && l.target.id === sourceNode.id)
+          );
+          if (!alreadyLinked) {
+            links.push({
+              source: sourceNode,
+              target: targetNode
+            });
+          }
+        }
       }
-
-      links.push({
-        source: nodeMap.get(n.id),
-        target: targetNode
-      });
     }
   });
 
-  // 3. Layout: Calculate balanced positions with straight line geometry
+  // 3. Layout: Balanced circular layout with straight line geometry
   const width = 380;
   const height = 440;
   const cx = width / 2;
   const cy = height / 2;
-  const radius = Math.min(width, height) * 0.36;
+  const radius = Math.min(width, height) * 0.35;
 
   nodes.forEach((node, i) => {
-    const angle = (i / nodes.length) * 2 * Math.PI - (Math.PI / 2);
-    // Slight jitter based on active node
-    const r = node.active ? radius * 0.25 : (node.type === 'concept' ? radius * 1.05 : radius * 0.75);
+    const angle = (i / Math.max(1, nodes.length)) * 2 * Math.PI - (Math.PI / 2);
+    const r = node.active ? radius * 0.55 : radius * 0.88;
     node.x = cx + r * Math.cos(angle);
     node.y = cy + r * Math.sin(angle);
   });
@@ -2628,7 +2061,7 @@ function renderKnowledgeGraph() {
 
   nodes.forEach(node => {
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.setAttribute('class', `graph-node-group ${node.active ? 'is-active-node' : ''} type-${node.type}`);
+    g.setAttribute('class', `graph-node-group ${node.active ? 'is-active-node' : ''}`);
     g.setAttribute('data-id', node.id);
 
     // Glow aura for active node
@@ -2636,7 +2069,7 @@ function renderKnowledgeGraph() {
       const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       glow.setAttribute('cx', node.x);
       glow.setAttribute('cy', node.y);
-      glow.setAttribute('r', '18');
+      glow.setAttribute('r', '17');
       glow.setAttribute('class', 'node-glow-aura');
       g.appendChild(glow);
     }
@@ -2645,17 +2078,17 @@ function renderKnowledgeGraph() {
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttribute('cx', node.x);
     circle.setAttribute('cy', node.y);
-    circle.setAttribute('r', node.active ? '10' : (node.type === 'note' ? '7.5' : '6'));
+    circle.setAttribute('r', node.active ? '9.5' : '7.5');
     circle.setAttribute('class', 'graph-circle-node');
     g.appendChild(circle);
 
     // Node Label
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', node.x);
-    text.setAttribute('y', node.y + (node.y > cy ? 16 : -12));
+    text.setAttribute('y', node.y + (node.y > cy ? 17 : -12));
     text.setAttribute('text-anchor', 'middle');
     text.setAttribute('class', 'graph-node-label');
-    text.textContent = node.name.length > 22 ? node.name.substring(0, 20) + '...' : node.name;
+    text.textContent = node.name.length > 20 ? node.name.substring(0, 18) + '...' : node.name;
     g.appendChild(text);
 
     // Hover Highlight
@@ -2674,28 +2107,8 @@ function renderKnowledgeGraph() {
 
     // Click to Open Note
     g.addEventListener('click', () => {
-      if (node.type === 'note') {
-        selectNote(node.id);
-        showToast(`Switched to note "${node.name}"`);
-      } else {
-        // Concept node: find or create
-        const match = appNotes.find(n => n.title.toLowerCase() === node.name.toLowerCase());
-        if (match) {
-          selectNote(match.id);
-        } else {
-          const newN = {
-            id: `note-${Date.now()}`,
-            title: node.name,
-            category: 'Architecture',
-            date: 'Today',
-            content: `# ${node.name}\n\nEntity documented from knowledge graph.\n`
-          };
-          appNotes.push(newN);
-          saveNotes();
-          selectNote(newN.id);
-          showToast(`Created note for "${node.name}"`);
-        }
-      }
+      selectNote(node.id);
+      showToast(`Switched to note "${node.name}"`);
     });
 
     nodesGroup.appendChild(g);
@@ -2705,71 +2118,116 @@ function renderKnowledgeGraph() {
 }
 
 // ============================================================================
-// MASTER VIEW NAVIGATION (Dashboard, Tasks, Calendar, Notes, Timer, Reports)
+// MASTER VIEW NAVIGATION (Home, Dashboard, Tasks, Calendar, Notes, Timer, Reports)
 // ============================================================================
+
+export function updateLiquidPillGlider(activeTab) {
+  const glider = document.getElementById('liquid-pill-glider');
+  const nav = document.getElementById('clockit-top-pills');
+  if (!glider || !nav) return;
+  const tab = activeTab || nav.querySelector('.clockit-pill-tab.active');
+  if (!tab) return;
+  const navRect = nav.getBoundingClientRect();
+  const tabRect = tab.getBoundingClientRect();
+  if (tabRect.width === 0) return;
+  glider.style.left = `${tabRect.left - navRect.left}px`;
+  glider.style.width = `${tabRect.width}px`;
+  glider.style.opacity = '1';
+}
 
 export function navigateToTrackerView(viewName) {
   currentActiveView = viewName;
+  const homeSection = document.getElementById('clockit-home-section');
+  const appMain = document.getElementById('clockit-app-main') || document.getElementById('actual-app-view');
+
+  if (viewName === 'home') {
+    if (homeSection) {
+      homeSection.hidden = false;
+      homeSection.style.display = 'block';
+    }
+    if (appMain) {
+      appMain.hidden = true;
+      appMain.classList.remove('active');
+    }
+    document.body.classList.remove('in-app-mode');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+    }, 120);
+  } else {
+    if (homeSection) {
+      homeSection.hidden = true;
+      homeSection.style.display = 'none';
+    }
+    if (appMain) {
+      appMain.hidden = false;
+      appMain.classList.add('active');
+    }
+    document.body.classList.add('in-app-mode');
+
+    // Views dictionary
+    const views = {
+      'dashboard': document.getElementById('tracker-view-dashboard'),
+      'tasks': document.getElementById('tracker-view-tasks'),
+      'calendar': document.getElementById('tracker-view-calendar'),
+      'notes': document.getElementById('tracker-view-notes'),
+      'reports': document.getElementById('tracker-view-reports'),
+      'timer': document.getElementById('tracker-view-timer')
+    };
+
+    // Hide all views first
+    Object.values(views).forEach(v => {
+      if (v) {
+        v.hidden = true;
+        v.classList.remove('active');
+      }
+    });
+
+    // Show target view
+    const targetViewEl = views[viewName] || views['dashboard'];
+    if (targetViewEl) {
+      targetViewEl.hidden = false;
+      targetViewEl.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Handle specific view hooks
+    if (viewName === 'notes') {
+      renderNotesList();
+      loadActiveNote();
+      renderKnowledgeGraph();
+    } else if (viewName === 'calendar') {
+      renderPersonalCalendar();
+    } else if (viewName === 'tasks' || viewName === 'dashboard') {
+      renderAppDashboard();
+    } else if (viewName === 'timer') {
+      const timerView = document.getElementById('clockit-timer-view');
+      if (timerView) timerView.style.display = 'block';
+    }
+  }
 
   // Sync Top Nav Pills
-  document.querySelectorAll('#tracker-top-pills .tracker-pill-tab').forEach(pill => {
+  document.querySelectorAll('#clockit-top-pills .clockit-pill-tab, #tracker-top-pills .tracker-pill-tab').forEach(pill => {
     const target = pill.getAttribute('data-view');
     const isAct = target === viewName;
     pill.classList.toggle('active', isAct);
     pill.setAttribute('aria-selected', isAct ? 'true' : 'false');
+    if (isAct) {
+      updateLiquidPillGlider(pill);
+    }
   });
 
-  // Sync Left Sidebar Items
+  // Sync Left Sidebar Items if any exist
   document.querySelectorAll('#tracker-sidebar .tracker-sidebar-item').forEach(item => {
     const target = item.getAttribute('data-view');
     item.classList.toggle('active', target === viewName);
   });
-
-  // Views dictionary
-  const views = {
-    'dashboard': document.getElementById('tracker-view-dashboard'),
-    'home': document.getElementById('tracker-view-dashboard'),
-    'tasks': document.getElementById('tracker-view-tasks'),
-    'calendar': document.getElementById('tracker-view-calendar'),
-    'notes': document.getElementById('tracker-view-notes'),
-    'reports': document.getElementById('tracker-view-reports'),
-    'timer': document.getElementById('tracker-view-timer')
-  };
-
-  // Hide all views first
-  Object.values(views).forEach(v => {
-    if (v) {
-      v.hidden = true;
-      v.classList.remove('active');
-    }
-  });
-
-  // Show target view
-  const targetViewEl = views[viewName] || views['dashboard'];
-  if (targetViewEl) {
-    targetViewEl.hidden = false;
-    targetViewEl.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // Handle specific view hooks
-  if (viewName === 'notes') {
-    renderJournalNavigation();
-    renderNotesList();
-    renderKnowledgeGraph();
-  } else if (viewName === 'calendar') {
-    renderSubscriptionCalendar();
-  } else if (viewName === 'tasks' || viewName === 'dashboard') {
-    renderAppDashboard();
-  } else if (viewName === 'timer') {
-    const timerView = document.getElementById('clockit-timer-view');
-    if (timerView) timerView.style.display = 'block';
-  }
 }
 
 if (typeof window !== 'undefined') {
   window.navigateToTrackerView = navigateToTrackerView;
   window.switchClockitView = navigateToTrackerView;
+  window.updateLiquidPillGlider = updateLiquidPillGlider;
 }
 
 // ============================================================================
@@ -2784,19 +2242,12 @@ function initAppDashboard() {
   initCalendarView();
   initNotesWorkspace();
 
-  // Top Nav Pills Click
-  document.querySelectorAll('#tracker-top-pills .tracker-pill-tab').forEach(pill => {
-    pill.addEventListener('click', () => {
-      const action = pill.getAttribute('data-action');
-      if (action === 'settings') {
-        const settingsModal = document.getElementById('timer-settings-modal');
-        if (settingsModal) settingsModal.hidden = false;
-        return;
-      }
-      const view = pill.getAttribute('data-view') || 'dashboard';
-      navigateToTrackerView(view);
-    });
-  });
+  initLiquidNavigation();
+  initFluidCards();
+  initLiquidTimerWave();
+  initLiveClockAndGreeting();
+  initPomodoroTimer(showToast);
+  initQuickNotes();
 
   // Left Sidebar Click
   document.querySelectorAll('#tracker-sidebar .tracker-sidebar-item').forEach(item => {
@@ -2865,11 +2316,11 @@ function initAppDashboard() {
     });
   }
 
-  // Squad select on Tasks Page
-  const tasksSquadSelect = document.getElementById('tasks-page-squad-select');
-  if (tasksSquadSelect) {
-    tasksSquadSelect.addEventListener('change', (e) => {
-      activeSquadFilter = e.target.value;
+  // Category select on Tasks Page
+  const tasksCategorySelect = document.getElementById('tasks-page-category-select');
+  if (tasksCategorySelect) {
+    tasksCategorySelect.addEventListener('change', (e) => {
+      activeCategoryFilter = e.target.value;
       renderAppDashboard();
     });
   }
@@ -2889,7 +2340,7 @@ function initAppDashboard() {
   const notifTrigger = document.getElementById('tracker-notif-trigger');
   if (notifTrigger) {
     notifTrigger.addEventListener('click', () => {
-      showToast('Sprint 12 velocity is 12% ahead of target! All systems operational.');
+      showToast('All tasks and workspace systems operational.');
     });
   }
 
@@ -2912,37 +2363,228 @@ function initAppDashboard() {
     createTaskForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const titleEl = document.getElementById('new-task-title');
-      const squadEl = document.getElementById('new-task-squad');
-      const ptsEl = document.getElementById('new-task-points');
+      const catEl = document.getElementById('new-task-category');
+      const prioEl = document.getElementById('new-task-priority');
+      const dueEl = document.getElementById('new-task-duedate');
 
       const title = titleEl ? titleEl.value.trim() : '';
-      const squad = squadEl ? squadEl.value : 'Frontend';
-      const pts = ptsEl ? parseInt(ptsEl.value, 10) || 3 : 3;
+      const category = catEl ? catEl.value : 'Personal';
+      const priority = prioEl ? prioEl.value : 'Medium';
+      const dueDate = dueEl ? dueEl.value : '2026-10-26';
 
       if (!title) return;
 
-      const nextNum = 130 + appSprintTasks.length;
       const newTask = {
-        id: `TRK-${nextNum}`,
+        id: `task-${Date.now()}`,
         title,
-        squad,
-        pts,
-        status: 'todo',
-        assignee: 'AC',
-        day: 'Wed'
+        category,
+        priority,
+        dueDate,
+        status: 'todo'
       };
 
       appSprintTasks.unshift(newTask);
       saveAppTasks();
       renderAppDashboard();
-      renderCalendarView();
+      renderPersonalCalendar();
       closeModal('app-create-task-modal');
       if (titleEl) titleEl.value = '';
-      showToast(`Created issue ${newTask.id}: ${title}`);
+      showToast(`Created task: ${title}`);
+    });
+  }
+}
+
+// ============================================================================
+// CLOCKIT LIQUID UI & MODULAR CONTROLLERS (TOP LEVEL)
+// ============================================================================
+
+export function initLiquidNavigation() {
+  // Top Nav Pills Click
+  document.querySelectorAll('#clockit-top-pills .clockit-pill-tab, #tracker-top-pills .tracker-pill-tab').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const action = pill.getAttribute('data-action');
+      if (action === 'settings') {
+        const settingsModal = document.getElementById('timer-settings-modal');
+        if (settingsModal) settingsModal.hidden = false;
+        return;
+      }
+      const view = pill.getAttribute('data-view') || 'dashboard';
+      navigateToTrackerView(view);
+    });
+  });
+
+  // ClockIt Home Brand Logo Button
+  const brandHomeBtn = document.getElementById('clockit-brand-home-btn');
+  if (brandHomeBtn) {
+    brandHomeBtn.addEventListener('click', () => {
+      navigateToTrackerView('home');
     });
   }
 
-  // Live Animated Digital Clock & Greeting
+  // Header Actions: Music Toggle, Settings, Profile
+  const topAudioBtn = document.getElementById('top-audio-toggle-btn');
+  if (topAudioBtn) {
+    topAudioBtn.addEventListener('click', () => {
+      const musicWidget = document.getElementById('music-widget');
+      if (musicWidget) {
+        musicWidget.classList.toggle('active');
+        musicWidget.hidden = !musicWidget.classList.contains('active');
+      }
+    });
+  }
+
+  const topSettingsBtn = document.getElementById('top-settings-btn');
+  if (topSettingsBtn) {
+    topSettingsBtn.addEventListener('click', () => {
+      const modal = document.getElementById('timer-settings-modal');
+      if (modal) modal.hidden = false;
+    });
+  }
+
+  // Avatar User Dropdown
+  const userBtn = document.getElementById('clockit-user-btn');
+  const userDropdown = document.getElementById('clockit-user-dropdown');
+  if (userBtn && userDropdown) {
+    userBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+    });
+  }
+
+  // Theme Toggle Button inside User Menu
+  const appThemeBtn = document.getElementById('app-theme-toggle-btn');
+  if (appThemeBtn) {
+    appThemeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('tracker-theme', isDark ? 'dark' : 'light');
+      showToast(isDark ? 'Switched to Dark mode' : 'Switched to Light mode', 2000);
+    });
+  }
+
+  // Open Preferences Modal
+  const openPrefBtn = document.getElementById('app-open-settings-item');
+  if (openPrefBtn) {
+    openPrefBtn.addEventListener('click', () => {
+      const modal = document.getElementById('timer-settings-modal');
+      if (modal) modal.hidden = false;
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    updateLiquidPillGlider();
+  });
+  setTimeout(() => updateLiquidPillGlider(), 150);
+}
+
+export function initFluidCards() {
+  const cards = document.querySelectorAll('.clockit-fluid-card');
+  cards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+  });
+}
+
+export function initLiquidTimerWave() {
+  const dashCanvas = document.getElementById('liquid-timer-canvas');
+  const fullCanvas = document.getElementById('pomodoro-liquid-canvas');
+  if (!dashCanvas && !fullCanvas) return;
+
+  let waveOffset = 0;
+
+  function drawWaveOnCanvas(canvas, snap) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+
+    // Calculate level based on actual remaining progress from engine
+    const progress = (snap && typeof snap.progress === 'number') ? snap.progress : 0;
+    const remainingRatio = Math.max(0.06, Math.min(0.94, 1 - progress));
+    const waterY = height - (height * remainingRatio);
+
+    const isBreak = snap && (snap.mode === 'shortBreak' || snap.mode === 'longBreak');
+    const prefersReducedMotion = typeof window !== 'undefined' && 
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    ctx.save();
+    // Circular clipping
+    ctx.beginPath();
+    ctx.arc(width / 2, height / 2, (width / 2) - 1.5, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Wave 1: Back/crest wave (lighter/translucent)
+    ctx.beginPath();
+    ctx.moveTo(0, height);
+    const amp1 = prefersReducedMotion ? 0 : (width > 200 ? 7 : 3.8);
+    const freq1 = width > 200 ? 32 : 18;
+    for (let x = 0; x <= width; x += 2) {
+      const y = waterY + Math.sin((x / freq1) + waveOffset) * amp1;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(width, height);
+    ctx.closePath();
+    ctx.fillStyle = isBreak ? 'rgba(114, 181, 149, 0.38)' : 'rgba(248, 191, 162, 0.42)';
+    ctx.fill();
+
+    // Wave 2: Foreground deeper wave with gradient
+    ctx.beginPath();
+    ctx.moveTo(0, height);
+    const amp2 = prefersReducedMotion ? 0 : (width > 200 ? 8.5 : 4.8);
+    const freq2 = width > 200 ? 28 : 16;
+    for (let x = 0; x <= width; x += 2) {
+      const y = waterY + Math.cos((x / freq2) + (waveOffset * 1.25)) * amp2;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(width, height);
+    ctx.closePath();
+
+    const grad = ctx.createLinearGradient(0, waterY, 0, height);
+    if (isBreak) {
+      grad.addColorStop(0, 'rgba(74, 150, 114, 0.78)');
+      grad.addColorStop(1, 'rgba(45, 105, 78, 0.95)');
+    } else {
+      grad.addColorStop(0, 'rgba(224, 122, 95, 0.78)');
+      grad.addColorStop(1, 'rgba(186, 101, 66, 0.96)');
+    }
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function renderWave() {
+    const snap = (typeof window !== 'undefined' && window.pomodoroEngine) 
+      ? window.pomodoroEngine.getSnapshot() 
+      : { progress: 0.25, mode: 'focus', state: 'idle' };
+
+    drawWaveOnCanvas(dashCanvas, snap);
+    drawWaveOnCanvas(fullCanvas, snap);
+
+    const prefersReducedMotion = typeof window !== 'undefined' && 
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!prefersReducedMotion) {
+      waveOffset += 0.035;
+    }
+
+    requestAnimationFrame(renderWave);
+  }
+
+  renderWave();
+}
+
+export function initLiveClockAndGreeting() {
   const timeDigitsEl = document.getElementById('clockit-time-digits');
   const timeAmpmEl = document.getElementById('clockit-time-ampm');
   const dateBadgeEl = document.getElementById('clockit-live-date');
@@ -2979,11 +2621,9 @@ function initAppDashboard() {
 
   updateLiveClock();
   setInterval(updateLiveClock, 1000);
+}
 
-  // Initialize Pomodoro Timer Engine
-  initPomodoroTimer(showToast);
-
-  // Quick Notes Form Submission
+export function initQuickNotes() {
   const notesForm = document.getElementById('clockit-notes-form');
   const noteInput = document.getElementById('clockit-new-note-input');
   const notesList = document.getElementById('clockit-notes-list');
@@ -3012,38 +2652,6 @@ function initAppDashboard() {
       showToast('Note added to Quick Notes');
     });
   }
-
-  // Avatar User Dropdown
-  const userBtn = document.getElementById('clockit-user-btn');
-  const userDropdown = document.getElementById('clockit-user-dropdown');
-  if (userBtn && userDropdown) {
-    userBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userDropdown.classList.toggle('open');
-    });
-    document.addEventListener('click', () => {
-      userDropdown.classList.remove('open');
-    });
-  }
-
-  // Theme Toggle Button inside User Menu
-  const appThemeBtn = document.getElementById('app-theme-toggle-btn');
-  if (appThemeBtn) {
-    appThemeBtn.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('tracker-theme', isDark ? 'dark' : 'light');
-      showToast(isDark ? 'Switched to Dark mode' : 'Switched to Light mode', 2000);
-    });
-  }
-
-  // Open Preferences Modal
-  const openPrefBtn = document.getElementById('app-open-settings-item');
-  if (openPrefBtn) {
-    openPrefBtn.addEventListener('click', () => {
-      const modal = document.getElementById('timer-settings-modal');
-      if (modal) modal.hidden = false;
-    });
-  }
 }
 
 // ============================================================================
@@ -3053,7 +2661,7 @@ function initAppDashboard() {
 // ============================================================================
 
 function initAuthSystem() {
-  const actualAppView = document.getElementById('actual-app-view');
+  const actualAppView = document.getElementById('clockit-app-main') || document.getElementById('actual-app-view');
   const navUserPill = document.getElementById('nav-user-pill');
   const navCtaBtn = document.getElementById('nav-cta-btn');
   const heroStartBtn = document.getElementById('hero-start-btn');
@@ -3068,31 +2676,17 @@ function initAuthSystem() {
   }
 
   function enterAppDashboard(targetView = 'dashboard') {
-    document.body.classList.add('in-app-mode');
-    if (actualAppView) {
-      actualAppView.hidden = false;
-      actualAppView.classList.add('active');
-    }
-    window.scrollTo({ top: 0, behavior: 'instant' });
     navigateToTrackerView(targetView);
     updateAuthUI(true);
   }
 
   function exitAppDashboard() {
-    document.body.classList.remove('in-app-mode');
-    if (actualAppView) {
-      actualAppView.hidden = true;
-      actualAppView.classList.remove('active');
-    }
+    navigateToTrackerView('home');
     if (window.location.hash && !window.location.hash.includes('website')) {
       try {
         history.pushState(null, null, window.location.pathname);
       } catch (e) {}
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 150);
   }
 
   function signInAsDemo(targetView = 'dashboard', suppressToast = false) {
@@ -3188,6 +2782,6 @@ window.addEventListener('DOMContentLoaded', () => {
   initAuthDrawer();
   initThemeToggle();
   initMusicWidget();
-  initAuthSystem();
   initAppDashboard();
+  initAuthSystem();
 });

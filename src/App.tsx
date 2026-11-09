@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Sidebar, NavView } from './components/layout/Sidebar';
-import { Header } from './components/layout/Header';
+import React from 'react';
+import { Navigate, Route, Routes, useNavigate, useOutletContext } from 'react-router-dom';
+import LandingPage from './landing/LandingPage';
+import AuthPage from './auth/AuthPage';
+import ProtectedRoute from './auth/ProtectedRoute';
+import { ScrollToTop } from './motion/ScrollToTop';
+import { DashboardLayout, DashboardOutletContext } from './components/layout/DashboardLayout';
 import { HomePage } from './components/pages/HomePage';
 import { FocusPage } from './components/pages/FocusPage';
 import { TasksPage } from './components/pages/TasksPage';
@@ -8,106 +12,82 @@ import { NotesPage } from './components/pages/NotesPage';
 import { AnalyticsPage } from './components/pages/AnalyticsPage';
 import { HabitsPage } from './components/pages/HabitsPage';
 import { CalendarPage } from './components/pages/CalendarPage';
-import { dataService } from './services/dataService';
-import './styles/clockit-theme.css';
+import { SettingsPage } from './components/pages/SettingsPage';
 
-export const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<NavView>('home');
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return (
-        document.documentElement.classList.contains('dark') ||
-        localStorage.getItem('tracker-theme') === 'dark' ||
-        localStorage.getItem('vertix-theme') === 'dark'
-      );
-    }
-    return false;
-  });
-
-  const [tasks, setTasks] = useState(() => dataService.getTasks());
-  const [workspaces, setWorkspaces] = useState(() => dataService.getWorkspaces());
-  const [activeWorkspace, setActiveWorkspace] = useState('personal');
-  const [habits, setHabits] = useState(() => dataService.getHabits());
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Sync dark mode class
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('tracker-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('tracker-theme', 'light');
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
-  };
-
-  const handleToggleTask = (id: string) => {
-    const updated = dataService.toggleTask(id);
-    setTasks(updated);
-  };
-
-  const handleToggleHabit = (id: string) => {
-    const updated = dataService.toggleHabit(id);
-    setHabits(updated);
-  };
-
+/** The home view links out to the other views through the router. */
+const HomeRoute: React.FC = () => {
+  const navigate = useNavigate();
   return (
-    <div className="clockit-layout-container">
-      {/* 1. Global Left Sidebar */}
-      <Sidebar
-        activeView={activeView}
-        onViewChange={(view) => setActiveView(view)}
-        workspaces={workspaces}
-        activeWorkspace={activeWorkspace}
-        onWorkspaceSelect={(id) => setActiveWorkspace(id)}
-      />
+    <HomePage
+      onNavigateToFocus={() => navigate('/app/focus')}
+      onNavigateToTasks={() => navigate('/app/tasks')}
+      onNavigateToCalendar={() => navigate('/app/calendar')}
+    />
+  );
+};
 
-      {/* 2. Main Viewport */}
-      <div className="clockit-main-viewport">
-        {/* Top Header */}
-        <Header
-          isDarkMode={isDarkMode}
-          onToggleTheme={toggleTheme}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+const TasksRoute: React.FC = () => {
+  const navigate = useNavigate();
+  return (
+    <TasksPage
+      onNavigateToCalendar={() => navigate('/app/calendar')}
+      onNavigateToFocus={() => navigate('/app/focus')}
+    />
+  );
+};
 
-        {/* Dynamic Page Views */}
-        <main style={{ flex: 1 }}>
-          {activeView === 'home' && (
-            <HomePage
-              tasks={tasks}
-              onToggleTask={handleToggleTask}
-              onNavigateToFocus={() => setActiveView('focus')}
-            />
-          )}
+/** Habits receive their data from the persistent layout via outlet context. */
+const HabitsRoute: React.FC = () => {
+  const { habits, onToggleHabit } = useOutletContext<DashboardOutletContext>();
+  return <HabitsPage habits={habits} onToggleHabit={onToggleHabit} />;
+};
 
-          {activeView === 'focus' && <FocusPage />}
+/**
+ * Three distinct experiences, three sets of routes:
+ *
+ *   1. Public landing page   →  /
+ *   2. Authentication        →  /login, /signup
+ *   3. Authenticated app     →  /app/* (guarded)
+ *
+ * The dashboard is nested under a single layout element so its sidebar and
+ * header are mounted once and stay stable while pages change underneath.
+ */
+export const App: React.FC = () => {
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+        {/* 1. Public */}
+        <Route path="/" element={<LandingPage />} />
 
-          {activeView === 'tasks' && (
-            <TasksPage
-              tasks={tasks}
-              onToggleTask={handleToggleTask}
-              onNavigateToCalendar={() => setActiveView('calendar')}
-            />
-          )}
+        {/* 2. Auth */}
+        <Route path="/login" element={<AuthPage mode="login" />} />
+        <Route path="/signup" element={<AuthPage mode="signup" />} />
 
-          {activeView === 'notes' && <NotesPage />}
+        {/* 3. Authenticated dashboard */}
+        <Route
+          path="/app"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<HomeRoute />} />
+          <Route path="focus" element={<FocusPage />} />
+          <Route path="tasks" element={<TasksRoute />} />
+          <Route path="notes" element={<NotesPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="habits" element={<HabitsRoute />} />
+          <Route path="calendar" element={<CalendarPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="*" element={<Navigate to="/app" replace />} />
+        </Route>
 
-          {activeView === 'analytics' && <AnalyticsPage />}
-
-          {activeView === 'habits' && (
-            <HabitsPage habits={habits} onToggleHabit={handleToggleHabit} />
-          )}
-
-          {activeView === 'calendar' && <CalendarPage />}
-        </main>
-      </div>
-    </div>
+        {/* Unknown URLs land on the public page. */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 };
 

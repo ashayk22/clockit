@@ -1,0 +1,227 @@
+/* ==========================================================================
+   ClockIt Motion System — shared interaction layer
+   Subtle, purposeful, consistent. Transform + opacity only.
+   ========================================================================== */
+
+:root {
+  --motion-fast: 140ms;
+  --motion-base: 220ms;
+  --motion-slow: 320ms;
+  --motion-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- Interactive controls: hover / active / focus ---------- */
+
+.clockit-nav-item,
+.clockit-workspace-item,
+.clockit-icon-action-btn,
+.clockit-add-space-btn,
+.clockit-brand-row {
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    color var(--motion-base) var(--motion-ease),
+    transform var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-icon-action-btn:active,
+.clockit-add-space-btn:active {
+  transform: scale(0.94);
+}
+
+.clockit-nav-item:focus-visible,
+.clockit-workspace-item:focus-visible,
+.clockit-icon-action-btn:focus-visible,
+.clockit-add-space-btn:focus-visible,
+.clockit-brand-row:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid var(--accent-green);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Inputs and selects glide into focus rather than snapping. */
+.clockit-layout-container input,
+.clockit-layout-container select,
+.clockit-layout-container textarea,
+.clockit-auth-shell input,
+.clockit-auth-shell select,
+.clockit-auth-shell textarea {
+  transition:
+    border-color var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    background-color var(--motion-base) var(--motion-ease);
+}
+
+/* Buttons get a consistent press response everywhere in the app.
+   Scoped to the dashboard/auth shells so the public landing page keeps its
+   own hand-tuned button motion exactly as designed. */
+.clockit-layout-container button,
+.clockit-auth-shell button {
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    color var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease),
+    opacity var(--motion-base) var(--motion-ease),
+    transform var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease);
+}
+
+.clockit-layout-container button:active:not(:disabled),
+.clockit-auth-shell button:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.99);
+}
+
+.clockit-layout-container button:disabled,
+.clockit-auth-shell button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ---------- Surfaces respond gently to interaction ---------- */
+
+.clockit-card,
+.clockit-widget-card,
+.clockit-stat-card {
+  transition:
+    transform var(--motion-base) var(--motion-ease-out),
+    box-shadow var(--motion-base) var(--motion-ease-out),
+    border-color var(--motion-base) var(--motion-ease),
+    background-color var(--motion-base) var(--motion-ease);
+  will-change: transform;
+}
+
+.clockit-card:hover,
+.clockit-widget-card:hover,
+.clockit-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Any element can opt into the shared entrance/hover treatment. */
+[data-motion-card] {
+  transition:
+    transform var(--motion-base) var(--motion-ease-out),
+    box-shadow var(--motion-base) var(--motion-ease-out);
+}
+
+[data-motion-card]:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ---------- Charts, rings and progress indicators ---------- */
+
+/* NOTE: the Focus timepiece dial deliberately has NO rules here. Its arc,
+   end-cap and sweep needle are positioned every frame by the animation loop in
+   FocusPage, so any CSS transition on them would fight that loop and re-trigger
+   on each whole-second tick. All dial motion lives in `clockit-theme.css`. */
+
+/* ---------- Page transition host ---------- */
+
+[data-page-transition] {
+  min-height: 0;
+}
+
+/* ---------- Toast / modal / dropdown enter animations ---------- */
+
+@keyframes clockit-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes clockit-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes clockit-pop {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.motion-rise-in {
+  animation: clockit-rise-in var(--motion-slow) var(--motion-ease-out) both;
+}
+
+.motion-fade-in {
+  animation: clockit-fade-in var(--motion-base) var(--motion-ease) both;
+}
+
+.motion-pop {
+  animation: clockit-pop var(--motion-slow) var(--motion-ease-out) both;
+}
+
+/* ---------- Dashboard modals / drawers ----------
+   Every dashboard dialog is conditionally mounted as an inline
+   `position: fixed` overlay, so they can all share one enter animation
+   without each screen having to opt in individually: the scrim fades in,
+   the panel rises and settles. */
+
+.clockit-layout-container div[style*='position: fixed'] {
+  animation: clockit-fade-in var(--motion-base) var(--motion-ease);
+}
+
+.clockit-layout-container div[style*='position: fixed'] > .clockit-card {
+  animation: clockit-rise-in var(--motion-base) var(--motion-ease-out);
+}
+
+/* Row action menus are absolutely-positioned popovers rather than content
+   surfaces, so they rise in like every other dropdown and must not inherit
+   the shared card hover-lift (which would nudge the menu under the cursor). */
+.clockit-task-dropdown-menu {
+  transform-origin: top right;
+  animation: clockit-rise-in var(--motion-base) var(--motion-ease-out) both;
+}
+
+.clockit-task-dropdown-menu:hover {
+  transform: none;
+  box-shadow: var(--shadow-hover);
+}
+
+/* ---------- Respect prefers-reduced-motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .clockit-card:hover,
+  .clockit-widget-card:hover,
+  .clockit-stat-card:hover,
+  [data-motion-card]:hover {
+    transform: none;
+  }
+}

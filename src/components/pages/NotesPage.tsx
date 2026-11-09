@@ -3,22 +3,18 @@ import {
   Search,
   Plus,
   Share2,
-  MoreHorizontal,
   Folder as FolderIcon,
-  ChevronDown,
   ChevronRight,
-  SlidersHorizontal,
-  LayoutGrid,
-  Maximize2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRight,
   Star,
   Trash2,
   FileText,
   Bookmark,
-  Layers,
-  ArrowLeft,
   X,
-  Edit2,
   ExternalLink,
+  Hash,
 } from 'lucide-react';
 import { notesStorage, NoteFolder, NoteItem, GraphNode, GraphLink } from '../../services/notesStorage';
 import { NotesEditor } from '../notes/NotesEditor';
@@ -34,7 +30,11 @@ export const NotesPage: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'graph' | 'backlinks' | 'mentions'>('graph');
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  // IndexedDB reads are async, so the list gets a brief loading state instead
+  // of flashing "No notes found" before the first load resolves.
+  const [isLoadingNotes, setIsLoadingNotes] = useState(true);
 
   // Folder accordion collapse states
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
@@ -56,6 +56,19 @@ export const NotesPage: React.FC = () => {
 
   // Mobile / small tablet view switcher
   const [mobileTab, setMobileTab] = useState<'nav' | 'editor' | 'graph'>('editor');
+
+  // Escape closes whichever dialog is open — the shared modal affordance.
+  useEffect(() => {
+    if (!isNewFolderOpen && !noteToDelete) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsNewFolderOpen(false);
+        setNoteToDelete(null);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isNewFolderOpen, noteToDelete]);
 
   // Initialize IndexedDB and load data
   useEffect(() => {
@@ -79,6 +92,8 @@ export const NotesPage: React.FC = () => {
         }
       } catch (err) {
         console.error('Failed to initialize notes storage:', err);
+      } finally {
+        if (isMounted) setIsLoadingNotes(false);
       }
     };
     initAndLoad();
@@ -139,6 +154,13 @@ export const NotesPage: React.FC = () => {
   const favoritesCount = useMemo(() => notes.filter((n) => !n.isTrash && n.isFavorite).length, [notes]);
   const templatesCount = useMemo(() => notes.filter((n) => !n.isTrash && n.isTemplate).length, [notes]);
   const trashCount = useMemo(() => notes.filter((n) => n.isTrash).length, [notes]);
+
+  // Every tag currently used by a live note, for the tag filter
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    notes.filter((n) => !n.isTrash).forEach((n) => n.tags?.forEach((t) => tagSet.add(t)));
+    return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
+  }, [notes]);
 
   // Knowledge graph data computed from actual notes & real [[links]]
   const { nodes: graphNodes, links: graphLinks } = useMemo(() => {
@@ -282,13 +304,16 @@ export const NotesPage: React.FC = () => {
   }, [activeNote, folders]);
 
   return (
-    <div className="clockit-page-container" style={{ padding: '16px 24px', height: 'calc(100vh - var(--header-height))', display: 'flex', flexDirection: 'column' }}>
-      {/* Mobile/Tablet tab switcher bar */}
-      <div className="clockit-filter-pills" style={{ display: 'none', marginBottom: 10, width: '100%' }}>
+    <div className="clockit-page-container clockit-notes-page">
+      {/* Mobile / tablet panel switcher */}
+      <div className="clockit-filter-pills clockit-notes-mobile-tabs">
         <button
           type="button"
           className={`clockit-filter-pill ${mobileTab === 'nav' ? 'active' : ''}`}
-          onClick={() => setMobileTab('nav')}
+          onClick={() => {
+            setIsLeftPanelOpen(true);
+            setMobileTab('nav');
+          }}
         >
           Folders &amp; Notes
         </button>
@@ -302,353 +327,355 @@ export const NotesPage: React.FC = () => {
         <button
           type="button"
           className={`clockit-filter-pill ${mobileTab === 'graph' ? 'active' : ''}`}
-          onClick={() => setMobileTab('graph')}
+          onClick={() => {
+            setIsRightPanelOpen(true);
+            setMobileTab('graph');
+          }}
         >
           Graph
         </button>
       </div>
 
-      <div className={`clockit-notes-layout ${!isRightPanelOpen ? 'collapsed-right' : ''}`}>
+      <div
+        className={`clockit-notes-layout${isLeftPanelOpen ? '' : ' collapsed-left'}${isRightPanelOpen ? '' : ' collapsed-right'}`}
+        data-mobile-tab={mobileTab}
+      >
         {/* ===================================================================
-            PANEL 1: Notes Navigation Sidebar (Folders, Quick Views, & Note List)
+            PANEL 1: Notes Navigation (Quick views, folders, tags, note list)
             =================================================================== */}
-        <aside className="clockit-notes-sidebar" aria-label="Notes Directory">
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>Notes</span>
-            <div style={{ display: 'flex', gap: 4 }}>
-              <button
-                className="clockit-icon-action-btn"
-                style={{ padding: 4 }}
-                title="Search notes"
-                type="button"
-                onClick={() => document.getElementById('notes-search-input')?.focus()}
-              >
-                <Search size={14} />
-              </button>
-              <button
-                className="clockit-icon-action-btn"
-                style={{ padding: 4 }}
-                title="Create new note"
-                type="button"
-                onClick={() => handleCreateNote()}
-              >
-                <Plus size={15} />
-              </button>
+        <div className={`clockit-notes-slot slot-left${isLeftPanelOpen ? '' : ' is-collapsed'}`}>
+          <aside className="clockit-notes-sidebar" aria-label="Notes Directory">
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>Notes</span>
+              <div style={{ display: 'flex', gap: 4 }}>
+                <button
+                  className="clockit-icon-action-btn"
+                  style={{ padding: 4 }}
+                  title="Search notes"
+                  type="button"
+                  onClick={() => document.getElementById('notes-search-input')?.focus()}
+                >
+                  <Search size={14} />
+                </button>
+                <button
+                  className="clockit-icon-action-btn"
+                  style={{ padding: 4 }}
+                  title="Create new note"
+                  type="button"
+                  onClick={() => handleCreateNote()}
+                >
+                  <Plus size={15} />
+                </button>
+                <button
+                  className="clockit-icon-action-btn"
+                  style={{ padding: 4 }}
+                  title="Collapse navigation"
+                  type="button"
+                  onClick={() => setIsLeftPanelOpen(false)}
+                >
+                  <PanelLeftClose size={14} />
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Quick Search */}
-          <div style={{ position: 'relative' }}>
-            <input
-              id="notes-search-input"
-              type="text"
-              placeholder="Search title, tag, text..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="clockit-quick-add-input"
-              style={{ fontSize: 12, paddingLeft: 26, height: 30 }}
-            />
-            <Search size={13} color="var(--text-muted)" style={{ position: 'absolute', left: 8, top: 8.5 }} />
-            {searchQuery && (
-              <X
-                size={13}
-                color="var(--text-muted)"
-                style={{ position: 'absolute', right: 8, top: 8.5, cursor: 'pointer' }}
-                onClick={() => setSearchQuery('')}
+            {/* Quick Search */}
+            <div style={{ position: 'relative' }}>
+              <input
+                id="notes-search-input"
+                type="text"
+                placeholder="Search title, tag, text..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="clockit-quick-add-input"
+                style={{ fontSize: 12, paddingLeft: 26, height: 30 }}
               />
-            )}
-          </div>
-
-          {/* Quick Views */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '6px 8px',
-                borderRadius: 6,
-                fontSize: 13,
-                cursor: 'pointer',
-                background: selectedView === 'all' && !selectedFolderId && !selectedTag ? 'var(--bg-surface-subtle)' : 'transparent',
-                fontWeight: selectedView === 'all' && !selectedFolderId && !selectedTag ? 600 : 400,
-              }}
-              onClick={() => {
-                setSelectedView('all');
-                setSelectedFolderId(null);
-                setSelectedTag(null);
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <FileText size={14} color="var(--text-secondary)" />
-                <span style={{ color: 'var(--text-primary)' }}>All Notes</span>
-              </div>
-              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{allNotesCount}</span>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '6px 8px',
-                borderRadius: 6,
-                fontSize: 13,
-                cursor: 'pointer',
-                background: selectedView === 'favorites' ? 'var(--bg-surface-subtle)' : 'transparent',
-                fontWeight: selectedView === 'favorites' ? 600 : 400,
-              }}
-              onClick={() => {
-                setSelectedView('favorites');
-                setSelectedFolderId(null);
-                setSelectedTag(null);
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Star size={14} color="#f59e0b" fill={selectedView === 'favorites' ? '#f59e0b' : 'none'} />
-                <span style={{ color: 'var(--text-secondary)' }}>Favorites</span>
-              </div>
-              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{favoritesCount}</span>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '6px 8px',
-                borderRadius: 6,
-                fontSize: 13,
-                cursor: 'pointer',
-                background: selectedView === 'templates' ? 'var(--bg-surface-subtle)' : 'transparent',
-                fontWeight: selectedView === 'templates' ? 600 : 400,
-              }}
-              onClick={() => {
-                setSelectedView('templates');
-                setSelectedFolderId(null);
-                setSelectedTag(null);
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Bookmark size={14} color="var(--text-secondary)" />
-                <span style={{ color: 'var(--text-secondary)' }}>Templates</span>
-              </div>
-              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{templatesCount}</span>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '6px 8px',
-                borderRadius: 6,
-                fontSize: 13,
-                cursor: 'pointer',
-                background: selectedView === 'trash' ? 'var(--bg-surface-subtle)' : 'transparent',
-                fontWeight: selectedView === 'trash' ? 600 : 400,
-              }}
-              onClick={() => {
-                setSelectedView('trash');
-                setSelectedFolderId(null);
-                setSelectedTag(null);
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Trash2 size={14} color="var(--text-muted)" />
-                <span style={{ color: 'var(--text-secondary)' }}>Trash</span>
-              </div>
-              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{trashCount}</span>
-            </div>
-          </div>
-
-          {/* Folders Tree Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Folders
-            </span>
-            <button
-              className="clockit-icon-action-btn"
-              style={{ padding: 2 }}
-              title="Add Folder"
-              type="button"
-              onClick={() => setIsNewFolderOpen(true)}
-            >
-              <Plus size={13} color="var(--text-muted)" />
-            </button>
-          </div>
-
-          {/* Folders Accordion List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 13 }}>
-            {rootFolders.map((folder) => {
-              const children = getSubFolders(folder.id);
-              const isExpanded = expandedFolders[folder.id];
-              const isParentActive = selectedFolderId === folder.id;
-
-              return (
-                <div key={folder.id}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '5px 6px',
-                      borderRadius: 6,
-                      color: isParentActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                      fontWeight: isParentActive ? 600 : 400,
-                      cursor: 'pointer',
-                      background: isParentActive ? 'var(--bg-surface-subtle)' : 'transparent',
-                    }}
-                    onClick={() => {
-                      setSelectedFolderId(folder.id);
-                      setSelectedView('all');
-                      if (children.length > 0) toggleFolderAccordion(folder.id);
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
-                      {children.length > 0 ? (
-                        <span onClick={(e) => { e.stopPropagation(); toggleFolderAccordion(folder.id); }}>
-                          {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-                        </span>
-                      ) : (
-                        <span style={{ width: 13 }} />
-                      )}
-                      <FolderIcon size={14} color={folder.color} fill={folder.color} style={{ flexShrink: 0 }} />
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{folder.name}</span>
-                    </div>
-                    <button
-                      className="clockit-icon-action-btn"
-                      style={{ padding: 2 }}
-                      title="New Note in Folder"
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCreateNote(folder.id);
-                      }}
-                    >
-                      <Plus size={12} color="var(--text-muted)" />
-                    </button>
-                  </div>
-
-                  {/* Subfolders */}
-                  {children.length > 0 && isExpanded && (
-                    <div style={{ paddingLeft: 22, display: 'flex', flexDirection: 'column', gap: 2, marginTop: 2 }}>
-                      {children.map((sub) => {
-                        const isSubActive = selectedFolderId === sub.id;
-                        return (
-                          <div
-                            key={sub.id}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '4px 8px',
-                              borderRadius: 6,
-                              fontSize: 12.5,
-                              cursor: 'pointer',
-                              background: isSubActive ? 'var(--accent-green-subtle)' : 'transparent',
-                              color: isSubActive ? 'var(--accent-green-text)' : 'var(--text-secondary)',
-                              fontWeight: isSubActive ? 600 : 400,
-                            }}
-                            onClick={() => {
-                              setSelectedFolderId(sub.id);
-                              setSelectedView('all');
-                            }}
-                          >
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.name}</span>
-                            <span
-                              style={{ fontSize: 11, color: 'var(--text-muted)' }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCreateNote(sub.id);
-                              }}
-                            >
-                              +
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Notes in Current Selection */}
-          <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 10, marginTop: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {selectedView === 'trash' ? 'Trash Notes' : selectedView === 'favorites' ? 'Favorite Notes' : 'Notes List'}
-              </span>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{filteredNotes.length}</span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 220, overflowY: 'auto' }}>
-              {filteredNotes.length === 0 ? (
-                <div style={{ padding: '16px 8px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
-                  No notes found.
-                  <button
-                    type="button"
-                    onClick={() => handleCreateNote()}
-                    style={{ display: 'block', margin: '6px auto 0', color: 'var(--accent-mint)', fontSize: 12, fontWeight: 600 }}
-                  >
-                    + Create one
-                  </button>
-                </div>
-              ) : (
-                filteredNotes.map((note) => {
-                  const isActive = note.id === activeNoteId;
-                  return (
-                    <div
-                      key={note.id}
-                      style={{
-                        padding: '6px 8px',
-                        borderRadius: 6,
-                        cursor: 'pointer',
-                        background: isActive ? 'var(--bg-surface-subtle)' : 'transparent',
-                        borderLeft: isActive ? '3px solid var(--accent-mint)' : '3px solid transparent',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2,
-                        transition: 'background 0.12s ease',
-                      }}
-                      onClick={() => handleSelectNote(note.id)}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span
-                          style={{
-                            fontSize: 12.5,
-                            fontWeight: isActive ? 600 : 500,
-                            color: 'var(--text-primary)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {note.title || 'Untitled Note'}
-                        </span>
-                        {note.isFavorite && <Star size={11} color="#f59e0b" fill="#f59e0b" />}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10.5, color: 'var(--text-muted)' }}>
-                        <span>{new Date(note.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                        {note.tags?.[0] && <span>{note.tags[0]}</span>}
-                      </div>
-                    </div>
-                  );
-                })
+              <Search size={13} color="var(--text-muted)" style={{ position: 'absolute', left: 8, top: 8.5 }} />
+              {searchQuery && (
+                <X
+                  size={13}
+                  color="var(--text-muted)"
+                  style={{ position: 'absolute', right: 8, top: 8.5, cursor: 'pointer' }}
+                  onClick={() => setSearchQuery('')}
+                />
               )}
             </div>
-          </div>
-        </aside>
+
+            {/* Quick Views */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div
+                className={`clockit-notes-nav-row${selectedView === 'all' && !selectedFolderId && !selectedTag ? ' is-active' : ''}`}
+                onClick={() => {
+                  setSelectedView('all');
+                  setSelectedFolderId(null);
+                  setSelectedTag(null);
+                }}
+              >
+                <div className="clockit-notes-nav-row-left">
+                  <FileText size={14} color="var(--text-secondary)" />
+                  <span>All Notes</span>
+                </div>
+                <span className="clockit-notes-row-count">{allNotesCount}</span>
+              </div>
+
+              <div
+                className={`clockit-notes-nav-row${selectedView === 'favorites' ? ' is-active' : ''}`}
+                onClick={() => {
+                  setSelectedView('favorites');
+                  setSelectedFolderId(null);
+                  setSelectedTag(null);
+                }}
+              >
+                <div className="clockit-notes-nav-row-left">
+                  <Star size={14} color="#f59e0b" fill={selectedView === 'favorites' ? '#f59e0b' : 'none'} />
+                  <span>Favorites</span>
+                </div>
+                <span className="clockit-notes-row-count">{favoritesCount}</span>
+              </div>
+
+              <div
+                className={`clockit-notes-nav-row${selectedView === 'templates' ? ' is-active' : ''}`}
+                onClick={() => {
+                  setSelectedView('templates');
+                  setSelectedFolderId(null);
+                  setSelectedTag(null);
+                }}
+              >
+                <div className="clockit-notes-nav-row-left">
+                  <Bookmark size={14} color="var(--text-secondary)" />
+                  <span>Templates</span>
+                </div>
+                <span className="clockit-notes-row-count">{templatesCount}</span>
+              </div>
+
+              <div
+                className={`clockit-notes-nav-row${selectedView === 'trash' ? ' is-active' : ''}`}
+                onClick={() => {
+                  setSelectedView('trash');
+                  setSelectedFolderId(null);
+                  setSelectedTag(null);
+                }}
+              >
+                <div className="clockit-notes-nav-row-left">
+                  <Trash2 size={14} color="var(--text-muted)" />
+                  <span>Trash</span>
+                </div>
+                <span className="clockit-notes-row-count">{trashCount}</span>
+              </div>
+            </div>
+
+            {/* Folders Tree Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+              <span className="clockit-notes-section-label">Folders</span>
+              <button
+                className="clockit-icon-action-btn"
+                style={{ padding: 2 }}
+                title="Add Folder"
+                type="button"
+                onClick={() => setIsNewFolderOpen(true)}
+              >
+                <Plus size={13} color="var(--text-muted)" />
+              </button>
+            </div>
+
+            {/* Folders Accordion List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 13 }}>
+              {rootFolders.map((folder) => {
+                const children = getSubFolders(folder.id);
+                const isExpanded = expandedFolders[folder.id];
+                const isParentActive = selectedFolderId === folder.id;
+
+                return (
+                  <div key={folder.id}>
+                    <div
+                      className={`clockit-notes-nav-row${isParentActive ? ' is-active' : ''}`}
+                      onClick={() => {
+                        setSelectedFolderId(folder.id);
+                        setSelectedView('all');
+                        if (children.length > 0) toggleFolderAccordion(folder.id);
+                      }}
+                    >
+                      <div className="clockit-notes-nav-row-left" style={{ gap: 6 }}>
+                        {children.length > 0 ? (
+                          <span
+                            className="clockit-notes-caret"
+                            data-expanded={isExpanded ? 'true' : 'false'}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${folder.name}`}
+                            aria-expanded={isExpanded}
+                            onClick={(e) => { e.stopPropagation(); toggleFolderAccordion(folder.id); }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleFolderAccordion(folder.id);
+                              }
+                            }}
+                          >
+                            <ChevronRight size={13} />
+                          </span>
+                        ) : (
+                          <span style={{ width: 13 }} />
+                        )}
+                        <FolderIcon size={14} color={folder.color} fill={folder.color} style={{ flexShrink: 0 }} />
+                        <span>{folder.name}</span>
+                      </div>
+                      <button
+                        className="clockit-icon-action-btn"
+                        style={{ padding: 2 }}
+                        title="New Note in Folder"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCreateNote(folder.id);
+                        }}
+                      >
+                        <Plus size={12} color="var(--text-muted)" />
+                      </button>
+                    </div>
+
+                    {/* Subfolders */}
+                    {children.length > 0 && isExpanded && (
+                      <div
+                        className="clockit-notes-subfolder-list"
+                        style={{ paddingLeft: 22, display: 'flex', flexDirection: 'column', gap: 2, marginTop: 2 }}
+                      >
+                        {children.map((sub) => {
+                          const isSubActive = selectedFolderId === sub.id;
+                          return (
+                            <div
+                              key={sub.id}
+                              className={`clockit-notes-subfolder-row${isSubActive ? ' is-active' : ''}`}
+                              onClick={() => {
+                                setSelectedFolderId(sub.id);
+                                setSelectedView('all');
+                              }}
+                            >
+                              <span>{sub.name}</span>
+                              <span
+                                style={{ fontSize: 11, color: 'var(--text-muted)' }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCreateNote(sub.id);
+                                }}
+                              >
+                                +
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Tags */}
+            {allTags.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 2 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="clockit-notes-section-label">Tags</span>
+                  {selectedTag && (
+                    <button type="button" className="clockit-text-btn" onClick={() => setSelectedTag(null)}>
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="clockit-notes-tag-list">
+                  {allTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      className={`clockit-notes-tag-chip${selectedTag === tag ? ' is-active' : ''}`}
+                      onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                    >
+                      <Hash size={11} />
+                      {tag.replace(/^#/, '')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes in Current Selection */}
+            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 10, marginTop: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span className="clockit-notes-section-label">
+                  {selectedView === 'trash' ? 'Trash Notes' : selectedView === 'favorites' ? 'Favorite Notes' : 'Notes List'}
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{filteredNotes.length}</span>
+              </div>
+
+              <div className="clockit-notes-list">
+                {isLoadingNotes ? (
+                  <div className="clockit-notes-skeleton" role="status" aria-live="polite" aria-label="Loading notes">
+                    <span className="clockit-skeleton-row" />
+                    <span className="clockit-skeleton-row" />
+                    <span className="clockit-skeleton-row" />
+                  </div>
+                ) : filteredNotes.length === 0 ? (
+                  <div style={{ padding: '16px 8px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
+                    No notes found.
+                    <button
+                      type="button"
+                      onClick={() => handleCreateNote()}
+                      style={{ display: 'block', margin: '6px auto 0', color: 'var(--accent-mint)', fontSize: 12, fontWeight: 600 }}
+                    >
+                      + Create one
+                    </button>
+                  </div>
+                ) : (
+                  filteredNotes.map((note) => {
+                    const isActive = note.id === activeNoteId;
+                    return (
+                      <div
+                        key={note.id}
+                        className={`clockit-notes-note-row${isActive ? ' is-active' : ''}`}
+                        onClick={() => handleSelectNote(note.id)}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                          <span className="clockit-notes-note-row-title">{note.title || 'Untitled Note'}</span>
+                          {note.isFavorite && <Star size={11} color="#f59e0b" fill="#f59e0b" />}
+                        </div>
+                        <div className="clockit-notes-note-row-meta">
+                          <span>{new Date(note.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                          {note.tags?.[0] && <span>{note.tags[0]}</span>}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </aside>
+        </div>
 
         {/* ===================================================================
             PANEL 2: Central Rich-Text Document Editor
             =================================================================== */}
-        <main className="clockit-notes-editor-pane" aria-label="Note Editor">
+        <main
+          key={activeNote?.id || 'no-note'}
+          className="clockit-notes-editor-pane motion-fade-in"
+          aria-label="Note Editor"
+        >
           {activeNote ? (
             <>
               {/* Top Breadcrumb & Actions Bar */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <div className="clockit-notes-editor-bar">
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{breadcrumb}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    className="clockit-icon-action-btn"
+                    style={{ padding: 4 }}
+                    title={isLeftPanelOpen ? 'Collapse navigation' : 'Show navigation'}
+                    type="button"
+                    onClick={() => setIsLeftPanelOpen((prev) => !prev)}
+                  >
+                    {isLeftPanelOpen ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+                  </button>
+
                   <button
                     className="clockit-icon-action-btn"
                     style={{ padding: 4 }}
@@ -685,11 +712,11 @@ export const NotesPage: React.FC = () => {
                   <button
                     className="clockit-icon-action-btn"
                     style={{ padding: 4 }}
-                    title={isRightPanelOpen ? 'Collapse side panel' : 'Expand side panel'}
+                    title={isRightPanelOpen ? 'Collapse knowledge panel' : 'Show knowledge panel'}
                     type="button"
                     onClick={() => setIsRightPanelOpen((prev) => !prev)}
                   >
-                    <Maximize2 size={14} />
+                    <PanelRight size={14} />
                   </button>
                 </div>
               </div>
@@ -700,35 +727,13 @@ export const NotesPage: React.FC = () => {
                 value={activeNote.title}
                 onChange={handleTitleChange}
                 placeholder="Note title..."
-                className="clockit-page-title"
-                style={{
-                  fontSize: 30,
-                  margin: '2px 0 0',
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  color: 'var(--text-primary)',
-                  width: '100%',
-                }}
+                className="clockit-page-title clockit-notes-title-input"
               />
 
               {/* Tags Row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '2px 0 8px', flexWrap: 'wrap' }}>
+              <div className="clockit-notes-tags-row">
                 {activeNote.tags?.map((tag) => (
-                  <span
-                    key={tag}
-                    style={{
-                      fontSize: 11.5,
-                      background: 'rgba(59, 130, 246, 0.12)',
-                      color: '#3b82f6',
-                      padding: '2px 8px',
-                      borderRadius: 9999,
-                      fontWeight: 500,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 4,
-                    }}
-                  >
+                  <span key={tag} className="clockit-notes-title-tag">
                     <span>{tag}</span>
                     <X size={11} style={{ cursor: 'pointer' }} onClick={() => handleRemoveTag(tag)} />
                   </span>
@@ -770,6 +775,13 @@ export const NotesPage: React.FC = () => {
                 isSaving={isSaving}
               />
             </>
+          ) : isLoadingNotes ? (
+            <div className="clockit-notes-editor-loading" role="status" aria-live="polite" aria-label="Loading note">
+              <span className="clockit-skeleton-row" style={{ width: '45%', height: 18 }} />
+              <span className="clockit-skeleton-row" style={{ width: '100%' }} />
+              <span className="clockit-skeleton-row" style={{ width: '92%' }} />
+              <span className="clockit-skeleton-row" style={{ width: '78%' }} />
+            </div>
           ) : (
             <div style={{ padding: 48, textAlign: 'center', color: 'var(--text-muted)' }}>
               <h3>No note selected</h3>
@@ -790,7 +802,7 @@ export const NotesPage: React.FC = () => {
         {/* ===================================================================
             PANEL 3: Interactive Knowledge Graph & Linked Notes
             =================================================================== */}
-        {isRightPanelOpen && (
+        <div className={`clockit-notes-slot slot-right${isRightPanelOpen ? '' : ' is-collapsed'}`}>
           <aside className="clockit-notes-graph-pane" aria-label="Knowledge Graph">
             {/* Tabs */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -890,8 +902,18 @@ export const NotesPage: React.FC = () => {
                         key={node.id}
                         transform={`translate(${node.x}, ${node.y})`}
                         style={{ cursor: 'pointer' }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Open note ${node.label}`}
                         onClick={() => handleSelectNote(node.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSelectNote(node.id);
+                          }
+                        }}
                       >
+                        <title>{node.folderName ? `${node.label} — ${node.folderName}` : node.label}</title>
                         {isCurrent && (
                           <rect
                             x="-48"
@@ -1003,26 +1025,18 @@ export const NotesPage: React.FC = () => {
               )}
             </div>
           </aside>
-        )}
+        </div>
       </div>
 
       {/* Delete Confirmation Modal */}
       {noteToDelete && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-          }}
-          onClick={() => setNoteToDelete(null)}
-        >
+        <div className="clockit-modal-scrim" onClick={() => setNoteToDelete(null)}>
           <div
-            className="clockit-card"
-            style={{ width: 380, maxWidth: '90%' }}
+            className="clockit-card clockit-modal-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={noteToDelete.isTrash ? 'Permanently delete note confirmation' : 'Move note to trash confirmation'}
+            style={{ width: 380 }}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 style={{ fontSize: 17, margin: '0 0 8px', color: 'var(--text-primary)' }}>
@@ -1056,21 +1070,13 @@ export const NotesPage: React.FC = () => {
 
       {/* New Folder Modal */}
       {isNewFolderOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-          }}
-          onClick={() => setIsNewFolderOpen(false)}
-        >
+        <div className="clockit-modal-scrim" onClick={() => setIsNewFolderOpen(false)}>
           <div
-            className="clockit-card"
-            style={{ width: 380, maxWidth: '90%' }}
+            className="clockit-card clockit-modal-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Create new folder"
+            style={{ width: 380 }}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 style={{ fontSize: 17, margin: '0 0 12px', color: 'var(--text-primary)' }}>Create New Folder</h3>

@@ -1,0 +1,416 @@
+/* ==========================================================================
+   ClockIt Auth — sign in / sign up
+   Shares the existing visual identity: warm cream surfaces in light mode,
+   charcoal surfaces in dark mode, one restrained green accent.
+   Interaction is handled by the shared motion layer (motion.css), so this
+   file only describes surfaces, spacing and typography.
+   ========================================================================== */
+
+.clockit-auth-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ---------- Left: brand / product panel ---------- */
+
+.clockit-auth-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 44px 52px;
+  overflow: hidden;
+  color: #eef3ee;
+  background-color: #22432f;
+  background-image:
+    radial-gradient(120% 90% at 12% 8%, rgba(52, 211, 153, 0.28), transparent 58%),
+    radial-gradient(90% 80% at 100% 100%, rgba(23, 25, 28, 0.55), transparent 60%);
+}
+
+html.dark .clockit-auth-panel {
+  color: #e7ebf0;
+  background-color: #14171c;
+  background-image:
+    radial-gradient(120% 90% at 12% 8%, rgba(52, 211, 153, 0.16), transparent 58%),
+    radial-gradient(90% 80% at 100% 100%, rgba(0, 0, 0, 0.5), transparent 60%);
+}
+
+.clockit-auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: inherit;
+}
+
+.clockit-auth-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.clockit-auth-panel-copy {
+  max-width: 440px;
+}
+
+.clockit-auth-panel-copy h2 {
+  font-family: 'Newsreader', Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(26px, 3vw, 38px);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+}
+
+.clockit-auth-panel-copy p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(238, 243, 238, 0.78);
+}
+
+html.dark .clockit-auth-panel-copy p {
+  color: rgba(231, 235, 240, 0.7);
+}
+
+.clockit-auth-points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.clockit-auth-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(238, 243, 238, 0.82);
+}
+
+html.dark .clockit-auth-points li {
+  color: rgba(231, 235, 240, 0.72);
+}
+
+.clockit-auth-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--accent-mint);
+}
+
+.clockit-auth-panel-foot {
+  font-size: 12.5px;
+  color: rgba(238, 243, 238, 0.5);
+}
+
+html.dark .clockit-auth-panel-foot {
+  color: rgba(231, 235, 240, 0.42);
+}
+
+/* ---------- Right: the form ---------- */
+
+.clockit-auth-main {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px 48px;
+  overflow-y: auto;
+}
+
+.clockit-auth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.clockit-auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--motion-base) var(--motion-ease),
+    background-color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-auth-back:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-hover);
+}
+
+.clockit-auth-card {
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.clockit-auth-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent-green-text);
+  margin-bottom: 10px;
+}
+
+.clockit-auth-title {
+  font-family: 'Newsreader', Georgia, serif;
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+}
+
+.clockit-auth-subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.clockit-auth-alert {
+  margin-top: 18px;
+  padding: 11px 13px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--badge-critical-text);
+  background-color: var(--badge-critical-bg);
+  border: 1px solid color-mix(in srgb, var(--badge-critical-text) 28%, transparent);
+  animation: clockit-rise-in var(--motion-base) var(--motion-ease-out) both;
+}
+
+.clockit-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+/* ---------- Fields ---------- */
+
+.clockit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.clockit-field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.clockit-field-error {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--badge-critical-text);
+}
+
+.clockit-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface);
+  transition:
+    border-color var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    background-color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-input-wrap:hover {
+  border-color: var(--border-strong);
+}
+
+.clockit-input-wrap:focus-within {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px var(--accent-green-subtle);
+}
+
+.clockit-input-wrap.has-error {
+  border-color: var(--badge-critical-text);
+}
+
+.clockit-input-wrap.has-error:focus-within {
+  box-shadow: 0 0 0 3px var(--badge-critical-bg);
+}
+
+.clockit-input-icon {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+}
+
+.clockit-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 14.5px;
+  color: var(--text-primary);
+}
+
+.clockit-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* The wrapper renders the focus ring, so suppress the generic outline. */
+.clockit-input:focus-visible {
+  outline: none;
+}
+
+.clockit-input-suffix-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-input-suffix-btn:hover {
+  color: var(--text-primary);
+}
+
+/* ---------- Submit + secondary actions ---------- */
+
+.clockit-auth-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  margin-top: 4px;
+  padding: 0 18px;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--accent-green);
+  box-shadow: var(--shadow-card);
+}
+
+.clockit-auth-submit:hover:not(:disabled) {
+  background-color: var(--accent-green-hover);
+  box-shadow: var(--shadow-hover);
+}
+
+.clockit-auth-spinner {
+  animation: clockit-spin 0.75s linear infinite;
+}
+
+@keyframes clockit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.clockit-auth-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  margin-top: 14px;
+  padding: 11px 13px;
+  width: 100%;
+  text-align: left;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface-subtle);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.clockit-auth-demo:hover:not(:disabled) {
+  border-color: var(--accent-green);
+  color: var(--text-primary);
+}
+
+.clockit-auth-demo code {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  font-size: 12.5px;
+  color: var(--accent-green-text);
+}
+
+.clockit-auth-alt {
+  margin-top: 22px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.clockit-auth-link {
+  font-weight: 600;
+  color: var(--accent-green-text);
+  transition: color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-auth-link:hover {
+  color: var(--accent-green);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Narrow screens: stack the panel above the form ---------- */
+
+@media (max-width: 880px) {
+  .clockit-auth-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .clockit-auth-panel {
+    gap: 24px;
+    padding: 28px 24px;
+  }
+
+  .clockit-auth-panel-copy h2 {
+    font-size: 24px;
+  }
+
+  .clockit-auth-points,
+  .clockit-auth-panel-foot {
+    display: none;
+  }
+
+  .clockit-auth-main {
+    padding: 20px 20px 40px;
+  }
+
+  .clockit-auth-card {
+    margin: 0 auto;
+  }
+}

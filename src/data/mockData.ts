@@ -4,17 +4,39 @@ export interface Workspace {
   color: string;
 }
 
+export type TaskPriority = 'Critical' | 'High' | 'Medium' | 'Low';
+export type TaskStatus = 'todo' | 'in-progress' | 'completed';
+
 export interface TaskItem {
   id: string;
   title: string;
+  description?: string;
   workspace: string;
   categoryColor: string;
   deadline: string;
+  dueDate?: string;
+  dueTime?: string;
   daysLeft: string;
-  priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  priority: TaskPriority;
+  status: TaskStatus;
   completed: boolean;
   estimate?: string;
   isToday?: boolean;
+  isOverdue?: boolean;
+  tags?: string[];
+  createdAt: number;
+  updatedAt: number;
+  focusMinutes?: number;
+  focusSessionsCount?: number;
+}
+
+export interface FocusSession {
+  id: string;
+  taskId?: string | null;
+  taskTitle?: string;
+  mode: 'Deep Work' | 'Short Break' | 'Long Break';
+  durationMinutes: number;
+  completedAt: number;
 }
 
 export interface HabitItem {
@@ -75,86 +97,219 @@ export const INITIAL_TASKS: TaskItem[] = [
   {
     id: 't-1',
     title: 'PBL Final Report',
+    description: 'Comprehensive documentation and final presentation deck for Problem Based Learning.',
     workspace: 'College',
     categoryColor: '#3b82f6',
     deadline: '1 Nov 2026',
+    dueDate: '2026-11-01',
+    dueTime: '10:00 AM',
     daysLeft: '6 days left',
     priority: 'Critical',
+    status: 'in-progress',
     completed: false,
     estimate: '2–3 hrs',
     isToday: true,
+    isOverdue: false,
+    tags: ['#college', '#report', '#presentation'],
+    createdAt: 1793000000000,
+    updatedAt: 1793000000000,
   },
   {
     id: 't-2',
-    title: 'Financity Event Design',
-    workspace: 'Club',
-    categoryColor: '#a855f7',
+    title: 'Read CCN notes',
+    description: 'Review Chapter 4 and 5 on packet switching and congestion control.',
+    workspace: 'College',
+    categoryColor: '#3b82f6',
     deadline: '3 Nov 2026',
+    dueDate: '2026-11-03',
+    dueTime: '02:00 PM',
     daysLeft: '8 days left',
     priority: 'High',
+    status: 'todo',
     completed: false,
-    estimate: '4 hrs',
+    estimate: '1 hr',
     isToday: true,
+    isOverdue: false,
+    tags: ['#study', '#networking'],
+    createdAt: 1793001000000,
+    updatedAt: 1793001000000,
   },
   {
     id: 't-3',
-    title: 'Prepare for OOP Exam',
-    workspace: 'College',
-    categoryColor: '#3b82f6',
+    title: 'UI ideas for ClockIt',
+    description: 'Finalize dark mode palette, focus timer glow effect, and mobile breakpoints.',
+    workspace: 'Personal',
+    categoryColor: '#22c55e',
     deadline: '5 Nov 2026',
+    dueDate: '2026-11-05',
+    dueTime: '11:00 AM',
     daysLeft: '10 days left',
     priority: 'High',
+    status: 'todo',
     completed: false,
-    estimate: '3 hrs',
-    isToday: false,
+    estimate: '2 hrs',
+    isToday: true,
+    isOverdue: false,
+    tags: ['#design', '#clockit'],
+    createdAt: 1793002000000,
+    updatedAt: 1793002000000,
   },
   {
     id: 't-4',
-    title: 'BrandUp Client Website',
-    workspace: 'Freelance',
-    categoryColor: '#f97316',
+    title: 'Financity Event Design',
+    description: 'Banners, social media assets, and participant badges for club conference.',
+    workspace: 'Club',
+    categoryColor: '#a855f7',
     deadline: '10 Nov 2026',
+    dueDate: '2026-11-10',
+    dueTime: '05:00 PM',
     daysLeft: '15 days left',
     priority: 'Medium',
+    status: 'todo',
     completed: false,
-    estimate: '5 hrs',
-    isToday: false,
+    estimate: '4 hrs',
+    isToday: true,
+    isOverdue: false,
+    tags: ['#club', '#design', '#event'],
+    createdAt: 1793003000000,
+    updatedAt: 1793003000000,
   },
   {
     id: 't-5',
-    title: 'Techverse Blog CMS',
-    workspace: 'Personal',
-    categoryColor: '#22c55e',
+    title: 'BrandUp Client Website',
+    description: 'Implement responsive hero layout and contact form integration.',
+    workspace: 'Freelance',
+    categoryColor: '#f97316',
     deadline: '12 Nov 2026',
+    dueDate: '2026-11-12',
+    dueTime: '03:00 PM',
     daysLeft: '17 days left',
     priority: 'Medium',
+    status: 'todo',
     completed: false,
-    estimate: '2 hrs',
+    estimate: '5 hrs',
     isToday: false,
+    isOverdue: false,
+    tags: ['#freelance', '#client', '#web'],
+    createdAt: 1793004000000,
+    updatedAt: 1793004000000,
   },
   {
     id: 't-6',
-    title: 'SIH Documentation',
-    workspace: 'SIH',
-    categoryColor: '#10b981',
-    deadline: '20 Nov 2026',
-    daysLeft: '25 days left',
-    priority: 'Low',
-    completed: false,
-    estimate: '1.5 hrs',
-    isToday: false,
-  },
-  {
-    id: 't-7',
-    title: 'Learn GSAP Animations',
+    title: 'Techverse Blog CMS',
+    description: 'Configure Markdown MDX blog publishing pipeline.',
     workspace: 'Personal',
     categoryColor: '#22c55e',
-    deadline: '28 Nov 2026',
-    daysLeft: '33 days left',
+    deadline: '20 Nov 2026',
+    dueDate: '2026-11-20',
+    dueTime: '01:00 PM',
+    daysLeft: '25 days left',
     priority: 'Low',
+    status: 'todo',
     completed: false,
     estimate: '2 hrs',
     isToday: false,
+    isOverdue: false,
+    tags: ['#personal', '#blog'],
+    createdAt: 1793005000000,
+    updatedAt: 1793005000000,
+  },
+  {
+    id: 't-7',
+    title: 'SIH Documentation',
+    description: 'System architecture diagrams and patent literature survey for Smart India Hackathon.',
+    workspace: 'SIH',
+    categoryColor: '#10b981',
+    deadline: '28 Nov 2026',
+    dueDate: '2026-11-28',
+    dueTime: '11:00 AM',
+    daysLeft: '33 days left',
+    priority: 'Low',
+    status: 'todo',
+    completed: false,
+    estimate: '1.5 hrs',
+    isToday: false,
+    isOverdue: false,
+    tags: ['#hackathon', '#sih'],
+    createdAt: 1793006000000,
+    updatedAt: 1793006000000,
+  },
+  {
+    id: 't-8',
+    title: 'Deploy New Update',
+    description: 'Deploy hotfix v1.0.4 for task state sync and theme transitions.',
+    workspace: 'Development',
+    categoryColor: '#10b981',
+    deadline: '24 Oct 2026',
+    dueDate: '2026-10-24',
+    dueTime: '02:00 PM',
+    daysLeft: '2 days overdue',
+    priority: 'High',
+    status: 'todo',
+    completed: false,
+    estimate: '1 hr',
+    isToday: false,
+    isOverdue: true,
+    tags: ['#dev', '#release', '#deploy'],
+    createdAt: 1792900000000,
+    updatedAt: 1792900000000,
+  },
+  {
+    id: 't-9',
+    title: 'Draft Architecture Spec',
+    description: 'Write specifications for IndexedDB offline persistence and state store.',
+    workspace: 'Development',
+    categoryColor: '#10b981',
+    deadline: '20 Oct 2026',
+    dueDate: '2026-10-20',
+    daysLeft: 'Completed',
+    priority: 'Medium',
+    status: 'completed',
+    completed: true,
+    estimate: '3 hrs',
+    isToday: false,
+    isOverdue: false,
+    tags: ['#architecture', '#spec'],
+    createdAt: 1792800000000,
+    updatedAt: 1792850000000,
+  },
+  {
+    id: 't-10',
+    title: 'Wireframe Review',
+    description: 'Feedback session on multi-column Notes and Habit calendar.',
+    workspace: 'Personal',
+    categoryColor: '#22c55e',
+    deadline: '18 Oct 2026',
+    dueDate: '2026-10-18',
+    daysLeft: 'Completed',
+    priority: 'Low',
+    status: 'completed',
+    completed: true,
+    estimate: '1 hr',
+    isToday: false,
+    isOverdue: false,
+    tags: ['#ui', '#review'],
+    createdAt: 1792700000000,
+    updatedAt: 1792750000000,
+  },
+  {
+    id: 't-11',
+    title: 'Update Readme & Notes',
+    description: 'Document local developer setup and testing workflows.',
+    workspace: 'Personal',
+    categoryColor: '#22c55e',
+    deadline: '15 Oct 2026',
+    dueDate: '2026-10-15',
+    daysLeft: 'Completed',
+    priority: 'Low',
+    status: 'completed',
+    completed: true,
+    estimate: '45 mins',
+    isToday: false,
+    isOverdue: false,
+    tags: ['#docs'],
+    createdAt: 1792600000000,
+    updatedAt: 1792650000000,
   },
 ];
 
@@ -165,13 +320,17 @@ export const INITIAL_TODAY_TASKS = [
   { id: 'td-4', title: 'Financity Event Design', color: '#a855f7', deadline: '10 Nov', priority: 'Medium' as const, completed: false },
 ];
 
-export const INITIAL_FOCUS_STATS = {
-  timeFocused: '2h 15m',
-  percentage: 65,
-  sessions: 3,
-  deepWork: '1h 20m',
-  lightWork: '45m',
-};
+/**
+ * Seed focus sessions for the design anchor day. Every focus figure in the app
+ * is derived from these records — the data layer never hard-codes statistics.
+ */
+export const INITIAL_FOCUS_SESSIONS: FocusSession[] = [
+  { id: 'fs-seed-1', taskId: null, taskTitle: 'Morning planning', mode: 'Short Break', durationMinutes: 15, completedAt: new Date('2026-10-26T08:45:00').getTime() },
+  { id: 'fs-seed-2', taskId: null, taskTitle: 'Deep work block', mode: 'Deep Work', durationMinutes: 45, completedAt: new Date('2026-10-26T09:30:00').getTime() },
+  { id: 'fs-seed-3', taskId: null, taskTitle: 'Deep work block', mode: 'Deep Work', durationMinutes: 45, completedAt: new Date('2026-10-26T10:30:00').getTime() },
+  { id: 'fs-seed-4', taskId: null, taskTitle: 'Midday reset', mode: 'Long Break', durationMinutes: 20, completedAt: new Date('2026-10-26T11:00:00').getTime() },
+  { id: 'fs-seed-5', taskId: null, taskTitle: 'Afternoon focus', mode: 'Deep Work', durationMinutes: 30, completedAt: new Date('2026-10-26T14:00:00').getTime() },
+];
 
 export const INITIAL_HABITS: HabitItem[] = [
   { id: 'h-1', title: 'Wake up early', time: '6:00 AM', iconName: 'sun', completed: true, streak: 12 },

@@ -38,12 +38,21 @@
   --badge-low-bg: #dcfce7;
   --badge-low-text: #16a34a;
 
-  --sidebar-width: 220px;
-  --header-height: 56px;
+  --sidebar-width: 232px;
+  --sidebar-width-collapsed: 68px;
+  --header-height: 60px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-pill: 9999px;
+
+  /* Shared layout rhythm — one source of truth for the shell and every page. */
+  --page-pad-x: 34px;
+  --page-pad-y: 26px;
+  --page-gap: 22px;
+  --content-max: 1460px;
+  --panel-gap: 20px;
+  --card-pad: 20px;
   
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.06);
@@ -158,35 +167,63 @@ textarea:focus-visible {
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  padding: 16px 14px;
+  padding: 14px 12px;
   position: sticky;
   top: 0;
   height: 100vh;
   box-sizing: border-box;
   z-index: 40;
+  overflow: hidden;
+  transition:
+    width var(--motion-base) var(--motion-ease),
+    min-width var(--motion-base) var(--motion-ease),
+    transform var(--motion-base) var(--motion-ease-out),
+    padding var(--motion-base) var(--motion-ease);
+}
+
+/* Rail mode — icons only, labels collapse away. */
+.clockit-sidebar.is-collapsed {
+  width: var(--sidebar-width-collapsed);
+  min-width: var(--sidebar-width-collapsed);
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/* Scrollable navigation region keeps the footer pinned to the bottom. */
+.clockit-sidebar-scroll {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
 .clockit-brand-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 8px 18px;
+  padding: 6px 6px 16px;
   cursor: pointer;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 .clockit-brand-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+  width: 27px;
+  height: 27px;
+  border-radius: 8px;
   background: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--bg-primary);
+  flex-shrink: 0;
 }
 
 .clockit-brand-name {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.02em;
   color: var(--text-primary);
@@ -195,24 +232,34 @@ textarea:focus-visible {
 .clockit-nav-list {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .clockit-nav-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 7px 11px;
+  padding: 8px 11px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   font-size: 13.5px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.12s ease;
   user-select: none;
+  white-space: nowrap;
+}
+
+/* Icons keep a fixed box so labels stay perfectly aligned across items. */
+.clockit-nav-item svg,
+.clockit-workspace-item svg,
+.clockit-add-space-btn svg {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
 }
 
 .clockit-nav-item:hover {
@@ -231,26 +278,50 @@ textarea:focus-visible {
   color: var(--accent-green);
 }
 
+/* Smooth sliding active indicator that grows out of the item's centre. */
+.clockit-nav-item::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-green);
+  opacity: 0;
+  transform: translateY(-50%) scaleY(0.25);
+  transition:
+    opacity var(--motion-base) var(--motion-ease),
+    transform var(--motion-base) var(--motion-ease-out);
+}
+
+.clockit-nav-item.active::before {
+  opacity: 1;
+  transform: translateY(-50%) scaleY(1);
+}
+
 .clockit-sidebar-section-title {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 16px 11px 6px;
+  padding: 18px 11px 6px;
+  white-space: nowrap;
+  transition: opacity var(--motion-fast) var(--motion-ease);
 }
 
 .clockit-workspace-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 11px;
+  padding: 7px 11px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.12s ease;
+  white-space: nowrap;
 }
 
 .clockit-workspace-item:hover {
@@ -269,47 +340,18 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 11px;
+  padding: 7px 11px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   font-size: 12.5px;
   cursor: pointer;
+  white-space: nowrap;
+  border: 1px dashed var(--border-subtle);
 }
 
 .clockit-add-space-btn:hover {
   color: var(--text-primary);
-}
-
-/* Sidebar Motivational Box */
-.clockit-sidebar-motivational {
-  margin-top: auto;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  position: relative;
-  height: 105px;
-  background: linear-gradient(180deg, #9ca3af 0%, #4b5563 100%);
-  display: flex;
-  align-items: flex-end;
-  padding: 12px;
-  margin-bottom: 12px;
-}
-
-.clockit-sidebar-motivational-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(20,25,22,0.1) 0%, rgba(15,18,16,0.78) 100%);
-  z-index: 1;
-}
-
-.clockit-sidebar-motivational p {
-  position: relative;
-  z-index: 2;
-  margin: 0;
-  color: #ffffff;
-  font-size: 11.5px;
-  font-weight: 500;
-  line-height: 1.35;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  border-color: var(--border-strong);
 }
 
 /* Sidebar User Footer */
@@ -317,9 +359,11 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
   padding: 6px 2px;
   border-top: 1px solid var(--border-subtle);
-  padding-top: 10px;
+  padding-top: 12px;
+  margin-top: 12px;
 }
 
 .clockit-sidebar-user-left {
@@ -327,26 +371,98 @@ textarea:focus-visible {
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  min-width: 0;
+}
+
+.clockit-sidebar-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .clockit-user-avatar {
-  width: 26px;
-  height: 26px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
-  background: var(--bg-surface-subtle);
+  background: var(--accent-green-subtle);
   border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--accent-green-text);
+  flex-shrink: 0;
+}
+
+.dark .clockit-user-avatar {
+  color: var(--accent-green);
 }
 
 .clockit-user-name {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Collapsed (rail) state ---------- */
+
+.clockit-sidebar.is-collapsed .clockit-brand-row {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.clockit-sidebar.is-collapsed .clockit-brand-name,
+.clockit-sidebar.is-collapsed .clockit-nav-label,
+.clockit-sidebar.is-collapsed .clockit-workspace-name,
+.clockit-sidebar.is-collapsed .clockit-user-name,
+.clockit-sidebar.is-collapsed .clockit-add-space-btn span,
+.clockit-sidebar.is-collapsed .clockit-sidebar-user-left svg {
+  display: none;
+}
+
+.clockit-sidebar.is-collapsed .clockit-sidebar-section-title {
+  opacity: 0;
+  height: 14px;
+  padding: 8px 0 0;
+  overflow: hidden;
+}
+
+.clockit-sidebar.is-collapsed .clockit-nav-item,
+.clockit-sidebar.is-collapsed .clockit-workspace-item,
+.clockit-sidebar.is-collapsed .clockit-add-space-btn,
+.clockit-sidebar.is-collapsed .clockit-sidebar-user,
+.clockit-sidebar.is-collapsed .clockit-sidebar-user-left {
+  justify-content: center;
+  gap: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.clockit-sidebar.is-collapsed .clockit-nav-item::before {
+  left: 3px;
+}
+
+/* In rail mode the footer stacks vertically so the avatar and controls
+   still fit inside the narrow column. */
+.clockit-sidebar.is-collapsed .clockit-sidebar-user {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.clockit-sidebar.is-collapsed .clockit-sidebar-user-actions {
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Mobile off-canvas backdrop */
+.clockit-sidebar-backdrop {
+  display: none;
 }
 
 /* Main Content Area */
@@ -361,15 +477,23 @@ textarea:focus-visible {
 /* Header */
 .clockit-topbar {
   height: var(--header-height);
-  padding: 0 28px;
+  padding: 0 var(--page-pad-x);
   display: flex;
   align-items: center;
+  gap: 16px;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
   background-color: var(--bg-primary);
   position: sticky;
   top: 0;
   z-index: 30;
+}
+
+.clockit-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .clockit-search-box {
@@ -379,10 +503,20 @@ textarea:focus-visible {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-pill);
-  padding: 5px 14px;
-  width: 310px;
+  padding: 6px 14px;
+  width: clamp(190px, 30vw, 360px);
   color: var(--text-muted);
   box-shadow: var(--shadow-card);
+  transition:
+    width var(--motion-base) var(--motion-ease-out),
+    border-color var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease);
+}
+
+.clockit-search-box:focus-within {
+  width: clamp(240px, 38vw, 460px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-hover);
 }
 
 .clockit-search-box input {
@@ -392,6 +526,23 @@ textarea:focus-visible {
   font-size: 12.5px;
   color: var(--text-primary);
   width: 100%;
+  min-width: 0;
+}
+
+.clockit-search-box input::placeholder {
+  color: var(--text-muted);
+}
+
+.clockit-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.clockit-search-clear:hover {
+  color: var(--text-primary);
 }
 
 .clockit-kbd-pill {
@@ -402,36 +553,296 @@ textarea:focus-visible {
   padding: 1px 5px;
   color: var(--text-muted);
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.clockit-search-box:focus-within .clockit-kbd-pill {
+  opacity: 0;
+  transition: opacity var(--motion-fast) var(--motion-ease);
 }
 
 .clockit-topbar-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
 }
 
 .clockit-live-date-pill {
   font-size: 12.5px;
   font-weight: 500;
   color: var(--text-secondary);
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface-subtle);
+  white-space: nowrap;
 }
 
 .clockit-icon-action-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 7px;
   border-radius: 50%;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.12s ease;
+  position: relative;
 }
 
 .clockit-icon-action-btn:hover {
   background-color: var(--bg-surface-subtle);
   color: var(--text-primary);
+}
+
+.clockit-icon-action-btn.is-open {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+/* Unread count badge on the notification bell.
+   Compact, and anchored ABOVE the glyph's upper-right corner so the bell's ink
+   is never covered. Neutral charcoal by default so it reads as part of the
+   icon; the bright red is opt-in via `.is-urgent`, reserved for overdue work. */
+.clockit-badge-count {
+  position: absolute;
+  top: -7px;
+  right: -4px;
+  z-index: 2;
+  box-sizing: border-box;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 3px;
+  border-radius: var(--radius-pill);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--bg-surface);
+  /* Decorative only — it must never intercept the bell's click target. */
+  pointer-events: none;
+  transition: background var(--motion-fast) var(--motion-ease),
+    color var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-badge-count.is-urgent {
+  background: var(--badge-critical-text);
+  color: #ffffff;
+}
+
+/* ---------- Topbar dropdown menus ---------- */
+
+.clockit-menu-anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.clockit-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 268px;
+  /* Never let the popover run past a narrow viewport. */
+  max-width: calc(100vw - 24px);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-hover);
+  padding: 8px;
+  z-index: 60;
+  transform-origin: top right;
+  animation: clockit-rise-in var(--motion-base) var(--motion-ease-out) both;
+}
+
+.clockit-dropdown-notif {
+  width: 320px;
+  max-width: min(320px, calc(100vw - 24px));
+}
+
+.clockit-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 6px;
+}
+
+.clockit-dropdown-title {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+.clockit-dropdown-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Inline text action living in a dropdown header. */
+.clockit-dropdown-action {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-green);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.clockit-dropdown-action:hover {
+  color: var(--accent-green-text);
+  background: var(--accent-green-subtle);
+}
+
+.clockit-dropdown-sep {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 6px 2px;
+}
+
+.clockit-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.clockit-dropdown-item:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-dropdown-item svg {
+  flex-shrink: 0;
+}
+
+.clockit-dropdown-item.is-danger:hover {
+  color: var(--badge-critical-text);
+}
+
+.clockit-notif-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.clockit-notif-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: background var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-notif-row:hover {
+  background: var(--bg-surface-subtle);
+}
+
+/* Already acknowledged — the row stays legible but steps back. */
+.clockit-notif-row.is-read .clockit-notif-title {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.clockit-notif-row.is-read .clockit-notif-dot {
+  opacity: 0.4;
+}
+
+.clockit-notif-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* Semantic, not decorative: red marks overdue work, amber marks today's. */
+.clockit-notif-dot.is-overdue {
+  background: var(--badge-critical-text);
+}
+
+.clockit-notif-dot.is-today {
+  background: var(--badge-medium-text);
+}
+
+.clockit-notif-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.clockit-notif-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clockit-notif-meta {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+/* Unread marker — a small forest-green rail on the trailing edge. */
+.clockit-notif-unread {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.clockit-notif-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 24px 10px;
+  text-align: center;
+}
+
+.clockit-notif-empty-icon {
+  color: var(--text-muted);
+  opacity: 0.5;
+  margin-bottom: 2px;
+}
+
+.clockit-notif-empty-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.clockit-notif-empty-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+/* Hamburger — only shown on small screens. */
+.clockit-nav-trigger {
+  display: none;
 }
 
 /* ==========================================================================
@@ -440,11 +851,11 @@ textarea:focus-visible {
 
 .clockit-page-container,
 .clockit-home-container {
-  padding: 24px 32px 48px;
+  padding: var(--page-pad-y) var(--page-pad-x) 56px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  max-width: 1440px;
+  gap: var(--page-gap);
+  max-width: var(--content-max);
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -484,7 +895,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 7px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .dark .clockit-primary-btn {
@@ -512,7 +923,7 @@ textarea:focus-visible {
   font-weight: 500;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .clockit-subtab-pill:hover {
@@ -552,6 +963,159 @@ textarea:focus-visible {
 }
 
 /* ==========================================================================
+   HOME — "TODAY AT A GLANCE" SNAPSHOT STRIP
+   ========================================================================== */
+
+.clockit-home-snapshot {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: var(--page-gap);
+  background: var(--border-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.clockit-snapshot-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 15px 16px;
+  text-align: left;
+  background: var(--bg-surface);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transition: background-color var(--motion-fast, 140ms) var(--motion-ease, ease);
+}
+
+.clockit-snapshot-card:hover {
+  background: var(--bg-surface-subtle);
+}
+
+.clockit-snapshot-card:active {
+  background: var(--bg-surface-hover);
+}
+
+.clockit-snapshot-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+}
+
+.clockit-snapshot-icon[data-tone="alert"] {
+  background: var(--badge-critical-bg);
+  color: var(--badge-critical-text);
+}
+
+.clockit-snapshot-icon[data-tone="today"] {
+  background: var(--accent-green-subtle);
+  color: var(--accent-green-text);
+}
+
+.clockit-snapshot-icon[data-tone="upcoming"] {
+  background: var(--badge-medium-bg);
+  color: var(--badge-medium-text);
+}
+
+.clockit-snapshot-icon[data-tone="focus"] {
+  background: var(--accent-green-subtle);
+  color: var(--accent-green-text);
+}
+
+.clockit-snapshot-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.clockit-snapshot-value {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.clockit-snapshot-of {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.clockit-snapshot-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Task card header (title + live count + route button) */
+.clockit-tasks-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.clockit-tasks-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.clockit-tasks-card-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.clockit-text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  padding: 5px 8px;
+  margin: -2px -4px 0 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent-green-text);
+  border-radius: var(--radius-sm);
+  transition: background var(--motion-fast, 140ms) var(--motion-ease, ease),
+    color var(--motion-fast, 140ms) var(--motion-ease, ease);
+}
+
+.clockit-text-btn:hover {
+  background: var(--accent-green-subtle);
+}
+
+.clockit-badge-overdue {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-pill);
+  background: var(--badge-critical-bg);
+  color: var(--badge-critical-text);
+}
+
+/* ==========================================================================
    HOME PAGE (HERO & 2-COLUMN LAYOUT)
    ========================================================================== */
 
@@ -583,49 +1147,279 @@ textarea:focus-visible {
   background: linear-gradient(90deg, rgba(14, 17, 20, 0.95) 0%, rgba(14, 17, 20, 0.8) 55%, rgba(14, 17, 20, 0.35) 100%);
 }
 
+/* Mountain-sunset backdrop — reused from the landing hero treatment so the
+   greeting section carries the same subtle decorative scene.
+   It is positioned against the greeting row (not the card), so the scene grows
+   out of the base of the greeting composition and its right edge lines up with
+   the quote above and the primary-task panel below. The SVG keeps its own
+   aspect ratio (preserveAspectRatio="xMaxYMax") and is anchored bottom-right, so
+   the horizon always meets the base of the greeting row and the illustration can
+   never reach the panel. */
+.clockit-hero-mountains {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  opacity: 0.9;
+}
+
+.clockit-hero-mountains .mountain-backdrop-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.dark .clockit-hero-mountains {
+  opacity: 0.45;
+}
+
+/* Cohesive primary-task + focus panel (one surface, not two floating cards) */
+.clockit-hero-panel {
+  position: relative;
+  z-index: 2;
+  margin-top: 24px;
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.clockit-hero-primary {
+  flex: 1.7 1 360px;
+  min-width: 0;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clockit-hero-primary-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.clockit-hero-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.clockit-hero-panel .clockit-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.clockit-hero-panel .clockit-status.is-critical,
+.clockit-hero-panel .clockit-status.is-overdue {
+  color: #ef4444;
+}
+
+.clockit-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.clockit-hero-primary-title {
+  font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: color var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-hero-primary-title:hover {
+  color: var(--accent-mint);
+}
+
+.clockit-hero-primary-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.clockit-hero-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.clockit-hero-meta-item.is-overdue {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.clockit-hero-primary-foot {
+  margin-top: 2px;
+}
+
+.clockit-hero-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 7px 10px 7px 12px;
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-hero-open-btn:hover {
+  background: var(--bg-surface-subtle);
+  border-color: var(--border-strong);
+}
+
+.clockit-hero-focus-block {
+  flex: 1 1 260px;
+  padding: 18px 22px;
+  border-left: 1px solid var(--border-subtle);
+  background: var(--bg-surface-subtle);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .clockit-hero-panel {
+    flex-direction: column;
+  }
+
+  .clockit-hero-focus-block {
+    flex-basis: auto;
+    border-left: none;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .clockit-hero-mountains {
+    opacity: 0.7;
+  }
+}
+
+@media (max-width: 560px) {
+  .clockit-hero-top {
+    min-height: 96px;
+  }
+
+  .clockit-hero-mountains {
+    opacity: 0.5;
+  }
+}
+
 .clockit-hero-top {
   position: relative;
   z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  /* The backdrop is clipped to this row, and the row is given a little more
+     height than the text strictly needs so the illustration has room to read as
+     part of the greeting composition rather than as a sliver under the quote. */
+  min-height: clamp(96px, 11vw, 156px);
+  overflow: hidden;
 }
 
-.clockit-hero-greeting-sub {
-  font-size: 14.5px;
-  color: var(--text-secondary);
-  margin: 0;
-  font-weight: 450;
+.clockit-hero-greeting {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 62ch;
+}
+
+/* Editorial hierarchy: a quiet tracked label, a large serif name, then a single
+   supporting line where the date carries a little more weight than the aside. */
+.clockit-hero-greeting-label {
+  margin: 0 0 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .clockit-hero-greeting-title {
   font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
-  font-size: 38px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 500;
+  line-height: 1.06;
   letter-spacing: -0.02em;
-  margin: 2px 0 6px;
+  margin: 0 0 12px;
   color: var(--text-primary);
 }
 
 .clockit-hero-greeting-matters {
-  font-size: 14px;
-  color: var(--text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
   margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.clockit-hero-greeting-date {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.clockit-hero-greeting-sep {
+  color: var(--border-strong);
 }
 
 .clockit-hero-quote {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 auto;
+  max-width: min(34ch, 38%);
+  margin: 0;
   font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
   font-style: italic;
-  font-size: 16px;
+  font-size: clamp(14px, 1.2vw, 17px);
+  line-height: 1.45;
   color: var(--text-secondary);
+  text-align: right;
   border-bottom: 1px solid var(--border-strong);
-  padding-bottom: 4px;
+  padding-bottom: 6px;
 }
 
 .clockit-hero-cards-row {
   position: relative;
   z-index: 2;
   display: flex;
+  /* The two hero cards ("Next in line" + "Let's focus") keep a min-content width,
+     so on a phone they cannot both fit — without wrapping, the focus card is
+     clipped past the right edge. Wrapping stacks them only when they no longer
+     fit, leaving the desktop side-by-side layout untouched. */
+  flex-wrap: wrap;
   gap: 16px;
   margin-top: 24px;
 }
@@ -705,7 +1499,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .clockit-hero-arrow-btn:hover {
@@ -751,7 +1545,7 @@ textarea:focus-visible {
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .dark .clockit-focus-btn {
@@ -780,7 +1574,7 @@ textarea:focus-visible {
 
 @media (max-width: 1100px) {
   .clockit-home-columns {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -795,7 +1589,7 @@ textarea:focus-visible {
 
 @media (max-width: 1100px) {
   .clockit-tasks-columns {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -830,7 +1624,7 @@ textarea:focus-visible {
   font-weight: 500;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
@@ -875,7 +1669,7 @@ textarea:focus-visible {
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   border-bottom: 1px solid var(--border-subtle);
-  transition: background 0.12s ease;
+  transition: background var(--motion-fast) var(--motion-ease);
   gap: 16px;
   min-width: 0;
 }
@@ -905,7 +1699,7 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.12s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
   flex-shrink: 0;
   font-size: 11px;
 }
@@ -951,8 +1745,9 @@ textarea:focus-visible {
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
   padding: 3px 9px;
-  border-radius: var(--radius-pill);
+  border-radius: 6px;
   white-space: nowrap;
 }
 
@@ -966,31 +1761,189 @@ textarea:focus-visible {
 }
 
 .clockit-priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
+  padding: 3px 8px 3px 7px;
+  border-radius: 6px;
   white-space: nowrap;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+}
+
+.clockit-priority-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
 }
 
 .clockit-priority-badge.Critical {
-  background: var(--badge-critical-bg);
   color: var(--badge-critical-text);
 }
 
 .clockit-priority-badge.High {
-  background: var(--badge-high-bg);
   color: var(--badge-high-text);
 }
 
 .clockit-priority-badge.Medium {
-  background: var(--badge-medium-bg);
   color: var(--badge-medium-text);
 }
 
 .clockit-priority-badge.Low {
-  background: var(--badge-low-bg);
   color: var(--badge-low-text);
+}
+
+.clockit-task-deadline.overdue {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.clockit-task-deadline.overdue svg {
+  color: #ef4444 !important;
+}
+
+/* Kanban Board View */
+.clockit-board-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+  .clockit-board-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.clockit-board-column {
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.clockit-board-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-primary);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.clockit-board-badge {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+}
+
+.clockit-board-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 80px;
+}
+
+/* Scoped to the dashboard shell: the restored public landing page reuses the
+   `clockit-board-card` name inside its hero mockup, and must not inherit the
+   dashboard's hover motion. */
+.clockit-layout-container .clockit-board-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--motion-ease);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.clockit-layout-container .clockit-board-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+/* Board drag & drop — cards are grabbable, the target column lights up. */
+.clockit-board-column {
+  transition:
+    border-color var(--motion-base) var(--motion-ease),
+    background-color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-board-column.is-drag-over {
+  border-color: var(--accent-mint);
+  background: var(--accent-green-subtle);
+}
+
+.clockit-board-column .clockit-board-card {
+  cursor: grab;
+}
+
+.clockit-board-column .clockit-board-card:active {
+  cursor: grabbing;
+}
+
+.clockit-layout-container .clockit-board-card.is-dragging {
+  opacity: 0.45;
+  border-style: dashed;
+  border-color: var(--accent-mint);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Matrix 2x2 View */
+.clockit-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 850px) {
+  .clockit-matrix-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.clockit-matrix-quadrant {
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clockit-matrix-quadrant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-primary);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 /* ==========================================================================
@@ -1023,10 +1976,12 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 7px;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: background var(--motion-fast) var(--motion-ease),
+    color var(--motion-fast) var(--motion-ease);
+  position: relative;
 }
 
 .clockit-calendar-day:hover {
@@ -1035,9 +1990,23 @@ textarea:focus-visible {
 }
 
 .clockit-calendar-day.active {
-  background: var(--text-primary);
-  color: var(--bg-primary);
+  background: rgba(52, 211, 153, 0.16);
+  color: var(--accent-mint);
   font-weight: 700;
+}
+
+.clockit-calendar-day.has-task::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-mint);
+}
+
+.clockit-calendar-day.active.has-task::after {
+  background: var(--accent-mint);
 }
 
 .clockit-today-item {
@@ -1139,6 +2108,60 @@ textarea:focus-visible {
    FOCUS PAGE STYLING
    ========================================================================== */
 
+/* Primary session control — a segmented mode switch above the dial. */
+.clockit-focus-mode-switch {
+  display: inline-flex;
+  align-self: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+}
+
+.clockit-focus-mode-btn {
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.clockit-focus-mode-btn:hover {
+  color: var(--text-primary);
+}
+
+.clockit-focus-mode-btn.is-active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.clockit-focus-target-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.clockit-focus-target-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.clockit-focus-target-select {
+  font-size: 12px;
+  height: 30px;
+  max-width: 260px;
+  min-width: 0;
+}
+
 .clockit-focus-dial-container {
   display: flex;
   flex-direction: column;
@@ -1148,22 +2171,312 @@ textarea:focus-visible {
   padding: 16px 0 24px;
 }
 
+.clockit-dial-svg {
+  display: block;
+  /* Scale with the (capped) stage so the dial never overflows a narrow phone. */
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  /* Origin for the whole-dial reactions (begin breath, mode settle). */
+  transform-origin: 50% 50%;
+}
+
+/* The dial plate — a quiet disc so the mechanism reads as an instrument rather
+   than a ring floating on the page. */
+.clockit-dial-plate {
+  fill: var(--bg-surface);
+  stroke: var(--border-subtle);
+  stroke-width: 1;
+}
+
+/* Bezel ticks — three weights: minute, hour, and the four quarters. */
+.clockit-dial-tick {
+  stroke: var(--border-strong);
+}
+
+.clockit-dial-tick.is-hour {
+  stroke: var(--text-muted);
+}
+
+.clockit-dial-tick.is-cardinal {
+  stroke: var(--text-primary);
+}
+
+/* Everything the frame loop drives shares one transform origin at the dial's
+   centre, so a single `rotate()` reads correctly on each element. */
+.clockit-dial-progress,
+.clockit-dial-cap,
+.clockit-dial-sweep {
+  transform-box: view-box;
+  transform-origin: 170px 170px;
+}
+
+.clockit-dial-progress,
+.clockit-dial-cap,
+.clockit-dial-sweep {
+  will-change: transform;
+}
+
+/* One outward breath when a session completes. */
+.clockit-dial-ripple {
+  fill: none;
+  opacity: 0;
+  transform-box: view-box;
+  transform-origin: 170px 170px;
+}
+
+.clockit-dial-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 0 40px;
+  text-align: center;
+}
+
+.clockit-dial-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.clockit-dial-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-mint);
+}
+
+.clockit-dial-status-dot.is-live {
+  animation: clockit-focus-pulse 2.2s var(--motion-ease) infinite;
+}
+
+/* Paused mid-session: steady amber instead of a live pulse. */
+.clockit-dial-status-dot.is-paused {
+  background: var(--badge-medium-text);
+  opacity: 0.75;
+}
+
+.clockit-dial-mode {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* Elapsed readout — the counterweight to the remaining digits above. */
+.clockit-dial-elapsed {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.clockit-dial-task {
+  margin-top: 6px;
+  max-width: 200px;
+  font-size: 12px;
+  color: var(--accent-mint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Break sessions shift the accent to the palette's warm amber. */
+.clockit-focus-dial-container.is-break .clockit-dial-status-dot {
+  background: var(--badge-medium-text);
+}
+
+.clockit-focus-dial-container.is-break .clockit-dial-task {
+  color: var(--badge-medium-text);
+}
+
+@keyframes clockit-focus-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+
+.clockit-focus-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+  width: 100%;
+  align-items: start;
+}
+
+.clockit-focus-side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.clockit-session-complete-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--accent-green-subtle);
+  color: var(--accent-green-text);
+  animation: clockit-pop var(--motion-slow) var(--motion-ease-out) both;
+}
+
+@media (max-width: 1000px) {
+  .clockit-focus-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .clockit-focus-dial-stage {
   position: relative;
-  width: 340px;
-  height: 340px;
+  /* Fixed 340px dials overflow narrow phones — cap it to the column and keep
+     the square aspect so the centred readout stays aligned to the ring. */
+  width: min(340px, 100%);
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  /* Running / paused / mode-switch states all read as calm transitions. */
+  transition: box-shadow 460ms var(--motion-ease-out), filter 460ms var(--motion-ease-out);
+}
+
+/* Live: a soft accent halo announces that the mechanism is running. */
+.clockit-focus-dial-container.is-running .clockit-focus-dial-stage {
+  box-shadow: 0 0 38px -10px rgba(52, 211, 153, 0.55);
+}
+
+.clockit-focus-dial-container.is-running.is-break .clockit-focus-dial-stage {
+  box-shadow: 0 0 38px -10px rgba(245, 158, 11, 0.45);
+}
+
+/* Paused: the halo withdraws and the dial desaturates, so the stop reads. */
+.clockit-focus-dial-container.is-paused .clockit-focus-dial-stage {
+  box-shadow: none;
+  filter: saturate(0.5);
 }
 
 .clockit-dial-digits {
-  font-size: 62px;
+  font-size: 64px;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--text-primary);
   line-height: 1;
   margin: 6px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The end-cap and the arc are positioned by the frame loop, so no CSS
+   transition may interpolate them — that is what previously restarted the
+   motion once a second. Only the accent hue is transitioned. */
+.clockit-dial-cap {
+  transition: none;
+}
+
+/* Sweep needle — deliberately slender so the remaining-time arc stays dominant. */
+.clockit-dial-sweep {
+  opacity: 0.95;
+}
+
+/* Paused mid-session: the mechanism visibly holds still and recedes. */
+.clockit-focus-dial-container.is-paused .clockit-dial-progress {
+  opacity: 0.6;
+}
+
+.clockit-focus-dial-container.is-paused .clockit-dial-sweep {
+  opacity: 0.4;
+}
+
+.clockit-focus-dial-container.is-paused .clockit-dial-center {
+  opacity: 0.72;
+}
+
+.clockit-dial-center {
+  transition: opacity var(--motion-base) var(--motion-ease);
+}
+
+/* Completion flourish — a brief bloom, never a loop. */
+@keyframes clockit-dial-complete {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(52, 211, 153, 0));
+  }
+  32% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 18px rgba(52, 211, 153, 0.5));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(52, 211, 153, 0));
+  }
+}
+
+@keyframes clockit-dial-flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes clockit-dial-ripple {
+  0% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.16);
+  }
+}
+
+.clockit-focus-dial-stage.is-complete {
+  animation: clockit-dial-complete 900ms var(--motion-ease-out);
+}
+
+.clockit-focus-dial-stage.is-complete .clockit-dial-progress {
+  animation: clockit-dial-flash 900ms var(--motion-ease-out);
+}
+
+.clockit-focus-dial-stage.is-complete .clockit-dial-ripple {
+  animation: clockit-dial-ripple 900ms var(--motion-ease-out);
+}
+
+/* Switching Deep Work / Short Break / Long Break — the same dial settles into
+   its new mode instead of snapping. */
+@keyframes clockit-dial-mode-swap {
+  from {
+    opacity: 0.45;
+    transform: scale(0.965) rotate(-5deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.clockit-focus-dial-container.is-switching .clockit-dial-svg {
+  animation: clockit-dial-mode-swap 480ms var(--motion-ease-out);
 }
 
 .clockit-focus-side-quote {
@@ -1196,7 +2509,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .clockit-timer-icon-btn:hover {
@@ -1216,7 +2529,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .dark .clockit-timer-start-btn {
@@ -1224,11 +2537,33 @@ textarea:focus-visible {
   color: #0f1115;
 }
 
-/* 4-Stat Cards Row */
+/* Metric strip — one continuous surface separated by 1px rules rather than a
+   grid of four detached boxes (no Bento tiles). */
 .clockit-stats-grid-4 {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.clockit-stats-grid-4 .clockit-stat-card {
+  background: var(--bg-surface);
+  border: 0;
+  border-radius: 0;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: none;
+}
+
+/* The strip reads as one object, so a cell never lifts out of it. */
+.clockit-stats-grid-4 .clockit-stat-card:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .clockit-stat-card {
@@ -1266,41 +2601,59 @@ textarea:focus-visible {
 
 /* ==========================================================================
    NOTES PAGE (3-PANEL LAYOUT)
+   Left navigation · Centre document · Right knowledge graph
    ========================================================================== */
+.clockit-notes-page {
+  padding: var(--page-pad-y) var(--page-pad-x);
+  height: calc(100vh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
 .clockit-notes-layout {
+  --notes-left-w: 236px;
+  --notes-right-w: 292px;
   display: grid;
-  grid-template-columns: minmax(180px, 210px) minmax(0, 1fr) minmax(220px, 280px);
-  gap: 16px;
+  grid-template-columns: var(--notes-left-w) minmax(0, 1fr) var(--notes-right-w);
+  gap: var(--panel-gap);
   width: 100%;
   min-width: 0;
-  height: calc(100vh - var(--header-height) - 48px);
-  max-height: calc(100vh - var(--header-height) - 48px);
+  flex: 1;
+  min-height: 0;
   box-sizing: border-box;
+  /* Collapsing animates a single track from px → 0px, which interpolates. */
+  transition: grid-template-columns var(--motion-slow) var(--motion-ease);
+}
+
+.clockit-notes-layout.collapsed-left {
+  --notes-left-w: 0px;
 }
 
 .clockit-notes-layout.collapsed-right {
-  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  --notes-right-w: 0px;
 }
 
-@media (max-width: 1200px) {
-  .clockit-notes-layout {
-    grid-template-columns: minmax(170px, 200px) minmax(0, 1fr) minmax(200px, 250px);
-    gap: 12px;
-  }
+/* Clipping slot so a panel can slide shut without leaking padding/border. */
+.clockit-notes-slot {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  transition: opacity var(--motion-slow) var(--motion-ease);
 }
 
-@media (max-width: 980px) {
-  .clockit-notes-layout {
-    grid-template-columns: minmax(170px, 200px) minmax(0, 1fr);
-  }
+.clockit-notes-slot.is-collapsed {
+  opacity: 0;
+  pointer-events: none;
 }
 
-@media (max-width: 720px) {
-  .clockit-notes-layout {
-    grid-template-columns: 1fr;
-    height: auto;
-    max-height: none;
-  }
+.clockit-notes-slot > aside {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
 }
 
 .clockit-notes-sidebar {
@@ -1310,7 +2663,7 @@ textarea:focus-visible {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
   height: 100%;
   overflow-y: auto;
@@ -1322,15 +2675,46 @@ textarea:focus-visible {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 24px 28px;
+  padding: 20px 28px 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   box-sizing: border-box;
+}
+
+.clockit-notes-editor-bar,
+.clockit-notes-title-input,
+.clockit-notes-tags-row {
+  flex-shrink: 0;
+}
+
+.clockit-notes-editor-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.clockit-notes-title-input {
+  font-size: 30px;
+  margin: 2px 0 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.clockit-notes-tags-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 4px;
+  flex-wrap: wrap;
 }
 
 .clockit-notes-graph-pane {
@@ -1346,6 +2730,332 @@ textarea:focus-visible {
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
+}
+
+/* ---------- Left panel: navigation rows, folders, tags, note list ---------- */
+
+.clockit-notes-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.clockit-notes-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-notes-nav-row:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-notes-nav-row.is-active {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.clockit-notes-nav-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.clockit-notes-nav-row-left > span {
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clockit-notes-row-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.clockit-notes-subfolder-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-notes-subfolder-row:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-notes-subfolder-row.is-active {
+  background: var(--accent-green-subtle);
+  color: var(--accent-green-text);
+  font-weight: 600;
+}
+
+.clockit-notes-subfolder-row > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Folder caret rotates between collapsed/expanded instead of swapping icons. */
+.clockit-notes-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  color: var(--text-muted);
+  border-radius: 4px;
+  transition: transform var(--motion-base) var(--motion-ease);
+}
+
+.clockit-notes-caret[data-expanded='true'] {
+  transform: rotate(90deg);
+}
+
+.clockit-notes-caret:focus-visible {
+  outline: 2px solid var(--accent-green);
+  outline-offset: 2px;
+}
+
+/* Subfolders unfold in from the top rather than appearing instantly. */
+@keyframes clockit-notes-unfold {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.clockit-notes-subfolder-list {
+  transform-origin: top center;
+  animation: clockit-notes-unfold var(--motion-base) var(--motion-ease-out);
+}
+
+.clockit-notes-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.clockit-notes-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  line-height: 1.4;
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    color var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-notes-tag-chip:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.clockit-notes-tag-chip.is-active {
+  background: var(--accent-green-subtle);
+  border-color: var(--accent-mint);
+  color: var(--accent-green-text);
+  font-weight: 600;
+}
+
+.clockit-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ---------- Loading skeletons (notes list + editor) ---------- */
+
+.clockit-notes-skeleton,
+.clockit-notes-editor-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 8px;
+}
+
+.clockit-notes-editor-loading {
+  padding: 28px 4px;
+  gap: 14px;
+}
+
+.clockit-skeleton-row {
+  display: block;
+  height: 12px;
+  width: 100%;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-subtle) 0%,
+    var(--bg-surface-hover) 50%,
+    var(--bg-surface-subtle) 100%
+  );
+  background-size: 200% 100%;
+  animation: clockit-skeleton-shimmer 1400ms var(--motion-ease) infinite;
+}
+
+@keyframes clockit-skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.clockit-notes-note-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-notes-note-row:hover {
+  background: var(--bg-surface-subtle);
+}
+
+.clockit-notes-note-row.is-active {
+  background: var(--bg-surface-subtle);
+  border-left-color: var(--accent-mint);
+}
+
+.clockit-notes-note-row-title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clockit-notes-note-row.is-active .clockit-notes-note-row-title {
+  font-weight: 600;
+}
+
+.clockit-notes-note-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.clockit-notes-title-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-green-subtle);
+  color: var(--accent-green-text);
+  font-weight: 500;
+}
+
+.clockit-notes-mobile-tabs {
+  display: none;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+/* ---------- Notes responsive ---------- */
+
+@media (max-width: 1280px) {
+  .clockit-notes-layout {
+    --notes-left-w: 212px;
+    --notes-right-w: 264px;
+  }
+}
+
+/* Tablet & below: single-panel mode driven by the panel switcher tabs. */
+@media (max-width: 1024px) {
+  .clockit-notes-page {
+    height: auto;
+    min-height: calc(100vh - var(--header-height));
+    overflow: visible;
+  }
+
+  .clockit-notes-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    flex: none;
+    height: auto;
+    transition: none;
+  }
+
+  .clockit-notes-slot {
+    height: auto;
+    overflow: visible;
+  }
+
+  .clockit-notes-slot.is-collapsed {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .clockit-notes-sidebar,
+  .clockit-notes-graph-pane {
+    height: auto;
+    max-height: 78vh;
+  }
+
+  .clockit-notes-editor-pane {
+    height: auto;
+    min-height: 74vh;
+  }
+
+  .clockit-notes-mobile-tabs {
+    display: flex;
+  }
+
+  .clockit-notes-layout[data-mobile-tab='editor'] .clockit-notes-slot.slot-left,
+  .clockit-notes-layout[data-mobile-tab='editor'] .clockit-notes-slot.slot-right,
+  .clockit-notes-layout[data-mobile-tab='nav'] .clockit-notes-editor-pane,
+  .clockit-notes-layout[data-mobile-tab='nav'] .clockit-notes-slot.slot-right,
+  .clockit-notes-layout[data-mobile-tab='graph'] .clockit-notes-editor-pane,
+  .clockit-notes-layout[data-mobile-tab='graph'] .clockit-notes-slot.slot-left {
+    display: none;
+  }
 }
 
 .clockit-editor-toolbar {
@@ -1371,7 +3081,7 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.12s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .clockit-toolbar-btn:hover {
@@ -1390,21 +3100,31 @@ textarea:focus-visible {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 4px;
+  /* Wide/resized tables scroll horizontally instead of being clipped. */
+  overflow-x: auto;
+  padding-right: 6px;
+  padding-bottom: 28px;
 }
 
 .clockit-prose-editor {
   outline: none;
   min-height: 240px;
+  max-width: 860px;
   font-family: inherit;
   color: var(--text-primary);
-  line-height: 1.6;
-  font-size: 14px;
+  line-height: 1.72;
+  font-size: 14.5px;
+  letter-spacing: 0.002em;
+  /* Long unbroken strings never push the editor wider than its pane. */
+  overflow-wrap: break-word;
+}
+
+.clockit-prose-editor > *:first-child {
+  margin-top: 0;
 }
 
 .clockit-prose-editor p {
-  margin: 8px 0;
+  margin: 9px 0;
 }
 
 .clockit-prose-editor h1 {
@@ -1486,7 +3206,7 @@ textarea:focus-visible {
   border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .dark .clockit-editor-link,
@@ -1680,7 +3400,8 @@ textarea:focus-visible {
   padding: 8px 10px;
   border-bottom: 1px solid var(--border-subtle);
   border-right: 1px solid var(--border-subtle);
-  transition: background 0.12s ease;
+  transition: background var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease);
   box-sizing: border-box;
 }
 
@@ -1689,8 +3410,84 @@ textarea:focus-visible {
 }
 
 .clockit-cal-cell-active {
-  border: 1.5px solid var(--accent-mint) !important;
-  background: rgba(52, 211, 153, 0.04);
+  background: rgba(52, 211, 153, 0.05);
+  box-shadow: inset 0 0 0 1.5px var(--accent-mint);
+}
+
+/* Restrained month-cell date number + compact task indicators */
+.clockit-cal-daynum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-radius: 6px;
+  transition: background var(--motion-fast) var(--motion-ease),
+    color var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-cal-daynum.is-today {
+  color: var(--accent-mint);
+  font-weight: 700;
+}
+
+.clockit-cal-cell-items {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  min-width: 0;
+}
+
+.clockit-cal-mini-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+  transition: background var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-cal-mini-item:hover {
+  background: var(--bg-surface-subtle);
+}
+
+.clockit-cal-mini-item.is-done .clockit-cal-mini-title {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.clockit-cal-mini-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.clockit-cal-mini-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clockit-cal-mini-more {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding-left: 10px;
 }
 
 .clockit-cal-event-chip {
@@ -1706,6 +3503,7 @@ textarea:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  background: var(--bg-surface-subtle);
 }
 
 .clockit-timeline-item {
@@ -1741,3 +3539,1071 @@ textarea:focus-visible {
   color: var(--text-secondary);
   margin: 2px 0 0;
 }
+
+.clockit-cal-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 7px 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--motion-ease),
+    color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+
+/* ---------- Selected-date information panel ---------- */
+
+.clockit-day-panel {
+  min-width: 0;
+}
+
+.clockit-day-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Task entries are real controls: they open the task's details. */
+.clockit-day-panel-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 8px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+  text-align: left;
+  transition: background var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-day-panel-row:hover {
+  background: var(--bg-surface-subtle);
+}
+
+/* Scheduled events are read-only information, not controls. */
+.clockit-day-panel-row.is-static {
+  cursor: default;
+}
+
+.clockit-day-panel-row.is-static:hover {
+  background: transparent;
+}
+
+.clockit-day-panel-time {
+  flex: 0 0 54px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding-top: 1px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.clockit-day-panel-time.is-allday {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.clockit-day-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.clockit-day-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.clockit-day-panel-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clockit-day-panel-title.is-done {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.clockit-day-panel-tag {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 1px 6px;
+}
+
+.clockit-day-panel-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.clockit-day-panel-ws {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clockit-day-panel-ws-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.clockit-day-panel-deadline {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.clockit-day-panel-status {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.clockit-day-panel-status.is-done {
+  color: var(--accent-green);
+}
+
+.clockit-day-panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 10px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.clockit-day-panel-empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.clockit-day-panel-empty-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Agenda date headers double as a "select this day" control. */
+.clockit-cal-agenda-header.is-clickable {
+  width: 100%;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-cal-agenda-header.is-clickable:hover {
+  color: var(--accent-green);
+}
+
+.clockit-cal-add-btn:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+  border-color: var(--accent-mint);
+}
+
+/* ==========================================================================
+   CALENDAR WEEK, DAY, AND AGENDA VIEWS
+   ========================================================================== */
+
+.clockit-cal-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  min-width: 580px;
+}
+
+.clockit-cal-week-col {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+  transition: all var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-cal-week-col.active {
+  border-color: var(--accent-mint);
+  background: rgba(52, 211, 153, 0.03);
+}
+
+.clockit-cal-week-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.clockit-cal-day-view {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 540px;
+}
+
+.clockit-cal-day-slot {
+  display: flex;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  align-items: flex-start;
+  min-height: 44px;
+}
+
+.clockit-cal-day-time {
+  width: 65px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.clockit-cal-agenda-view {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 540px;
+}
+
+.clockit-cal-agenda-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.clockit-cal-agenda-header {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 2px;
+}
+
+.clockit-cal-agenda-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--motion-ease);
+  gap: 10px;
+}
+
+.clockit-cal-agenda-item:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   SHARED MODAL SURFACES
+   One scrim + panel transition used by every dashboard dialog (tasks, focus,
+   habits) so modals feel identical across pages.
+   ========================================================================== */
+
+.clockit-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(10, 12, 14, 0.5);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: clockit-fade-in var(--motion-base) var(--motion-ease) both;
+}
+
+.clockit-modal-panel {
+  max-width: 94%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: clockit-rise-in var(--motion-base) var(--motion-ease-out) both;
+}
+
+/* ==========================================================================
+   RESPONSIVE APPLICATION SHELL
+   Height collapses are driven from JS (see DashboardLayout); these rules only
+   govern how the docked surfaces re-flow at each breakpoint.
+   ========================================================================== */
+
+/* Laptop — tighten the page rhythm a little. */
+@media (max-width: 1280px) {
+  :root {
+    --page-pad-x: 26px;
+    --page-pad-y: 22px;
+    --page-gap: 20px;
+    --panel-gap: 18px;
+  }
+}
+
+/* Small laptop / tablet landscape — the search field is allowed to shrink. */
+@media (max-width: 1024px) {
+  :root {
+    --page-pad-x: 22px;
+  }
+
+  .clockit-search-box:focus-within {
+    width: clamp(200px, 44vw, 360px);
+  }
+
+  .clockit-home-snapshot {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tablet portrait — drop the date pill so search keeps its space. */
+@media (max-width: 900px) {
+  .clockit-live-date-pill {
+    display: none;
+  }
+}
+
+/* Phone — the sidebar becomes an off-canvas drawer. */
+@media (max-width: 768px) {
+  :root {
+    --page-pad-x: 16px;
+    --page-pad-y: 16px;
+    --page-gap: 16px;
+    --panel-gap: 14px;
+    --card-pad: 16px;
+  }
+
+  .clockit-nav-trigger {
+    display: flex;
+  }
+
+  .clockit-collapse-trigger {
+    display: none;
+  }
+
+  .clockit-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: min(288px, 86vw);
+    min-width: 0;
+    transform: translateX(-102%);
+    z-index: 90;
+    box-shadow: var(--shadow-hover);
+  }
+
+  .clockit-sidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  .clockit-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 12, 14, 0.52);
+    z-index: 85;
+    animation: clockit-fade-in var(--motion-base) var(--motion-ease) both;
+  }
+
+  .clockit-topbar {
+    gap: 10px;
+  }
+
+  .clockit-search-box,
+  .clockit-search-box:focus-within {
+    width: 100%;
+  }
+
+  .clockit-search-box input::placeholder {
+    color: transparent;
+  }
+
+  .clockit-kbd-pill {
+    display: none;
+  }
+}
+
+/* Very small phones — drop the overflow control only.
+   Scoped to the trailing anchor so the notification bell (which is also the
+   last child of its own wrapper) is never hidden. */
+@media (max-width: 420px) {
+  .clockit-topbar-right > .clockit-menu-anchor:last-child .clockit-icon-action-btn {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   PHASE 5 — ANALYTICS · HABITS · CALENDAR
+   Shared data-visualisation primitives used by the three insight pages.
+   ========================================================================== */
+
+/* ---------- Segmented range control (date ranges) ---------- */
+
+.clockit-range-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+}
+
+.clockit-range-option {
+  padding: 5px 13px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    color var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease);
+}
+
+.clockit-range-option:hover {
+  color: var(--text-primary);
+}
+
+.clockit-range-option.is-active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.dark .clockit-range-option.is-active {
+  background: var(--bg-surface-hover);
+}
+
+/* ---------- KPI progress ring ---------- */
+
+.clockit-kpi-ring {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+}
+
+.clockit-kpi-ring svg {
+  display: block;
+}
+
+.clockit-kpi-ring-track {
+  stroke: var(--bg-surface-subtle);
+}
+
+.clockit-kpi-ring-progress {
+  stroke: var(--accent-mint);
+  transition: stroke-dashoffset 900ms var(--motion-ease-out);
+}
+
+.clockit-kpi-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ---------- Responsive chart grids ---------- */
+
+.clockit-chart-grid {
+  display: grid;
+  gap: var(--page-gap);
+  /* Deliberately asymmetric so insight sections never read as a uniform tiled
+     grid of equally-sized boxes. */
+  grid-template-columns: 1.18fr 1fr 1.12fr;
+  align-items: start;
+}
+
+.clockit-chart-grid.is-asymmetric {
+  grid-template-columns: 1.1fr 1.35fr 1.15fr;
+}
+
+/* Two-up variant (e.g. Habits → Consistency). Declared as a class rather than
+   an inline style so the narrow-screen media queries below can still collapse
+   it to a single column. */
+.clockit-chart-grid.is-pair {
+  grid-template-columns: 1.35fr 1fr;
+}
+
+/* ---------- Animated data bars & track fills ---------- */
+
+@keyframes clockit-bar-grow {
+  from {
+    transform: scaleY(0.04);
+    opacity: 0.4;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes clockit-fill-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.clockit-data-bar {
+  transform-origin: bottom center;
+  animation: clockit-bar-grow 620ms var(--motion-ease-out) both;
+  transition:
+    background-color var(--motion-fast) var(--motion-ease),
+    opacity var(--motion-fast) var(--motion-ease);
+}
+
+.clockit-data-bar-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface-subtle);
+  overflow: hidden;
+}
+
+.clockit-data-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transform-origin: left center;
+  animation: clockit-fill-grow 760ms var(--motion-ease-out) both;
+}
+
+/* ---------- Chart empty state ---------- */
+
+.clockit-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 124px;
+  padding: 20px 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-surface-subtle);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.clockit-chart-empty strong {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--text-secondary);
+}
+
+/* ---------- Legend rows ---------- */
+
+.clockit-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 11.5px;
+}
+
+.clockit-legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.clockit-legend-key {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.clockit-legend-key > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clockit-legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.clockit-legend-value {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- Habits ---------- */
+
+@keyframes clockit-habit-pop {
+  0% {
+    transform: scale(0.72);
+  }
+  55% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.clockit-task-checkbox.just-checked {
+  animation: clockit-habit-pop 320ms var(--motion-ease-out);
+}
+
+.clockit-habit-rhythm {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  height: 104px;
+}
+
+.clockit-habit-rhythm-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex: 1;
+  height: 100%;
+}
+
+.clockit-habit-rhythm-bar {
+  width: 100%;
+  max-width: 28px;
+  border-radius: 6px 6px 3px 3px;
+  background: var(--accent-mint);
+  transform-origin: bottom center;
+  animation: clockit-bar-grow 600ms var(--motion-ease-out) both;
+}
+
+.clockit-habit-streak-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--motion-base) var(--motion-ease);
+}
+
+.clockit-habit-streak-row:hover {
+  background: var(--bg-surface-subtle);
+}
+
+.clockit-habit-streak-flame {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 650;
+  color: var(--accent-green-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Calendar view transition ---------- */
+
+@keyframes clockit-view-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.clockit-cal-view {
+  animation: clockit-view-in 280ms var(--motion-ease-out) both;
+}
+
+/* ---------- Phase 5 responsive ---------- */
+
+@media (max-width: 1100px) {
+  .clockit-stats-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1240px) {
+  .clockit-chart-grid,
+  .clockit-chart-grid.is-asymmetric,
+  .clockit-chart-grid.is-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .clockit-chart-grid,
+  .clockit-chart-grid.is-asymmetric,
+  .clockit-chart-grid.is-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .clockit-stats-grid-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .clockit-page-header-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .clockit-range-option {
+    padding: 5px 10px;
+    font-size: 11.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clockit-data-bar,
+  .clockit-data-bar-fill,
+  .clockit-habit-rhythm-bar,
+  .clockit-cal-view,
+  .clockit-task-checkbox.just-checked {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   PHASE 6 — RESPONSIVE POLISH
+   Narrow-screen reflow for the shared task row (Home + Tasks). When the row
+   can no longer hold the title and its metadata side by side, the metadata
+   moves to its own line and wraps, instead of crushing the title to a few
+   characters and pushing the row outside the viewport.
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .clockit-task-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .clockit-task-left {
+    flex: none;
+    width: 100%;
+  }
+
+  .clockit-task-right {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+}
+
+/* Phone: the search + sort + view-switch cluster may wrap onto its own lines
+   rather than pushing the card past the viewport edge. */
+@media (max-width: 560px) {
+  .clockit-tasks-sort {
+    flex-wrap: wrap;
+  }
+}
+
+/* ==========================================================================
+   PHASE 7 — REFINEMENT PASS
+   Signature login transition · mobile navigation · timepiece dial · narrow
+   screen polish. Every duration/easing below consumes the shared motion tokens
+   declared in motion.css so the whole product moves as one system.
+   ========================================================================== */
+
+/* ---------- 1. ClockIt login → dashboard transition ---------- */
+
+.clockit-login-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  will-change: opacity;
+}
+
+.clockit-login-transition-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.clockit-lt-clock {
+  display: block;
+  overflow: visible;
+}
+
+.clockit-lt-wordmark {
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+/* ---------- 2. Mobile bottom navigation ---------- */
+
+.clockit-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .clockit-mobile-nav {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 80;
+    align-items: stretch;
+    justify-content: space-around;
+    gap: 2px;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .clockit-mobile-nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 4px;
+    border-radius: var(--radius-sm);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .clockit-mobile-nav-item svg {
+    flex-shrink: 0;
+  }
+
+  .clockit-mobile-nav-item span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .clockit-mobile-nav-item.is-active {
+    color: var(--accent-green-text);
+    background: var(--accent-green-subtle);
+  }
+
+  /* Reserve room so no page content hides behind the fixed bar. */
+  .clockit-main-viewport {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ---------- 3. Focus timepiece dial ---------- */
+
+/* The needle is positioned per-frame by the animation loop — a CSS transition
+   here would fight it and re-trigger every second. */
+.clockit-dial-hand {
+  transition: none;
+}
+
+/* The remaining-time arc is drained by the same loop; only its accent hue
+   animates, so switching modes reads as a colour shift. */
+.clockit-dial-progress {
+  transition: stroke var(--motion-slow) var(--motion-ease);
+}
+
+.clockit-dial-inner-ring {
+  transition: stroke var(--motion-base) var(--motion-ease);
+}
+
+/* One soft breath the moment a run begins — never a looping distraction. */
+@keyframes clockit-focus-begin {
+  from {
+    transform: scale(0.955);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.clockit-focus-dial-container.is-running .clockit-dial-svg {
+  animation: clockit-focus-begin 480ms var(--motion-ease-out);
+}
+
+/* ---------- 4. Narrow-screen polish per page ---------- */
+
+/* Notes — the rich-text toolbar must scroll, never wrap the editor off-screen. */
+@media (max-width: 1024px) {
+  .clockit-notes-editor-pane {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .clockit-editor-toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .clockit-editor-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Calendar — a compact, fitted month grid: date numbers + dot indicators
+     only, with the day's detail living in the panel/agenda below. */
+  .clockit-month-calendar-table {
+    min-width: 0;
+  }
+
+  .clockit-month-calendar-table th {
+    padding: 8px 3px;
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .clockit-month-calendar-table td {
+    height: auto;
+    min-height: 52px;
+    padding: 6px 4px;
+  }
+
+  .clockit-cal-cell-items {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  .clockit-cal-mini-item {
+    width: auto;
+    padding: 0;
+  }
+
+  .clockit-cal-mini-title,
+  .clockit-cal-mini-more {
+    display: none;
+  }
+
+  .clockit-cal-daynum {
+    min-width: 20px;
+  }
+
+  /* Analytics / Habits — charts and controls take the full column. */
+  .clockit-range-control {
+    max-width: 100%;
+  }
+
+  .clockit-focus-side-quote {
+    display: none;
+  }
+}
+
+/* ---------- 5. Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .clockit-dial-hand,
+  .clockit-dial-cap {
+    transition-duration: 0.001ms;
+  }
+
+  .clockit-dial-progress {
+    transition-duration: 0.001ms;
+  }
+
+  /* No halo bloom, no desaturation fade, no cross-fade on the readout. */
+  .clockit-focus-dial-stage,
+  .clockit-dial-center {
+    transition: none;
+  }
+
+  .clockit-focus-dial-container.is-running .clockit-dial-svg,
+  .clockit-focus-dial-container.is-switching .clockit-dial-svg,
+  .clockit-focus-dial-stage.is-complete,
+  .clockit-focus-dial-stage.is-complete .clockit-dial-progress,
+  .clockit-focus-dial-stage.is-complete .clockit-dial-ripple {
+    animation: none;
+  }
+
+  .clockit-mobile-nav-item {
+    transition: none;
+  }
+}
+
+

@@ -50,6 +50,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
   const debounceTimerRef = useRef<any>(null);
+  // Anchors the [[link]] suggestion popup inside the editor surface.
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -128,6 +130,18 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         const query = textBefore.slice(doubleBracketIndex + 2);
         setInternalLinkQuery(query);
         setShowInternalLinkMenu(true);
+        // Anchor the popup to the caret, clamped inside the editor width.
+        try {
+          const coords = editor.view.coordsAtPos(from);
+          const rect = wrapperRef.current?.getBoundingClientRect();
+          const maxLeft = Math.max(8, (rect?.width ?? 248) - 248);
+          setMenuPosition({
+            top: coords.bottom - (rect?.top ?? 0) + 6,
+            left: Math.max(8, Math.min(coords.left - (rect?.left ?? 0), maxLeft)),
+          });
+        } catch {
+          // coordsAtPos can throw before the view is measurable — keep last anchor.
+        }
       } else {
         setShowInternalLinkMenu(false);
       }
@@ -217,7 +231,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+    <div ref={wrapperRef} style={{ position: 'relative', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/* Rich Editor Formatting Toolbar */}
       <div className="clockit-editor-toolbar" role="toolbar" aria-label="Rich text formatting">
         <select
@@ -238,6 +252,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('bold') ? 'active' : ''}`}
           title="Bold (Ctrl+B)"
+          aria-label="Bold"
+          aria-pressed={editor.isActive('bold')}
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
@@ -247,6 +263,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('italic') ? 'active' : ''}`}
           title="Italic (Ctrl+I)"
+          aria-label="Italic"
+          aria-pressed={editor.isActive('italic')}
           type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
         >
@@ -256,6 +274,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('underline') ? 'active' : ''}`}
           title="Underline (Ctrl+U)"
+          aria-label="Underline"
+          aria-pressed={editor.isActive('underline')}
           type="button"
           onClick={() => editor.chain().focus().toggleUnderline().run()}
         >
@@ -265,6 +285,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('strike') ? 'active' : ''}`}
           title="Strikethrough"
+          aria-label="Strikethrough"
+          aria-pressed={editor.isActive('strike')}
           type="button"
           onClick={() => editor.chain().focus().toggleStrike().run()}
         >
@@ -276,6 +298,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('bulletList') ? 'active' : ''}`}
           title="Bulleted List"
+          aria-label="Bulleted list"
+          aria-pressed={editor.isActive('bulletList')}
           type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
@@ -285,6 +309,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('orderedList') ? 'active' : ''}`}
           title="Numbered List"
+          aria-label="Numbered list"
+          aria-pressed={editor.isActive('orderedList')}
           type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
@@ -294,6 +320,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('taskList') ? 'active' : ''}`}
           title="Interactive Checklist"
+          aria-label="Checklist"
+          aria-pressed={editor.isActive('taskList')}
           type="button"
           onClick={() => editor.chain().focus().toggleTaskList().run()}
         >
@@ -305,6 +333,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('link') ? 'active' : ''}`}
           title="Link or [[Internal Note]]"
+          aria-label="Insert link"
+          aria-pressed={editor.isActive('link')}
           type="button"
           onClick={handleAddLink}
         >
@@ -314,6 +344,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('table') ? 'active' : ''}`}
           title="Insert Table"
+          aria-label="Insert table"
           type="button"
           onClick={handleInsertTable}
         >
@@ -323,6 +354,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className={`clockit-toolbar-btn ${editor.isActive('codeBlock') ? 'active' : ''}`}
           title="Code Block"
+          aria-label="Code block"
+          aria-pressed={editor.isActive('codeBlock')}
           type="button"
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         >
@@ -332,6 +365,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <button
           className="clockit-toolbar-btn"
           title="Insert Image"
+          aria-label="Insert image"
           type="button"
           onClick={handleInsertImage}
         >
@@ -385,15 +419,16 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
       {/* Internal link [[ suggestion popup */}
       {showInternalLinkMenu && filteredInternalNotes.length > 0 && (
         <div
-          className="clockit-card"
+          className="clockit-card motion-pop"
           style={{
             position: 'absolute',
+            top: menuPosition.top,
+            left: menuPosition.left,
             zIndex: 100,
             width: 240,
             padding: 8,
             boxShadow: 'var(--shadow-hover)',
             border: '1px solid var(--border-strong)',
-            marginTop: 4,
           }}
         >
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase' }}>

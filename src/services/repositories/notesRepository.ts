@@ -1,4 +1,3 @@
-import { INITIAL_QUICK_NOTES } from '../../data/mockData';
 import { notesStorage, type GraphLink, type GraphNode, type NoteFolder, type NoteItem } from '../notesStorage';
 import { crossTab, NOTES_SCOPE } from './crossTab';
 import { LocalJsonStore, ObservableRepository } from './storage';
@@ -21,7 +20,7 @@ export class LocalNoteRepository extends ObservableRepository implements NoteRep
 
   private readonly quickNotes = new LocalJsonStore<string[]>(
     QUICK_NOTES_KEY,
-    INITIAL_QUICK_NOTES,
+    [],
     isStringArray,
   );
 

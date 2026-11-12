@@ -1,9 +1,4 @@
-import {
-  CALENDAR_EVENTS,
-  TIMELINE_EVENTS,
-  type CalendarEvent,
-  type TimelineEvent,
-} from '../../data/mockData';
+import type { CalendarEvent, TimelineEvent } from '../../data/mockData';
 import { LocalJsonStore, ObservableRepository } from './storage';
 import type { CalendarRepository } from './types';
 
@@ -16,13 +11,13 @@ export class LocalCalendarRepository extends ObservableRepository implements Cal
 
   private readonly store = new LocalJsonStore<CalendarEvent[]>(
     'clockit_calendar_events',
-    CALENDAR_EVENTS,
+    [],
     isEventArray,
   );
 
   private readonly timeline = new LocalJsonStore<TimelineEvent[]>(
     'clockit_timeline_events',
-    TIMELINE_EVENTS,
+    [],
     isTimelineArray,
   );
 

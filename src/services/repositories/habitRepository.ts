@@ -1,4 +1,4 @@
-import { HABIT_CALENDAR_DAYS, INITIAL_HABITS, type HabitItem } from '../../data/mockData';
+import type { HabitItem } from '../../data/mockData';
 import { LocalJsonStore, ObservableRepository } from './storage';
 import type { HabitRepository } from './types';
 
@@ -10,7 +10,7 @@ export class LocalHabitRepository extends ObservableRepository implements HabitR
 
   private readonly store = new LocalJsonStore<HabitItem[]>(
     'clockit_habits',
-    INITIAL_HABITS,
+    [],
     isHabitArray,
   );
 
@@ -29,7 +29,9 @@ export class LocalHabitRepository extends ObservableRepository implements HabitR
   }
 
   getCalendarDays() {
-    return HABIT_CALENDAR_DAYS;
+    // Historical habit activity is not currently persisted as individual
+    // completion records, so never substitute demo history for real accounts.
+    return [];
   }
 
   refreshFromStorage(): boolean {

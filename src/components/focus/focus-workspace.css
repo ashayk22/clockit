@@ -1,0 +1,713 @@
+.clockit-focus-shell {
+  width: 100%;
+  max-width: none;
+  padding: 18px 26px 30px;
+}
+
+.focus-workspace {
+  --focus-green: var(--accent-green, #244b36);
+  --focus-ink: var(--text-primary, #18191c);
+  --focus-muted: var(--text-secondary, #5e646e);
+  --focus-line: var(--border-strong, #d5cfc2);
+  --focus-cream: var(--bg-primary, #fbf9f5);
+  --focus-surface: var(--bg-surface, #fff);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(18px, 2.3vw, 32px);
+  width: 100%;
+  min-height: min(82vh, 840px);
+  color: var(--focus-ink);
+  transition: padding 260ms ease, gap 260ms ease;
+}
+
+.focus-workspace button {
+  color: inherit;
+}
+
+.focus-workspace-header {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(140px, 1fr);
+  align-items: center;
+  gap: 20px;
+  min-height: 50px;
+}
+
+.focus-workspace-brand,
+.focus-workspace-actions,
+.focus-clock-mode-switch,
+.focus-notes-tabs,
+.focus-notes-tab,
+.focus-playback-controls,
+.focus-session-config,
+.focus-session-config button {
+  display: flex;
+  align-items: center;
+}
+
+.focus-workspace-brand {
+  gap: 13px;
+  min-width: 0;
+  color: var(--focus-green);
+}
+
+.focus-brand-divider {
+  width: 1px;
+  height: 25px;
+  background: var(--focus-line);
+}
+
+.focus-workspace-title {
+  overflow: hidden;
+  color: var(--focus-green);
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: clamp(17px, 1.8vw, 23px);
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.focus-clock-mode-switch {
+  justify-self: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid var(--focus-line);
+  border-radius: 999px;
+  background: var(--focus-cream);
+}
+
+.focus-clock-mode-switch button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 126px;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  color: var(--focus-green);
+  font-size: 13px;
+  font-weight: 650;
+  transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.focus-clock-mode-switch button:hover:not(.is-active) {
+  background: var(--bg-surface-subtle);
+}
+
+.focus-clock-mode-switch button.is-active {
+  background: var(--focus-green);
+  color: #fff;
+}
+
+.focus-digital-icon {
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.08em;
+}
+
+.focus-workspace-actions {
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.focus-utility-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--focus-line) !important;
+  border-radius: 15px;
+  color: var(--focus-green) !important;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.focus-utility-button:hover {
+  background: var(--bg-surface-subtle);
+  transform: translateY(-1px);
+}
+
+.focus-utility-button.is-selected {
+  background: var(--bg-surface-subtle);
+}
+
+.focus-seconds-label {
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.focus-workspace-main {
+  display: grid;
+  grid-template-columns: minmax(245px, 1fr) minmax(230px, 0.9fr) minmax(300px, 1.02fr);
+  align-items: center;
+  gap: clamp(14px, 2vw, 30px);
+  min-width: 0;
+}
+
+.focus-clock-pane,
+.focus-session-pane {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.focus-analog-clock {
+  width: min(100%, 390px);
+  aspect-ratio: 1;
+}
+
+.focus-clock-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.focus-clock-progress-track,
+.focus-clock-progress {
+  fill: none;
+  stroke-width: 7;
+  transform: rotate(-90deg);
+  transform-origin: 200px 200px;
+}
+
+.focus-clock-progress-track {
+  stroke: var(--border-subtle, #eae5dc);
+}
+
+.focus-clock-progress {
+  stroke: #91ad70;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 700ms cubic-bezier(.22,.61,.36,1);
+}
+
+.focus-clock-face {
+  fill: var(--bg-surface-subtle, #f5f2eb);
+  stroke: var(--focus-green);
+  stroke-width: 4;
+}
+
+.focus-clock-tick {
+  stroke: var(--focus-green);
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  opacity: 0.42;
+}
+
+.focus-clock-tick.is-major {
+  stroke-width: 2.6;
+  opacity: 0.9;
+}
+
+.focus-clock-number {
+  fill: var(--focus-green);
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 33px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.focus-clock-hand {
+  transform-box: view-box;
+  transform-origin: 200px 200px;
+  transition: transform 360ms cubic-bezier(.2,.7,.2,1);
+}
+
+.focus-clock-hour-hand,
+.focus-clock-minute-hand,
+.focus-clock-second-hand {
+  stroke: var(--focus-green);
+  stroke-linecap: round;
+}
+
+.focus-clock-hour-hand { stroke-width: 9; }
+.focus-clock-minute-hand { stroke-width: 6; }
+.focus-clock-second-hand {
+  stroke: #8aa96d;
+  stroke-width: 2.5;
+}
+
+.focus-clock-hub {
+  fill: #8aa96d;
+  stroke: var(--focus-green);
+  stroke-width: 3;
+}
+
+.focus-digital-clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--focus-green);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: clamp(43px, 5.6vw, 76px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.075em;
+  white-space: nowrap;
+}
+
+.focus-digital-clock i {
+  margin: 0 0.07em;
+  font-style: normal;
+  opacity: 0.52;
+  transform: translateY(-0.04em);
+}
+
+.focus-digital-seconds {
+  color: #7b9667;
+  font-size: 0.68em;
+  letter-spacing: -0.06em;
+}
+
+.focus-session-pane {
+  text-align: center;
+}
+
+.focus-session-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--focus-green);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.focus-session-eyebrow span {
+  width: clamp(20px, 4vw, 48px);
+  height: 1px;
+  background: var(--focus-line);
+}
+
+.focus-countdown {
+  margin-top: 12px;
+  color: var(--focus-green);
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: clamp(62px, 7vw, 92px);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.065em;
+  line-height: 1;
+}
+
+.focus-session-kind {
+  margin-top: 9px;
+  color: var(--focus-green);
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 20px;
+}
+
+.focus-session-status,
+.focus-elapsed-readout {
+  color: var(--focus-muted);
+  font-size: 12px;
+}
+
+.focus-session-status { margin-top: 5px; }
+
+.focus-mode-picker {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 18px;
+}
+
+.focus-mode-picker button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--focus-muted);
+  font-size: 11px;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.focus-mode-picker button:hover,
+.focus-mode-picker button.is-active {
+  border-color: var(--focus-line);
+  background: var(--focus-cream);
+  color: var(--focus-green);
+}
+
+.focus-playback-controls {
+  justify-content: center;
+  gap: clamp(14px, 2.2vw, 28px);
+  margin-top: 20px;
+}
+
+.focus-round-control,
+.focus-primary-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--focus-line) !important;
+  border-radius: 50%;
+  color: var(--focus-green) !important;
+  transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.focus-round-control {
+  width: 58px;
+  height: 58px;
+}
+
+.focus-primary-control {
+  width: 82px;
+  height: 82px;
+  border-color: var(--focus-green) !important;
+  background: var(--focus-green) !important;
+  color: #fff !important;
+}
+
+.focus-round-control:hover,
+.focus-primary-control:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 18px rgba(36, 75, 54, 0.13);
+}
+
+.focus-round-control:hover { background: var(--bg-surface-subtle); }
+.focus-primary-control:hover { background: var(--accent-green-hover) !important; }
+
+.focus-elapsed-readout {
+  margin-top: 13px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.focus-target-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  color: var(--focus-muted);
+  font-size: 11px;
+}
+
+.focus-target-control select {
+  max-width: min(100%, 240px);
+  min-width: 0;
+  height: 33px;
+  padding: 0 10px;
+  border: 1px solid var(--focus-line);
+  border-radius: 999px;
+  background: var(--focus-cream);
+  color: var(--focus-green);
+  font-size: 11px;
+}
+
+.focus-selected-task {
+  max-width: 100%;
+  margin-top: 8px;
+  overflow: hidden;
+  color: var(--focus-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.focus-selected-task strong { color: var(--focus-green); }
+
+.focus-notes-panel {
+  display: flex;
+  min-width: 0;
+  min-height: 365px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--focus-line);
+  border-radius: 25px;
+  background: var(--focus-cream);
+}
+
+.focus-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 68px;
+  margin: 0 19px;
+  border-bottom: 1px solid var(--border-subtle, #eae5dc);
+}
+
+.focus-notes-tabs { gap: 8px; min-width: 0; }
+
+.focus-notes-tab {
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 15px;
+  border-radius: 999px;
+  color: var(--focus-green);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.focus-notes-tab.is-active {
+  background: var(--focus-green);
+  color: #fff;
+}
+
+.focus-notes-more {
+  color: var(--focus-green) !important;
+  font-size: 20px;
+  letter-spacing: 0.12em;
+}
+
+.focus-notes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 52px;
+  margin: 0 19px;
+  border-bottom: 1px solid var(--border-subtle, #eae5dc);
+}
+
+.focus-notes-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 30px;
+  color: var(--focus-green) !important;
+  opacity: 0.85;
+}
+
+.focus-notes-toolbar button:disabled,
+.focus-notes-more:disabled { cursor: default; }
+
+.focus-notes-toolbar > span {
+  width: 1px;
+  height: 21px;
+  margin: 0 1px;
+  background: var(--focus-line);
+}
+
+.focus-notes-content {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 220px;
+  padding: 23px 24px;
+}
+
+.focus-notes-caret {
+  width: 2px;
+  height: 28px;
+  flex: 0 0 auto;
+  background: #789960;
+  opacity: 0.75;
+}
+
+.focus-notes-placeholder {
+  max-width: 25ch;
+  color: var(--text-muted);
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.focus-notes-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-subtle, #eae5dc);
+  color: var(--focus-muted);
+  font-size: 11px;
+}
+
+.focus-session-config {
+  justify-self: center;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 26px);
+  width: min(100%, 760px);
+  min-height: 76px;
+  padding: 8px clamp(14px, 2vw, 24px);
+  border: 1px solid var(--focus-line);
+  border-radius: 999px;
+  background: var(--focus-cream);
+}
+
+.focus-session-config button {
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 0;
+  color: var(--focus-green);
+  text-align: left;
+}
+
+.focus-config-icon { display: inline-flex; flex: 0 0 auto; }
+
+.focus-session-config button > span:nth-child(2) {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.focus-session-config small {
+  color: var(--focus-muted);
+  font-size: 10px;
+}
+
+.focus-session-config strong {
+  overflow: hidden;
+  color: var(--focus-ink);
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.focus-config-chevron { font-size: 17px; }
+
+.focus-config-divider {
+  width: 1px;
+  height: 36px;
+  flex: 0 0 auto;
+  background: var(--focus-line);
+}
+
+.focus-workspace.is-expanded {
+  position: fixed;
+  z-index: 9900;
+  inset: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 2vh;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: max(18px, env(safe-area-inset-top)) max(26px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(26px, env(safe-area-inset-left));
+  overflow: auto;
+  background: var(--focus-cream);
+  animation: focus-workspace-enter 240ms ease both;
+}
+
+.clockit-layout-container:has(.focus-workspace.is-expanded) .clockit-sidebar,
+.clockit-layout-container:has(.focus-workspace.is-expanded) .clockit-topbar,
+.clockit-layout-container:has(.focus-workspace.is-expanded) .clockit-mobile-nav,
+.clockit-layout-container:has(.focus-workspace.is-expanded) .clockit-sidebar-backdrop {
+  display: none !important;
+}
+
+.clockit-layout-container:has(.focus-workspace.is-expanded) .clockit-main-viewport {
+  padding: 0 !important;
+}
+
+.clockit-focus-shell:has(.focus-workspace.is-expanded) .clockit-modal-scrim {
+  z-index: 10010;
+}
+
+@keyframes focus-workspace-enter {
+  from { opacity: 0.92; transform: scale(0.992); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 1120px) {
+  .focus-workspace-main {
+    grid-template-columns: minmax(220px, 0.9fr) minmax(230px, 0.9fr);
+    row-gap: 22px;
+  }
+
+  .focus-notes-panel { grid-column: 1 / -1; min-height: 290px; }
+  .focus-notes-content { min-height: 150px; }
+}
+
+@media (max-width: 720px) {
+  .clockit-focus-shell { padding: 14px 16px 24px; }
+
+  .focus-workspace {
+    min-height: 0;
+    gap: 20px;
+  }
+
+  .focus-workspace-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+
+  .focus-workspace-brand { gap: 9px; }
+  .focus-brand-divider { height: 21px; }
+  .focus-workspace-title { font-size: 17px; }
+  .focus-workspace-actions { gap: 7px; }
+  .focus-utility-button { width: 40px; height: 40px; border-radius: 13px; }
+
+  .focus-clock-mode-switch {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: min(100%, 330px);
+  }
+
+  .focus-clock-mode-switch button { flex: 1 1 0; min-width: 0; min-height: 38px; }
+
+  .focus-workspace-main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 19px;
+  }
+
+  .focus-clock-pane { order: 0; }
+  .focus-session-pane { order: 1; }
+  .focus-notes-panel { grid-column: auto; order: 2; min-height: 260px; border-radius: 20px; }
+  .focus-analog-clock { width: min(76vw, 310px); }
+  .focus-digital-clock { font-size: clamp(48px, 15vw, 70px); }
+  .focus-countdown { margin-top: 7px; font-size: clamp(62px, 18vw, 82px); }
+  .focus-session-kind { margin-top: 4px; }
+  .focus-session-status { margin-top: 3px; }
+  .focus-mode-picker { margin-top: 12px; }
+  .focus-playback-controls { margin-top: 14px; }
+  .focus-primary-control { width: 70px; height: 70px; }
+  .focus-round-control { width: 50px; height: 50px; }
+  .focus-session-config { min-height: 66px; gap: 8px; padding: 7px 10px; }
+  .focus-session-config button { gap: 6px; }
+  .focus-config-icon svg { width: 17px; height: 17px; }
+  .focus-session-config small { font-size: 9px; }
+  .focus-session-config strong { font-size: 11px; }
+  .focus-config-chevron { display: none; }
+
+  .focus-workspace.is-expanded {
+    gap: 14px;
+    padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  }
+}
+
+@media (max-width: 370px) {
+  .clockit-focus-shell { padding-right: 12px; padding-left: 12px; }
+  .focus-workspace-brand svg { width: 29px; height: 29px; }
+  .focus-workspace-title { font-size: 15px; }
+  .focus-brand-divider { margin-right: -1px; }
+  .focus-workspace-actions { gap: 5px; }
+  .focus-utility-button { width: 36px; height: 36px; }
+  .focus-notes-header,
+  .focus-notes-toolbar { margin-right: 13px; margin-left: 13px; }
+  .focus-notes-tabs { gap: 3px; }
+  .focus-notes-tab { gap: 5px; padding: 0 10px; font-size: 11px; }
+  .focus-session-config { gap: 5px; padding-right: 7px; padding-left: 7px; }
+  .focus-session-config button { gap: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-workspace,
+  .focus-clock-mode-switch button,
+  .focus-utility-button,
+  .focus-clock-progress,
+  .focus-clock-hand,
+  .focus-round-control,
+  .focus-primary-control {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -445,11 +445,6 @@ async function hydrateQuickNotes(): Promise<void> {
     const list = data.map((row) => String((row as Row).body ?? ''));
     localStore.writeJson('clockit_quick_notes', list);
     noteRepository.refreshFromStorage();
-  } else {
-    const cleanInitial = ['Welcome to ClockIt! Capture quick thoughts here.'];
-    localStore.writeJson('clockit_quick_notes', cleanInitial);
-    noteRepository.refreshFromStorage();
-    enqueue({ kind: 'replace-quick-notes', notes: cleanInitial });
   }
   snapshots.set(TABLES.quickNotes, JSON.stringify(noteRepository.getQuickNotes()));
 }
@@ -484,20 +479,6 @@ async function hydrate(): Promise<void> {
           await domain.writeLocal(rows.map((row) => domain.fromRow(row)));
         } else {
           console.warn(`[clockit/sync] Preserving local edits for ${domain.table}`);
-        }
-      } else {
-        if (!hasPendingForDomain) {
-          const seeds = domain.initialRecords ? domain.initialRecords() : [];
-          await domain.writeLocal(seeds);
-          for (const record of seeds) {
-            enqueue({
-              kind: 'upsert',
-              table: domain.table,
-              conflict: 'user_id,client_id',
-              clientId: record.id,
-              payload: domain.toRow(record, uid),
-            });
-          }
         }
       }
       snapshots.set(domain.table, entitySignature(await domain.readLocal()));
@@ -626,11 +607,11 @@ export function stopCloudSync(): void {
   queue.length = 0;
   updateSyncState({ status: 'idle', lastSyncedAt: null, errorMessage: null, pendingCount: 0 });
 
-  // Reset local state to clean initial defaults on sign-out to prevent cross-user data residue
+  // Reset the shared cache so the next user cannot see prior account records.
   for (const domain of entityDomains) {
     const seeds = domain.initialRecords ? domain.initialRecords() : [];
     void domain.writeLocal(seeds);
   }
-  localStore.writeJson('clockit_quick_notes', ['Welcome to ClockIt! Capture quick thoughts here.']);
+  localStore.writeJson('clockit_quick_notes', []);
   noteRepository.refreshFromStorage();
 }

@@ -87,18 +87,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const next = await storeSignIn(email, password);
     if (next.isDemo) {
       loadDemoData();
+    } else if (user?.isDemo) {
+      clearDemoData();
     }
     requestLoginTransition();
     setUser(next);
     return next;
-  }, []);
+  }, [user?.isDemo]);
 
   const signUp = useCallback(async (name: string, email: string, password: string) => {
+    if (user?.isDemo) clearDemoData();
     const next = await storeSignUp(name, email, password);
     requestLoginTransition();
     setUser(next);
     return next;
-  }, []);
+  }, [user?.isDemo]);
 
   const updateProfile = useCallback(async (newName: string) => {
     const updated = await storeUpdateProfile(newName);

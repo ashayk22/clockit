@@ -84,7 +84,7 @@ export function clearDemoData(): void {
   localStore.writeJson('clockit_habits', []);
   localStore.writeJson('clockit_calendar_events', []);
   localStore.writeJson('clockit_timeline_events', []);
-  localStore.writeJson('clockit_quick_notes', ['Welcome to ClockIt! Jot down quick notes here.']);
+  localStore.writeJson('clockit_quick_notes', []);
 
   workspaceRepository.refreshFromStorage();
   taskRepository.refreshFromStorage();

@@ -1,4 +1,4 @@
-import { INITIAL_WORKSPACES, type Workspace } from '../../data/mockData';
+import { type Workspace } from '../../data/mockData';
 import { LocalJsonStore, ObservableRepository } from './storage';
 import type { WorkspaceRepository } from './types';
 
@@ -17,7 +17,7 @@ export class LocalWorkspaceRepository extends ObservableRepository implements Wo
 
   private readonly store = new LocalJsonStore<Workspace[]>(
     'clockit_workspaces',
-    INITIAL_WORKSPACES,
+    [],
     isWorkspaceArray,
   );
 

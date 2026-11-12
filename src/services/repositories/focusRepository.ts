@@ -1,4 +1,4 @@
-import { INITIAL_FOCUS_SESSIONS, type FocusSession } from '../../data/mockData';
+import { type FocusSession } from '../../data/mockData';
 import { LocalJsonStore, ObservableRepository } from './storage';
 import type { FocusSessionInput, FocusSessionRepository } from './types';
 
@@ -19,13 +19,13 @@ export class LocalFocusSessionRepository
 
   private readonly store = new LocalJsonStore<FocusSession[]>(
     'clockit_focus_sessions',
-    INITIAL_FOCUS_SESSIONS,
+    [],
     isSessionArray,
   );
 
   private readonly selection = new LocalJsonStore<string | null>(
     'clockit_selected_focus_task_id',
-    't-1',
+    null,
   );
 
   getAll(): FocusSession[] {

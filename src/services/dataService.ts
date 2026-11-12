@@ -7,6 +7,7 @@
  * itself, so the UI no longer has any storage knowledge.
  */
 import {
+  HABIT_CALENDAR_DAYS,
   KNOWLEDGE_GRAPH_LINKS,
   KNOWLEDGE_GRAPH_NODES,
   type CalendarEvent,
@@ -19,6 +20,7 @@ import {
   type TimelineEvent,
   type Workspace,
 } from '../data/mockData';
+import { isDemoActive } from '../demo/demoService';
 import { ANCHOR_DATE, WORKSPACE_COLORS, computeDaysDiff, formatDeadlineString } from './taskUtils';
 import { selectFocusStats } from './selectors';
 import {
@@ -251,7 +253,7 @@ class DataService {
   }
 
   getHabitCalendarDays(): HabitDayState[] {
-    return habitRepository.getCalendarDays();
+    return isDemoActive() ? HABIT_CALENDAR_DAYS : habitRepository.getCalendarDays();
   }
 
   // Calendar

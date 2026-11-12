@@ -1,4 +1,4 @@
-import { INITIAL_TASKS, type TaskItem, type TaskPriority } from '../../data/mockData';
+import { type TaskItem, type TaskPriority } from '../../data/mockData';
 import {
   ANCHOR_DATE,
   WORKSPACE_COLORS,
@@ -68,7 +68,7 @@ export function normalizeTask(raw: Partial<TaskItem>, index = 0): TaskItem {
 export class LocalTaskRepository extends ObservableRepository implements TaskRepository {
   readonly keys = ['clockit_tasks'];
 
-  private readonly store = new LocalJsonStore<TaskItem[]>('clockit_tasks', INITIAL_TASKS, isTaskArray);
+  private readonly store = new LocalJsonStore<TaskItem[]>('clockit_tasks', [], isTaskArray);
 
   constructor() {
     super();
@@ -76,7 +76,7 @@ export class LocalTaskRepository extends ObservableRepository implements TaskRep
   }
 
   private normalizeInPlace(): void {
-    const raw = Array.isArray(this.store.value) ? this.store.value : INITIAL_TASKS;
+    const raw = Array.isArray(this.store.value) ? this.store.value : [];
     this.store.hydrate(raw.map((task, index) => normalizeTask(task, index)));
   }
 

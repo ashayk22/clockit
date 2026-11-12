@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Compass, Sparkles, X } from 'lucide-react';
 import {
   TUTORIAL_MODULES,

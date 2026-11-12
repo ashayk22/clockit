@@ -1,4 +1,4 @@
-﻿# ClockIt — Phase 13.6 Migration Preflight
+# ClockIt — Phase 13.6 Migration Preflight
 
 **Type:** Read-only audit\
 **Date:** 2026-11-12\

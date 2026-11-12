@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 export interface PasswordStrength {
   score: number; // 0 to 4

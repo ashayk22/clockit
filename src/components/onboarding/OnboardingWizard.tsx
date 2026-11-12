@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Compass, Sparkles, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';

@@ -1,4 +1,4 @@
-﻿# ClockIt — Phase 13.4: Performance Optimization & Accessibility Hardening Report
+# ClockIt — Phase 13.4: Performance Optimization & Accessibility Hardening Report
 
 **Project Status:** Feature Freeze — Stabilization & Launch Preparation\
 **Target Environment:** Shared Beta (`nook` — `gynycspbhfoyisgcuiik`)\

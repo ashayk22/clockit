@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Verification test for ClockIt Supabase Migration Conflict Resolution & Database Isolation.
  */
 const fs = require('fs');

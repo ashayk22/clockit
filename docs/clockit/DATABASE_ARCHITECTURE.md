@@ -1,4 +1,4 @@
-﻿# ClockIt Database Architecture
+# ClockIt Database Architecture
 
 This document provides complete schema specifications for all 11 namespaced ClockIt PostgreSQL tables, column definitions, data types, indexes, and Row-Level Security (RLS) policies.
 

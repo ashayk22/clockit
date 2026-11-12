@@ -1,4 +1,4 @@
-﻿# ClockIt — Comprehensive Technical Documentation
+# ClockIt — Comprehensive Technical Documentation
 
 > **One focused workspace for time, tasks, attention, and personal knowledge.**
 

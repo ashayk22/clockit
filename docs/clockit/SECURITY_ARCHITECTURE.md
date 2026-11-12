@@ -1,4 +1,4 @@
-﻿# ClockIt Security & Data Isolation Architecture
+# ClockIt Security & Data Isolation Architecture
 
 This document describes the multi-tenant isolation model, Row-Level Security policies, authentication guarantees, token security, and the strict boundary protecting the coexisting café database.
 

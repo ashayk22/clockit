@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CLOCKIT — PHASE 12.4 ONBOARDING & ACCOUNT IDENTITY TEST SUITE
  * Validates:
  * 1. Full name sanitation and display name resolution (never uses email prefix).

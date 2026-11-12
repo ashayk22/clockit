@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Verification test for Phase 12.4 Core Functionality Repairs:
  * - Quick Notes CRUD, bulk-set, and reactivity
  * - Timer wall-clock drift-free calculation & persistence model

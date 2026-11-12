@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Realistic sample data for ClockIt Demo Mode.
  *
  * This dataset is completely isolated in local volatile state and NEVER

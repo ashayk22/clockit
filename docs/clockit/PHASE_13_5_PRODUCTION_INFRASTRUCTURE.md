@@ -1,4 +1,4 @@
-﻿# ClockIt — Phase 13.5: Production Infrastructure Specification & Architecture Plan
+# ClockIt — Phase 13.5: Production Infrastructure Specification & Architecture Plan
 
 **Project Status:** Feature Freeze — Production Infrastructure Stage\
 **Target Environment:** Dedicated Supabase Production Project (`clockit-production`)\

@@ -1,4 +1,4 @@
-﻿import {
+import {
   TOUR_PAGES,
   ALL_TOUR_STEPS,
   TOTAL_TOUR_STEPS,

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ClockIt Phase 12.4 Verification Suite
  *
  * Verifies:

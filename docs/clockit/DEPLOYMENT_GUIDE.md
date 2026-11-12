@@ -1,4 +1,4 @@
-﻿# ClockIt Deployment & Environment Guide
+# ClockIt Deployment & Environment Guide
 
 This document describes the current development environment, environment variables, build pipeline, and future production deployment planned for Phase 13.
 

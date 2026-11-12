@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Plus, Trash2, X, Check, FileText } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { useFocusTrap } from '../../hooks/useFocusTrap';

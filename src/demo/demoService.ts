@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Demo Service (Phase 12.4).
  *
  * Manages the isolated, read-only demo experience:

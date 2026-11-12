@@ -1,4 +1,4 @@
-﻿# ClockIt — Environment Configuration Audit
+# ClockIt — Environment Configuration Audit
 
 **Phase:** 13.5 — Production Infrastructure\
 **Audit type:** Read-only\

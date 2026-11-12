@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Maximize2, Plus, Send, Trash2 } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { QuickNotesModal } from './QuickNotesModal';

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 /**
  * Resilient dynamic import wrapper that retries failed chunk fetches

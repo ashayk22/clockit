@@ -1,4 +1,4 @@
-﻿# GSD Master Validation Script
+# GSD Master Validation Script
 # Runs all validators and reports overall status
 
 $TotalErrors = 0

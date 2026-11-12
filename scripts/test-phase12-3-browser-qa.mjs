@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ClockIt Phase 12.3 — Real Browser Integration QA Test Suite
  *
  * Runs end-to-end tests inside real Google Chrome via Puppeteer against the running Vite app.

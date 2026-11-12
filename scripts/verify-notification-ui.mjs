@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Test script verifying Watermelon Alert 4 Notification Toast implementation
  */
 

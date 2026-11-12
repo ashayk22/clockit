@@ -1,4 +1,4 @@
-﻿# ClockIt — Phase 13.6 Pre-Push Security & Deployment Audit
+# ClockIt — Phase 13.6 Pre-Push Security & Deployment Audit
 
 **Type:** Read + targeted remediation (2 credential leaks fixed)
 **Date:** 2026-11-12

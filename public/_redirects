@@ -1,2 +1,2 @@
-﻿# ClockIt SPA rewrite rule for Netlify, Cloudflare Pages, and compatible static hosts
+# ClockIt SPA rewrite rule for Netlify, Cloudflare Pages, and compatible static hosts
 /*    /index.html   200

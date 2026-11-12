@@ -1,4 +1,4 @@
-﻿# GSD Script Encoding Validation
+# GSD Script Encoding Validation
 # Parses every PowerShell script to catch encoding faults before users hit them.
 #
 # Windows PowerShell 5.1 reads .ps1 files as the system ANSI codepage unless a

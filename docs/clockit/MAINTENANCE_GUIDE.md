@@ -1,4 +1,4 @@
-﻿# ClockIt Maintenance, Troubleshooting & Account Inventory Guide
+# ClockIt Maintenance, Troubleshooting & Account Inventory Guide
 
 This document details database migrations, common operational issues, debugging workflows, module dependencies, and the formal **Account Inventory & Safe Cleanup Manifest**.
 

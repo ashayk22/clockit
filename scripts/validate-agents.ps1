@@ -1,4 +1,4 @@
-﻿# GSD Subagent Validation Script
+# GSD Subagent Validation Script
 # Validates all subagent definitions in .agents/agents/
 
 $ErrorCount = 0

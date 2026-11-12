@@ -1,4 +1,4 @@
-﻿# ClockIt Demo Mode Architecture
+# ClockIt Demo Mode Architecture
 
 This document describes the design, sample data structure, read-only guarantees, banner indicator, and reset behaviors of ClockIt's isolated Demo Mode.
 

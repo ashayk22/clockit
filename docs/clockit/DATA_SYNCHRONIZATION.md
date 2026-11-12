@@ -1,4 +1,4 @@
-﻿# ClockIt Data Synchronization Architecture
+# ClockIt Data Synchronization Architecture
 
 This document describes the local-first synchronization model, repository snapshotting, delta diffing, offline queuing, conflict handling, and cloud re-hydration.
 

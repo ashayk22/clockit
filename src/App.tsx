@@ -6,6 +6,7 @@ import { DashboardLayout, DashboardOutletContext } from './components/layout/Das
 import { HomePage } from './components/pages/HomePage';
 import { TasksPage } from './components/pages/TasksPage';
 import { HabitsPage } from './components/pages/HabitsPage';
+import { OnboardingProvider } from './components/onboarding/OnboardingContext';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 import { RouteLoadingFallback } from './components/common/RouteLoadingFallback';
 
@@ -97,7 +98,9 @@ export const App: React.FC = () => {
             path="/onboarding"
             element={
               <ProtectedRoute>
-                <OnboardingWizard />
+                <OnboardingProvider>
+                  <OnboardingWizard />
+                </OnboardingProvider>
               </ProtectedRoute>
             }
           />

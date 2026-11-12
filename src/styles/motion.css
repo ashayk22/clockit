@@ -1,5 +1,5 @@
-/* ==========================================================================
-   ClockIt Motion System — shared interaction layer
+﻿/* ==========================================================================
+   ClockIt Motion System â€” shared interaction layer
    Subtle, purposeful, consistent. Transform + opacity only.
    ========================================================================== */
 
@@ -224,4 +224,17 @@ textarea:focus-visible,
   [data-motion-card]:hover {
     transform: none;
   }
+}
+
+@keyframes clockitSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.clockit-spin {
+  animation: clockitSpin 1.2s linear infinite;
 }

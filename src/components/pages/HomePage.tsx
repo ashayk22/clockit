@@ -23,7 +23,18 @@ import {
 } from 'lucide-react';
 import { TaskItem, TaskPriority, TaskStatus } from '../../data/mockData';
 import { dataService, ANCHOR_DATE, WORKSPACE_COLORS } from '../../services/dataService';
+import {
+  selectTasks,
+  selectTodayTasks,
+  selectOverdueTasks,
+  selectUpcomingTasks,
+  selectCompletedTasks,
+  TASK_PRIORITY_RANK,
+} from '../../services/selectors';
 import { useAuth } from '../../auth/AuthContext';
+import { OnboardingWelcomeBanner } from '../onboarding/OnboardingWelcomeBanner';
+import { useOnboarding } from '../onboarding/OnboardingContext';
+import { QuickNotesCard } from '../notes/QuickNotesCard';
 
 interface HomePageProps {
   tasks?: TaskItem[];
@@ -42,6 +53,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [tasks, setTasks] = useState<TaskItem[]>(() => dataService.getTasks());
   const [quickNotes, setQuickNotes] = useState<string[]>(() => dataService.getQuickNotes());
   const { user } = useAuth();
+  const { startTutorial } = useOnboarding();
 
   // Completion feedback: bump a counter per task so the checkbox replays its pop.
   const [checkedPulse, setCheckedPulse] = useState<Record<string, number>>({});
@@ -204,7 +216,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     const pendingTasks = tasks.filter((t) => !t.completed && t.status !== 'completed');
     if (pendingTasks.length === 0) return null;
 
-    // Intelligent Priority Ranking:
+    // Intelligent Priority Ranking (shared ranking table — single source of truth):
     // 1. Overdue Critical tasks
     // 2. Overdue High tasks
     // 3. Other Overdue tasks
@@ -212,8 +224,6 @@ export const HomePage: React.FC<HomePageProps> = ({
     // 5. High priority tasks (by nearest due date)
     // 6. Nearest upcoming deadline
     // 7. General priority
-    const priorityRank: Record<TaskPriority, number> = { Critical: 4, High: 3, Medium: 2, Low: 1 };
-
     const sorted = [...pendingTasks].sort((a, b) => {
       // Overdue takes top precedence
       if (a.isOverdue && !b.isOverdue) return -1;
@@ -226,7 +236,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       // Due date comparison
       if (a.dueDate && b.dueDate) {
         if (a.dueDate !== b.dueDate) {
-          const pDiff = priorityRank[b.priority] - priorityRank[a.priority];
+          const pDiff = TASK_PRIORITY_RANK[b.priority] - TASK_PRIORITY_RANK[a.priority];
           if (pDiff >= 2) return 1; // Significant priority difference
           if (pDiff <= -2) return -1;
           return a.dueDate.localeCompare(b.dueDate);
@@ -238,7 +248,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       }
 
       // Tiebreaker: Priority
-      return priorityRank[b.priority] - priorityRank[a.priority];
+      return TASK_PRIORITY_RANK[b.priority] - TASK_PRIORITY_RANK[a.priority];
     });
 
     return sorted[0] || null;
@@ -254,82 +264,27 @@ export const HomePage: React.FC<HomePageProps> = ({
     }
   };
 
-  // STEP 2: Filter and sort tasks for the overview table
+  // STEP 2: Filter and sort tasks for the overview table (shared selector).
   const filteredTasks = useMemo(() => {
-    let result = [...tasks];
-
-    // Filter tabs
-    if (activeFilter === 'today') {
-      result = result.filter((t) => t.isToday || t.daysLeft === 'Today' || t.dueDate === ANCHOR_DATE);
-    } else if (activeFilter === 'upcoming') {
-      result = result.filter((t) => !t.completed && !t.isOverdue && t.daysLeft !== 'Today');
-    } else if (activeFilter === 'someday') {
-      result = result.filter((t) => t.priority === 'Low' || !t.dueDate);
-    } else if (activeFilter === 'completed') {
-      result = result.filter((t) => t.completed || t.status === 'completed');
-    } else if (activeFilter === 'overdue') {
-      result = result.filter((t) => t.isOverdue && !t.completed);
-    }
-
-    // Filter by selected mini-calendar day
-    if (selectedCalendarDate !== null) {
-      const monthStr = String(calendarMonth + 1).padStart(2, '0');
-      const dayStr = String(selectedCalendarDate).padStart(2, '0');
-      const targetDate = `${calendarYear}-${monthStr}-${dayStr}`;
-      result = result.filter((t) => t.dueDate === targetDate);
-    }
-
-    // Intelligent Sorting:
-    result.sort((a, b) => {
-      if (sortBy === 'priority') {
-        const priorityOrder: Record<TaskPriority, number> = { Critical: 4, High: 3, Medium: 2, Low: 1 };
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
-      }
-      if (sortBy === 'workspace') {
-        return a.workspace.localeCompare(b.workspace);
-      }
-
-      // Default: 'deadline' (Overdue first, then nearest upcoming date, someday/completed last)
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
-      if (a.isOverdue !== b.isOverdue) return a.isOverdue ? -1 : 1;
-      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
-      if (a.dueDate) return -1;
-      if (b.dueDate) return 1;
-      return 0;
-    });
-
-    return result;
+    const dueDate =
+      selectedCalendarDate === null
+        ? null
+        : `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(
+            selectedCalendarDate,
+          ).padStart(2, '0')}`;
+    return selectTasks(tasks, { filter: activeFilter, sortBy, dueDate });
   }, [tasks, activeFilter, selectedCalendarDate, calendarMonth, calendarYear, sortBy]);
 
-  // Today Tasks for the widget
-  const todayTasks = useMemo(() => {
-    return tasks.filter((t) => t.isToday || t.daysLeft === 'Today' || t.dueDate === ANCHOR_DATE);
-  }, [tasks]);
+  // Today Tasks for the widget — the shared definition of "today".
+  const todayTasks = useMemo(() => selectTodayTasks(tasks), [tasks]);
 
-  const todayCompletedCount = useMemo(() => {
-    return todayTasks.filter((t) => t.completed || t.status === 'completed').length;
-  }, [todayTasks]);
+  const todayCompletedCount = useMemo(() => selectCompletedTasks(todayTasks).length, [todayTasks]);
 
   // Real overdue count — powers the "what is overdue?" answer at a glance.
-  const overdueTasks = useMemo(
-    () => tasks.filter((t) => t.isOverdue && !t.completed && t.status !== 'completed'),
-    [tasks],
-  );
+  const overdueTasks = useMemo(() => selectOverdueTasks(tasks), [tasks]);
 
   // Real upcoming count — what is coming up next.
-  const upcomingTasks = useMemo(
-    () =>
-      tasks.filter(
-        (t) =>
-          !t.completed &&
-          t.status !== 'completed' &&
-          !t.isOverdue &&
-          !t.isToday &&
-          t.daysLeft !== 'Today' &&
-          t.dueDate !== ANCHOR_DATE,
-      ),
-    [tasks],
-  );
+  const upcomingTasks = useMemo(() => selectUpcomingTasks(tasks), [tasks]);
 
   // Add Today Task from Quick Add form
   const handleAddTodayTask = (e: React.FormEvent) => {
@@ -418,6 +373,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="clockit-home-container">
+      <OnboardingWelcomeBanner onStartTour={startTutorial} />
       {/* 1. Hero Banner */}
       <section className="clockit-hero-card" aria-label="Greeting and Immediate Priorities">
         <div className="clockit-hero-overlay" />
@@ -432,48 +388,84 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="clockit-hero-mountains" aria-hidden="true">
             <svg className="mountain-backdrop-svg" viewBox="0 0 800 240" preserveAspectRatio="xMaxYMax meet">
               <defs>
+                <radialGradient id="heroSunGlow" cx="680" cy="95" r="90">
+                  <stop offset="0%" stopColor="#fde7d3" stopOpacity="0.85" />
+                  <stop offset="55%" stopColor="#f8c9a8" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#f8c9a8" stopOpacity="0" />
+                </radialGradient>
                 <linearGradient id="heroMtnSun" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f8bfa2" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#f5a480" stopOpacity="0.6" />
+                  <stop offset="0%" stopColor="#f4b98a" stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="#e99466" stopOpacity="0.7" />
                 </linearGradient>
                 <linearGradient id="heroMtnBack" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f0e4dc" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="#fdfbf8" stopOpacity="0.2" />
+                  <stop offset="0%" stopColor="#e8ddd2" stopOpacity="0.7" />
+                  <stop offset="100%" stopColor="#fdfbf8" stopOpacity="0.15" />
                 </linearGradient>
                 <linearGradient id="heroMtnMid" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#e2d2c7" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#f9f6f2" stopOpacity="0.3" />
+                  <stop offset="0%" stopColor="#d8c8bb" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#f5efe8" stopOpacity="0.3" />
                 </linearGradient>
                 <linearGradient id="heroMtnFront" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#cfbbb0" stopOpacity="0.95" />
-                  <stop offset="100%" stopColor="#f5efe9" stopOpacity="0.4" />
+                  <stop offset="0%" stopColor="#bda89a" stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="#ece3db" stopOpacity="0.4" />
                 </linearGradient>
               </defs>
-              <circle cx="680" cy="100" r="48" fill="url(#heroMtnSun)" />
-              <path d="M410,118 Q414,115 418,118 Q422,115 426,118" fill="none" stroke="#ba8c7b" strokeWidth="1.2" opacity="0.55" />
-              <path d="M432,125 Q436,122 440,125 Q444,122 448,125" fill="none" stroke="#ba8c7b" strokeWidth="1" opacity="0.45" />
-              <path d="M300,240 L380,185 L460,205 L550,165 L650,195 L740,150 L800,180 L800,240 Z" fill="url(#heroMtnBack)" />
-              <path d="M370,240 L470,192 L560,218 L660,172 L750,198 L800,165 L800,240 Z" fill="url(#heroMtnMid)" />
-              <path d="M450,240 L550,215 L640,228 L730,192 L800,212 L800,240 Z" fill="url(#heroMtnFront)" />
-              <g fill="#43342d" opacity="0.82">
-                <polygon points="772,240 769,205 775,205" /><polygon points="772,165 766,180 778,180" /><polygon points="772,175 764,192 780,192" /><polygon points="772,188 762,206 782,206" />
-                <polygon points="786,240 783,210 789,210" /><polygon points="786,152 779,168 793,168" /><polygon points="786,164 777,182 795,182" /><polygon points="786,178 775,198 797,198" /><polygon points="786,194 773,212 799,212" />
-                <polygon points="756,240 754,215 758,215" /><polygon points="756,182 751,194 761,194" /><polygon points="756,191 749,205 763,205" /><polygon points="756,202 747,217 765,217" />
-                <polygon points="742,240 740,225 744,225" /><polygon points="742,198 738,208 746,208" /><polygon points="742,206 736,218 748,218" />
-                <polygon points="798,240 795,210 801,210" /><polygon points="798,170 792,185 804,185" /><polygon points="798,182 790,200 806,200" />
+
+              {/* Sun glow + disk */}
+              <circle cx="680" cy="95" r="90" fill="url(#heroSunGlow)" />
+              <circle cx="680" cy="95" r="42" fill="url(#heroMtnSun)" />
+
+              {/* Soft drifting clouds */}
+              <g fill="#ffffff" opacity="0.5">
+                <ellipse cx="520" cy="70" rx="42" ry="9" />
+                <ellipse cx="560" cy="62" rx="30" ry="7" />
+                <ellipse cx="430" cy="95" rx="34" ry="7" />
+              </g>
+
+              {/* Birds in flight */}
+              <g fill="none" stroke="#7a6a5e" strokeWidth="1.6" strokeLinecap="round" opacity="0.7">
+                <path d="M330,58 q6,-6 12,0 q6,-6 12,0" />
+                <path d="M360,46 q5,-5 10,0 q5,-5 10,0" />
+                <path d="M300,72 q5,-5 10,0 q5,-5 10,0" />
+              </g>
+
+              {/* Far mountain range */}
+              <path d="M0,240 L0,170 L120,120 L210,150 L300,108 L400,142 L500,115 L600,145 L700,120 L800,150 L800,240 Z" fill="url(#heroMtnBack)" />
+              {/* Mid range */}
+              <path d="M0,240 L0,190 L100,155 L200,178 L310,148 L420,172 L530,150 L640,175 L740,155 L800,170 L800,240 Z" fill="url(#heroMtnMid)" />
+              {/* Contour lines on the mid hill */}
+              <g fill="none" stroke="#bda89a" strokeWidth="1" opacity="0.4">
+                <path d="M120,200 Q260,180 400,200 Q540,220 680,198" />
+                <path d="M140,212 Q280,194 420,212 Q560,230 700,210" />
+                <path d="M160,224 Q300,208 440,224 Q580,240 720,222" />
+              </g>
+              {/* Front rolling hills */}
+              <path d="M0,240 L0,205 Q120,180 240,200 Q360,220 480,196 Q600,172 720,200 Q760,208 800,200 L800,240 Z" fill="url(#heroMtnFront)" />
+
+              {/* Foliage — a few tree clusters on the front ridge */}
+              <g fill="#6b8f5e" opacity="0.85">
+                <ellipse cx="150" cy="200" rx="14" ry="10" />
+                <ellipse cx="162" cy="196" rx="10" ry="8" />
+                <ellipse cx="620" cy="192" rx="12" ry="9" />
+                <ellipse cx="632" cy="188" rx="9" ry="7" />
+              </g>
+              <g fill="#557a4a" opacity="0.8">
+                <ellipse cx="470" cy="198" rx="11" ry="8" />
+                <ellipse cx="480" cy="194" rx="8" ry="6" />
               </g>
             </svg>
           </div>
 
           <div className="clockit-hero-greeting">
-            <p className="clockit-hero-greeting-label">{dailyContext.greeting}</p>
+            <p className="clockit-hero-greeting-label">{dailyContext.greeting.toUpperCase()}</p>
             <h1 className="clockit-hero-greeting-title">{dailyContext.firstName}.</h1>
+            <p className="clockit-hero-greeting-tagline">Track · Focus · Build Momentum.</p>
             <p className="clockit-hero-greeting-matters">
               <span className="clockit-hero-greeting-date">{dailyContext.longDate}</span>
               <span className="clockit-hero-greeting-sep" aria-hidden="true">
                 ·
               </span>
-              <span>Here's what matters next.</span>
+              <span>Here's your progress for today.</span>
             </p>
           </div>
           <div className="clockit-hero-quote">
@@ -913,7 +905,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* Right Column: Widgets */}
         <aside className="clockit-widgets-column" aria-label="Sidebar Widgets">
           {/* Widget 1: Interactive Mini Calendar (STEP 5) */}
-          <div className="clockit-widget-card">
+          <div className="clockit-widget-card" data-widget="calendar">
             <div className="clockit-widget-header">
               <span
                 className="clockit-widget-title"
@@ -950,23 +942,23 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <div key={idx} className="clockit-calendar-day-header">{day}</div>
               ))}
               {calendarDays.map((date, idx) => {
-                const hasTask = date ? taskDaysInMonth.has(date) : false;
-                const isAnchorToday = calendarYear === 2026 && calendarMonth === 9 && date === 26;
-                const isSelected = selectedCalendarDate === date;
+                const isEmpty = date === null;
+                const hasTask = date !== null && taskDaysInMonth.has(date);
+                const isAnchorToday = date !== null && calendarYear === 2026 && calendarMonth === 9 && date === 26;
+                const isSelected = date !== null && selectedCalendarDate === date;
 
                 return (
                   <div
                     key={idx}
-                    className={`clockit-calendar-day ${isAnchorToday ? 'active' : ''} ${hasTask ? 'has-task' : ''}`}
-                    style={isSelected ? { outline: '2px solid var(--accent-mint)', outlineOffset: 1 } : {}}
+                    className={`clockit-calendar-day${isEmpty ? ' is-empty' : ''}${isAnchorToday ? ' active' : ''}${isSelected ? ' is-selected' : ''}${hasTask ? ' has-task' : ''}`}
+                    aria-hidden={isEmpty || undefined}
                     onClick={() => {
-                      if (date) {
-                        setSelectedCalendarDate(selectedCalendarDate === date ? null : date);
-                      }
+                      if (date === null) return;
+                      setSelectedCalendarDate(selectedCalendarDate === date ? null : date);
                     }}
                     title={hasTask ? `Tasks due on ${monthNames[calendarMonth]} ${date}` : undefined}
                   >
-                    {date || ''}
+                    {isEmpty ? '' : date}
                   </div>
                 );
               })}
@@ -987,7 +979,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Widget 2: Today Tasks (STEP 5) */}
-          <div className="clockit-widget-card">
+          <div className="clockit-widget-card" data-widget="today">
             <div className="clockit-widget-header">
               <span className="clockit-widget-title">Today</span>
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
@@ -1048,7 +1040,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Widget 3: Real Focus Stats (STEP 4) */}
-          <div className="clockit-widget-card">
+          <div className="clockit-widget-card" data-widget="focus-stats">
             <div className="clockit-widget-header">
               <span
                 className="clockit-widget-title"
@@ -1126,72 +1118,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Widget 4: Quick Notes (STEP 6) */}
-          <div className="clockit-widget-card">
-            <div className="clockit-widget-header">
-              <span className="clockit-widget-title">Quick Notes</span>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button
-                  className="clockit-icon-action-btn"
-                  style={{ padding: 2 }}
-                  type="button"
-                  title="Focus note input"
-                  onClick={() => document.getElementById('home-quick-note-input')?.focus()}
-                >
-                  <Plus size={14} />
-                </button>
-                <button
-                  className="clockit-icon-action-btn"
-                  style={{ padding: 2 }}
-                  type="button"
-                  title="Expand notes"
-                >
-                  <Maximize2 size={13} />
-                </button>
-              </div>
-            </div>
-
-            {/* Note Snippets Preview */}
-            {quickNotes.length > 0 && (
-              <div style={{ marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 75, overflowY: 'auto' }}>
-                {quickNotes.slice(0, 2).map((qn, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      fontSize: 11.5,
-                      color: 'var(--text-secondary)',
-                      background: 'var(--bg-surface-subtle)',
-                      padding: '5px 8px',
-                      borderRadius: 4,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {qn}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <form onSubmit={handleAddQuickNote} className="clockit-notes-input-wrap">
-              <input
-                id="home-quick-note-input"
-                type="text"
-                placeholder="Jot down a thought..."
-                value={quickNote}
-                onChange={(e) => setQuickNote(e.target.value)}
-                aria-label="Jot down a thought"
-              />
-              <button
-                type="submit"
-                className="clockit-icon-action-btn"
-                style={{ padding: 2 }}
-                aria-label="Submit note"
-              >
-                <Send size={13} />
-              </button>
-            </form>
-          </div>
+          <QuickNotesCard maxVisibleNotes={4} />
         </aside>
       </div>
 

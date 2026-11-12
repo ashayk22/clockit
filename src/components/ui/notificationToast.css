@@ -1,0 +1,287 @@
+﻿/* ==========================================================================
+   ClockIt Notification / Toast System
+   Watermelon Alert 4 Visual Specification:
+   - Thin teal/accent border
+   - Subtle, refined background with backdrop blur
+   - Icon on the left
+   - Clear, legible notification text
+   - Optional action link on the right
+   - Subtle entrance and exit animations
+   - First-class Light & Dark theme support
+   - Variant support: success, error, warning, info
+   ========================================================================== */
+
+/* Toast Container (floating overlay) */
+.clockit-toast-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+  max-width: 90vw;
+  width: max-content;
+}
+
+/* Individual Toast Item */
+.clockit-toast-item {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md, 10px);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.45;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  will-change: transform, opacity;
+  animation: watermelonAlertEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  max-width: 520px;
+  word-break: break-word;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clockit-toast-item.is-exiting {
+  animation: watermelonAlertExit 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Watermelon Alert 4 Theme Tokens & Variants */
+
+/* 1. Success (Default Watermelon Teal/Emerald Accent) */
+.clockit-toast-item.variant-success {
+  border: 1px solid rgba(20, 184, 166, 0.45);
+  background: rgba(240, 253, 250, 0.94);
+  color: #0f172a;
+}
+
+.clockit-toast-item.variant-success .clockit-toast-icon {
+  color: #0d9488;
+}
+
+.clockit-toast-item.variant-success .clockit-toast-action {
+  color: #0d9488;
+}
+
+html.dark .clockit-toast-item.variant-success {
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  background: rgba(13, 26, 25, 0.92);
+  color: #f1f5f9;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45), 0 0 12px rgba(20, 184, 166, 0.15);
+}
+
+html.dark .clockit-toast-item.variant-success .clockit-toast-icon {
+  color: #2dd4bf;
+}
+
+html.dark .clockit-toast-item.variant-success .clockit-toast-action {
+  color: #2dd4bf;
+}
+
+/* 2. Informational (Calm Teal/Cyan) */
+.clockit-toast-item.variant-info {
+  border: 1px solid rgba(13, 148, 136, 0.4);
+  background: rgba(240, 253, 250, 0.94);
+  color: #0f172a;
+}
+
+.clockit-toast-item.variant-info .clockit-toast-icon {
+  color: #0d9488;
+}
+
+.clockit-toast-item.variant-info .clockit-toast-action {
+  color: #0d9488;
+}
+
+html.dark .clockit-toast-item.variant-info {
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  background: rgba(13, 26, 25, 0.92);
+  color: #f1f5f9;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45), 0 0 12px rgba(13, 148, 136, 0.12);
+}
+
+html.dark .clockit-toast-item.variant-info .clockit-toast-icon {
+  color: #2dd4bf;
+}
+
+html.dark .clockit-toast-item.variant-info .clockit-toast-action {
+  color: #2dd4bf;
+}
+
+/* 3. Warning (Warm Amber) */
+.clockit-toast-item.variant-warning {
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(254, 252, 232, 0.94);
+  color: #0f172a;
+}
+
+.clockit-toast-item.variant-warning .clockit-toast-icon {
+  color: #d97706;
+}
+
+.clockit-toast-item.variant-warning .clockit-toast-action {
+  color: #d97706;
+}
+
+html.dark .clockit-toast-item.variant-warning {
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(28, 24, 15, 0.92);
+  color: #f1f5f9;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45), 0 0 12px rgba(245, 158, 11, 0.12);
+}
+
+html.dark .clockit-toast-item.variant-warning .clockit-toast-icon {
+  color: #fbbf24;
+}
+
+html.dark .clockit-toast-item.variant-warning .clockit-toast-action {
+  color: #fbbf24;
+}
+
+/* 4. Error (Rose/Red) */
+.clockit-toast-item.variant-error {
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  background: rgba(255, 241, 242, 0.94);
+  color: #0f172a;
+}
+
+.clockit-toast-item.variant-error .clockit-toast-icon {
+  color: #e11d48;
+}
+
+.clockit-toast-item.variant-error .clockit-toast-action {
+  color: #e11d48;
+}
+
+html.dark .clockit-toast-item.variant-error {
+  border: 1px solid rgba(251, 113, 133, 0.4);
+  background: rgba(30, 16, 20, 0.92);
+  color: #f1f5f9;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45), 0 0 12px rgba(244, 63, 94, 0.12);
+}
+
+html.dark .clockit-toast-item.variant-error .clockit-toast-icon {
+  color: #fb7185;
+}
+
+html.dark .clockit-toast-item.variant-error .clockit-toast-action {
+  color: #fb7185;
+}
+
+/* Left Icon */
+.clockit-toast-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Content Text */
+.clockit-toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.clockit-toast-title {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.clockit-toast-msg {
+  font-weight: 450;
+  font-size: 13.5px;
+}
+
+/* Right Action link */
+.clockit-toast-action {
+  background: none;
+  border: none;
+  padding: 2px 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: var(--radius-xs, 4px);
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.clockit-toast-action:hover {
+  opacity: 0.85;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+html.dark .clockit-toast-action:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Close Dismiss button */
+.clockit-toast-close {
+  background: none;
+  border: none;
+  color: currentColor;
+  opacity: 0.55;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 2px;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.clockit-toast-close:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
+html.dark .clockit-toast-close:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Animations */
+@keyframes watermelonAlertEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes watermelonAlertExit {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+
+@media (max-width: 600px) {
+  .clockit-toast-container {
+    top: 16px;
+    width: calc(100vw - 32px);
+  }
+  .clockit-toast-item {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

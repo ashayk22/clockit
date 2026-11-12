@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -53,12 +53,14 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
   // Anchors the [[link]] suggestion popup inside the editor surface.
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const editor = useEditor({
-    extensions: [
+  const extensions = useMemo(
+    () => [
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
         },
+        link: false,
+        underline: false,
         codeBlock: {
           HTMLAttributes: {
             class: 'clockit-editor-code-block',
@@ -93,6 +95,11 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
       TableHeader,
       TableCell,
     ],
+    [],
+  );
+
+  const editor = useEditor({
+    extensions,
     content: initialContent,
     editorProps: {
       attributes: {

@@ -12,10 +12,12 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  Layers3,
 } from 'lucide-react';
 import { Workspace } from '../../data/mockData';
+import { ClockItLogo } from '../brand/ClockItLogo';
 
-export type NavView = 'home' | 'focus' | 'tasks' | 'notes' | 'analytics' | 'habits' | 'calendar';
+export type NavView = 'home' | 'focus' | 'tasks' | 'notes' | 'analytics' | 'habits' | 'calendar' | 'workspaces';
 
 interface SidebarProps {
   activeView: NavView;
@@ -23,6 +25,7 @@ interface SidebarProps {
   workspaces: Workspace[];
   activeWorkspace: string;
   onWorkspaceSelect: (id: string) => void;
+  onOpenWorkspaces?: () => void;
   userName?: string;
   onOpenSettings?: () => void;
   /** Desktop rail mode — icons only. */
@@ -38,13 +41,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   workspaces,
   activeWorkspace,
   onWorkspaceSelect,
-  userName = 'Ashay',
+  onOpenWorkspaces,
+  userName = 'ClockIt user',
   onOpenSettings,
   isCollapsed = false,
   onToggleCollapse,
   isMobileOpen = false,
 }) => {
-  const userInitial = userName.trim().charAt(0).toUpperCase() || 'A';
+  const userInitial = userName.trim().charAt(0).toUpperCase() || 'C';
 
   /** Keyboard activation for the custom (non-<button>) interactive rows. */
   const activateOnKey =
@@ -84,12 +88,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           title="ClockIt"
         >
           <div className="clockit-brand-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 7v5l3 3" />
-            </svg>
+            <ClockItLogo variant={isCollapsed ? 'icon' : 'icon'} size={isCollapsed ? 24 : 26} />
           </div>
-          <span className="clockit-brand-name">ClockIt</span>
+          {!isCollapsed && <span className="clockit-brand-name">ClockIt</span>}
         </div>
 
         {/* Primary Navigation */}
@@ -114,8 +115,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </ul>
 
         {/* Workspaces Section */}
-        <div className="clockit-sidebar-section-title">Workspace</div>
+        <div className="clockit-sidebar-section-title">Workspaces</div>
         <div className="clockit-nav-list">
+          {onOpenWorkspaces ? (
+            <button
+              className={`clockit-workspaces-overview-item${activeView === 'workspaces' ? ' active' : ''}`}
+              type="button"
+              onClick={onOpenWorkspaces}
+              title="Open all workspaces"
+              aria-current={activeView === 'workspaces' ? 'page' : undefined}
+            >
+              <Layers3 size={16} />
+              <span>All workspaces</span>
+            </button>
+          ) : null}
           {workspaces.map((ws) => (
             <div
               key={ws.id}
@@ -135,10 +148,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className="clockit-workspace-name">{ws.name}</span>
             </div>
           ))}
-          <div className="clockit-add-space-btn" title="Add space">
+          <button
+            className="clockit-add-space-btn"
+            type="button"
+            title="Add workspace"
+            onClick={onOpenWorkspaces}
+          >
             <Plus size={15} />
-            <span>Add space</span>
-          </div>
+            <span>Add workspace</span>
+          </button>
         </div>
       </div>
 

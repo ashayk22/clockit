@@ -1,6 +1,7 @@
 import { openDB, IDBPDatabase } from 'idb';
+import type { OwnedEntity } from '../data/ownership';
 
-export interface NoteFolder {
+export interface NoteFolder extends OwnedEntity {
   id: string;
   name: string;
   color: string;
@@ -8,7 +9,7 @@ export interface NoteFolder {
   createdAt: number;
 }
 
-export interface NoteItem {
+export interface NoteItem extends OwnedEntity {
   id: string;
   title: string;
   folderId: string;
@@ -92,7 +93,7 @@ const DEFAULT_NOTES: NoteItem[] = [
       <h2>Feature Ideas</h2>
       <ul data-type="taskList">
         <li data-type="taskItem" data-checked="true"><label><input type="checkbox" checked="checked"><span></span></label><div><p>Task management with deadlines &amp; prioritization</p></div></li>
-        <li data-type="taskItem" data-checked="true"><label><input type="checkbox" checked="checked"><span></span></label><div><p>Focus timer with ambient audio &amp; session analytics</p></div></li>
+        <li data-type="taskItem" data-checked="true"><label><input type="checkbox" checked="checked"><span></span></label><div><p>Focus timer with customizable intervals &amp; session analytics</p></div></li>
         <li data-type="taskItem" data-checked="false"><label><input type="checkbox"><span></span></label><div><p>Notes with rich text, tables, and code embeds</p></div></li>
         <li data-type="taskItem" data-checked="false"><label><input type="checkbox"><span></span></label><div><p>Knowledge graph view connecting [[UI Ideas]] and [[Tech Stack]]</p></div></li>
         <li data-type="taskItem" data-checked="false"><label><input type="checkbox"><span></span></label><div><p>Multiple workspaces for [[Task Management]] and [[Habit Tracker]]</p></div></li>
@@ -304,6 +305,34 @@ export const notesStorage = {
   async getNoteById(id: string): Promise<NoteItem | undefined> {
     const db = await getDB();
     return db.get('notes', id);
+  },
+
+  /** Every note, including trashed ones — used by cloud hydration. */
+  async getAllNotesIncludingTrash(): Promise<NoteItem[]> {
+    const db = await getDB();
+    return db.getAll('notes');
+  },
+
+  /**
+   * Replaces the whole notes store in one transaction (Phase 12 cloud
+   * hydration). Local-only callers never use this; it exists so a signed-in
+   * user's notes can be swapped in atomically without deleting the database.
+   */
+  async replaceAllNotes(notes: NoteItem[]): Promise<void> {
+    const db = await getDB();
+    const tx = db.transaction('notes', 'readwrite');
+    await tx.objectStore('notes').clear();
+    for (const note of notes) await tx.objectStore('notes').put(note);
+    await tx.done;
+  },
+
+  /** Replaces the whole folders store in one transaction (Phase 12 cloud hydration). */
+  async replaceAllFolders(folders: NoteFolder[]): Promise<void> {
+    const db = await getDB();
+    const tx = db.transaction('folders', 'readwrite');
+    await tx.objectStore('folders').clear();
+    for (const folder of folders) await tx.objectStore('folders').put(folder);
+    await tx.done;
   },
 
   async createNote(folderId = 'f-dev-webdev', title = 'Untitled Note'): Promise<NoteItem> {

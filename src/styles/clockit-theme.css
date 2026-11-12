@@ -962,9 +962,52 @@ textarea:focus-visible {
   color: var(--text-primary);
 }
 
+.clockit-tasks-card {
+  animation: clockitHomeSettle 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.clockit-widget-card {
+  transition:
+    border-color var(--motion-base, 220ms) var(--motion-ease, ease),
+    box-shadow var(--motion-base, 220ms) var(--motion-ease-out, ease-out),
+    transform var(--motion-fast, 140ms) var(--motion-ease, ease);
+}
+
+.clockit-widget-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.clockit-widgets-column > .clockit-widget-card:nth-child(1) {
+  animation: clockitHomeSettle 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.clockit-widgets-column > .clockit-widget-card:nth-child(2) {
+  animation: clockitHomeSettle 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
+}
+
+.clockit-widgets-column > .clockit-widget-card:nth-child(3) {
+  animation: clockitHomeSettle 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+}
+
+.clockit-widgets-column > .clockit-quick-notes-card,
+.clockit-widgets-column > .clockit-widget-card:nth-child(4) {
+  animation: clockitHomeSettle 0.44s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+}
+
 /* ==========================================================================
    HOME — "TODAY AT A GLANCE" SNAPSHOT STRIP
    ========================================================================== */
+
+@keyframes clockitHomeSettle {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 .clockit-home-snapshot {
   display: grid;
@@ -975,6 +1018,7 @@ textarea:focus-visible {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   overflow: hidden;
+  animation: clockitHomeSettle 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
 }
 
 .clockit-snapshot-card {
@@ -988,14 +1032,21 @@ textarea:focus-visible {
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  transition: background-color var(--motion-fast, 140ms) var(--motion-ease, ease);
+  transition:
+    background-color var(--motion-fast, 140ms) var(--motion-ease, ease),
+    transform var(--motion-fast, 140ms) var(--motion-ease, ease),
+    box-shadow var(--motion-fast, 140ms) var(--motion-ease, ease);
 }
 
 .clockit-snapshot-card:hover {
   background: var(--bg-surface-subtle);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 2;
 }
 
 .clockit-snapshot-card:active {
+  transform: translateY(0) scale(0.99);
   background: var(--bg-surface-hover);
 }
 
@@ -1129,22 +1180,24 @@ textarea:focus-visible {
   justify-content: space-between;
   padding: 28px 32px;
   box-shadow: var(--shadow-card);
-  background: linear-gradient(135deg, #ede7de 0%, #d8ccbd 50%, #c8b9a5 100%);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  animation: clockitHomeSettle 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .dark .clockit-hero-card {
-  background: linear-gradient(135deg, #1b1e24 0%, #14171c 100%);
+  background: var(--bg-surface);
 }
 
 .clockit-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(251, 249, 245, 0.94) 0%, rgba(251, 249, 245, 0.78) 55%, rgba(251, 249, 245, 0.25) 100%);
+  background: linear-gradient(90deg, var(--bg-surface) 0%, color-mix(in srgb, var(--bg-surface) 88%, transparent) 48%, transparent 100%);
   z-index: 1;
 }
 
 .dark .clockit-hero-overlay {
-  background: linear-gradient(90deg, rgba(14, 17, 20, 0.95) 0%, rgba(14, 17, 20, 0.8) 55%, rgba(14, 17, 20, 0.35) 100%);
+  background: linear-gradient(90deg, var(--bg-surface) 0%, color-mix(in srgb, var(--bg-surface) 88%, transparent) 48%, transparent 100%);
 }
 
 /* Mountain-sunset backdrop — reused from the landing hero treatment so the
@@ -1311,8 +1364,13 @@ textarea:focus-visible {
     flex-direction: column;
   }
 
+  .clockit-hero-primary {
+    flex: 0 1 auto;
+  }
+
   .clockit-hero-focus-block {
-    flex-basis: auto;
+    flex: 0 1 auto;
+    min-width: 0;
     border-left: none;
     border-top: 1px solid var(--border-subtle);
   }
@@ -1366,12 +1424,20 @@ textarea:focus-visible {
 
 .clockit-hero-greeting-title {
   font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
-  font-size: clamp(28px, 3.4vw, 40px);
+  font-size: clamp(34px, 4.2vw, 48px);
   font-weight: 500;
-  line-height: 1.06;
-  letter-spacing: -0.02em;
-  margin: 0 0 12px;
-  color: var(--text-primary);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  margin: 0 0 10px;
+  color: var(--accent-green-text);
+}
+
+.clockit-hero-greeting-tagline {
+  margin: 0 0 7px;
+  font-size: clamp(14px, 1.3vw, 15px);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-secondary);
 }
 
 .clockit-hero-greeting-matters {
@@ -1399,7 +1465,7 @@ textarea:focus-visible {
   position: relative;
   z-index: 1;
   flex: 0 1 auto;
-  max-width: min(34ch, 38%);
+  max-width: min(30ch, 36%);
   margin: 0;
   font-family: 'Newsreader', 'Instrument Serif', Georgia, serif;
   font-style: italic;
@@ -1409,6 +1475,20 @@ textarea:focus-visible {
   text-align: right;
   border-bottom: 1px solid var(--border-strong);
   padding-bottom: 6px;
+}
+
+@media (max-width: 700px) {
+  .clockit-hero-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .clockit-hero-quote {
+    max-width: 32ch;
+    align-self: flex-end;
+    font-size: 13px;
+  }
 }
 
 .clockit-hero-cards-row {
@@ -1995,18 +2075,45 @@ textarea:focus-visible {
   font-weight: 700;
 }
 
-.clockit-calendar-day.has-task::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
+/* Selected date: a soft filled pill rather than a harsh outline, so the
+   selection never reads as a stray square and stays stable across clicks. */
+.clockit-calendar-day.is-selected {
+  background: var(--accent-mint);
+  color: #0f1115;
+  font-weight: 700;
+}
+
+.clockit-calendar-day.is-selected:hover {
   background: var(--accent-mint);
 }
 
+.clockit-calendar-day.has-task::after {
+  content: '';
+  position: absolute;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--accent-green, #155e45);
+}
+
+.clockit-calendar-day.is-selected.has-task::after,
 .clockit-calendar-day.active.has-task::after {
-  background: var(--accent-mint);
+  background: currentColor;
+}
+
+/* Structural padding cells (before the 1st / after the last of the month).
+   They hold no date, so they must stay inert: no pointer, no hover fill, no
+   selection/today/event styling. */
+.clockit-calendar-day.is-empty {
+  color: transparent;
+  cursor: default;
+  pointer-events: none;
+}
+
+.clockit-calendar-day.is-empty:hover {
+  background: transparent;
 }
 
 .clockit-today-item {
@@ -3410,8 +3517,12 @@ textarea:focus-visible {
 }
 
 .clockit-cal-cell-active {
-  background: rgba(52, 211, 153, 0.05);
-  box-shadow: inset 0 0 0 1.5px var(--accent-mint);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.clockit-cal-cell-active .clockit-cal-daynum {
+  background: var(--accent-mint);
+  color: #0f1115;
 }
 
 /* Restrained month-cell date number + compact task indicators */
@@ -4605,5 +4716,3 @@ textarea:focus-visible {
     transition: none;
   }
 }
-
-

@@ -327,6 +327,22 @@ html.dark .clockit-auth-panel-foot {
   box-shadow: var(--shadow-hover);
 }
 
+.clockit-auth-submit:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: var(--shadow-card);
+}
+
+/* Staggered entrance for each form element — the delay is set inline so the
+   sequence adjusts to whichever fields are present (login vs signup). */
+.clockit-auth-stagger {
+  opacity: 0;
+  animation: clockit-rise-in var(--motion-base) var(--motion-ease-out) both;
+}
+
+.clockit-auth-stagger:focus-within {
+  opacity: 1;
+}
+
 .clockit-auth-spinner {
   animation: clockit-spin 0.75s linear infinite;
 }

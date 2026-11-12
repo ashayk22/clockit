@@ -14,6 +14,7 @@ import {
   CircleCheckBig,
 } from 'lucide-react';
 import { dataService, ANCHOR_DATE, WORKSPACE_COLORS } from '../../services/dataService';
+import { isTaskOverdue } from '../../services/selectors';
 import { TaskItem, TaskPriority, TaskStatus, CalendarEvent, TimelineEvent } from '../../data/mockData';
 
 // Safe Local Date Helpers (avoid UTC timezone shift bugs)
@@ -579,8 +580,9 @@ export const CalendarPage: React.FC = () => {
       return timeStringToMinutes(a.dueTime) - timeStringToMinutes(b.dueTime);
     });
 
-    const overdueList = sorted.filter((t) => t.isOverdue && !t.completed);
-    const nonOverdue = sorted.filter((t) => !t.isOverdue || t.completed);
+    // The shared overdue definition, so the agenda and the task lists agree.
+    const overdueList = sorted.filter(isTaskOverdue);
+    const nonOverdue = sorted.filter((t) => !isTaskOverdue(t));
 
     // Group nonOverdue by date
     const groups: Record<string, TaskItem[]> = {};
@@ -685,7 +687,11 @@ export const CalendarPage: React.FC = () => {
         <div className="clockit-cal-view" key={viewMode} style={{ minWidth: 0, overflowX: 'auto', width: '100%' }}>
           {/* MONTH VIEW */}
           {viewMode === 'Month' && (
-            <table className="clockit-month-calendar-table">
+            <table
+              className="clockit-month-calendar-table"
+              role="grid"
+              aria-label={`${navigationTitle} calendar`}
+            >
               <thead>
                 <tr>
                   {WEEKDAYS_SHORT.map((day) => (
@@ -708,9 +714,52 @@ export const CalendarPage: React.FC = () => {
                       return (
                         <td
                           key={dIdx}
+                          role="gridcell"
+                          aria-selected={isActive}
+                          aria-label={cell.date.toLocaleDateString(undefined, {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
+                          aria-current={isToday ? 'date' : undefined}
+                          tabIndex={isActive ? 0 : -1}
+                          data-calendar-date={cell.dateStr}
                           className={isActive ? 'clockit-cal-cell-active' : ''}
                           onClick={() => {
                             setSelectedDate(cell.dateStr);
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.target !== event.currentTarget) return;
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault();
+                              setSelectedDate(cell.dateStr);
+                              return;
+                            }
+                            const dayOffsets: Record<string, number> = {
+                              ArrowLeft: -1,
+                              ArrowRight: 1,
+                              ArrowUp: -7,
+                              ArrowDown: 7,
+                            };
+                            const offset = dayOffsets[event.key];
+                            if (offset === undefined) return;
+                            event.preventDefault();
+                            const nextDate = parseLocalDate(cell.dateStr);
+                            nextDate.setDate(nextDate.getDate() + offset);
+                            const nextDateStr = formatLocalDate(nextDate);
+                            setSelectedDate(nextDateStr);
+                            if (
+                              nextDate.getMonth() !== currentDate.getMonth() ||
+                              nextDate.getFullYear() !== currentDate.getFullYear()
+                            ) {
+                              setCurrentDate(nextDate);
+                            }
+                            window.requestAnimationFrame(() => {
+                              document
+                                .querySelector<HTMLElement>(`[data-calendar-date="${nextDateStr}"]`)
+                                ?.focus();
+                            });
                           }}
                           onDoubleClick={() => handleOpenCreateModal(cell.dateStr)}
                           style={{
@@ -1161,28 +1210,26 @@ export const CalendarPage: React.FC = () => {
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => (
                 <div key={idx} className="clockit-calendar-day-header" style={{ fontSize: 9.5 }}>{day}</div>
               ))}
-              {miniCalGrid.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`clockit-calendar-day ${item.isSelected ? 'active' : ''} ${item.hasTask ? 'has-task' : ''}`}
-                  onClick={() => {
-                    if (item.dateStr) {
+              {miniCalGrid.map((item, idx) => {
+                const isEmpty = item.day === null;
+                return (
+                  <div
+                    key={idx}
+                    className={`clockit-calendar-day${isEmpty ? ' is-empty' : ''}${item.isSelected ? ' active' : ''}${item.hasTask ? ' has-task' : ''}`}
+                    aria-hidden={isEmpty || undefined}
+                    onClick={() => {
+                      if (!item.dateStr) return;
                       setSelectedDate(item.dateStr);
                       if (viewMode === 'Day') {
                         setCurrentDate(parseLocalDate(item.dateStr));
                       }
-                    }
-                  }}
-                  style={{
-                    height: 22,
-                    fontSize: 11,
-                    cursor: item.day ? 'pointer' : 'default',
-                    opacity: item.day ? 1 : 0,
-                  }}
-                >
-                  {item.day || ''}
-                </div>
-              ))}
+                    }}
+                    style={{ height: 22, fontSize: 11 }}
+                  >
+                    {isEmpty ? '' : item.day}
+                  </div>
+                );
+              })}
             </div>
           </div>
 

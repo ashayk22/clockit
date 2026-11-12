@@ -1,11 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, NavView } from './Sidebar';
 import { Header } from './Header';
 import { MobileNavBar } from './MobileNavBar';
+import { DemoBanner } from '../demo/DemoBanner';
+import { OnboardingProvider } from '../onboarding/OnboardingContext';
 import { PageTransition } from '../../motion/PageTransition';
 import { LoginTransition } from '../../motion/LoginTransition';
+import { RouteErrorBoundary } from '../common/ErrorBoundary';
+import { RouteLoadingFallback } from '../common/RouteLoadingFallback';
 import { dataService } from '../../services/dataService';
+import { preferencesRepository } from '../../services/repositories';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../auth/AuthContext';
 import { isLoginTransitionPending, clearLoginTransition } from '../../auth/loginTransition';
@@ -20,6 +25,7 @@ export const VIEW_PATHS: Record<NavView, string> = {
   analytics: '/app/analytics',
   habits: '/app/habits',
   calendar: '/app/calendar',
+  workspaces: '/app/workspaces',
 };
 
 /** Anything the routed pages need from the layout. */
@@ -28,12 +34,13 @@ export interface DashboardOutletContext {
   onToggleHabit: (id: string) => void;
 }
 
-const SIDEBAR_COLLAPSE_KEY = 'clockit-sidebar-collapsed';
 const MOBILE_QUERY = '(max-width: 768px)';
 
 function viewFromPathname(pathname: string): NavView {
+  if (pathname.startsWith('/app/workspaces')) return 'workspaces';
   const match = (Object.keys(VIEW_PATHS) as NavView[])
     .filter((view) => view !== 'home')
+    .filter((view) => view !== 'workspaces')
     .find((view) => pathname === VIEW_PATHS[view] || pathname.startsWith(`${VIEW_PATHS[view]}/`));
   return match ?? 'home';
 }
@@ -70,10 +77,12 @@ export const DashboardLayout: React.FC = () => {
 
   const [workspaces, setWorkspaces] = useState(() => dataService.getWorkspaces());
   const [habits, setHabits] = useState(() => dataService.getHabits());
-  const [activeWorkspace, setActiveWorkspace] = useState('personal');
+  const [activeWorkspace, setActiveWorkspace] = useState(
+    () => preferencesRepository.get('activeWorkspaceId') || 'personal',
+  );
   const [searchQuery, setSearchQuery] = useState('');
-  const [isCollapsed, setIsCollapsed] = useState(
-    () => typeof window !== 'undefined' && window.localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === '1',
+  const [isCollapsed, setIsCollapsed] = useState(() =>
+    preferencesRepository.get('sidebarCollapsed'),
   );
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   // True only for the very first mount that directly follows a successful
@@ -89,11 +98,40 @@ export const DashboardLayout: React.FC = () => {
     });
   }, []);
 
+  useEffect(() => {
+    const match = pathname.match(/^\/app\/workspaces\/([^/]+)/);
+    const workspaceId = match?.[1];
+    if (workspaceId && workspaces.some((workspace) => workspace.id === workspaceId)) {
+      setActiveWorkspace(workspaceId);
+      if (preferencesRepository.get('activeWorkspaceId') !== workspaceId) {
+        preferencesRepository.set('activeWorkspaceId', workspaceId);
+      }
+      return;
+    }
+
+    if (activeWorkspace && !workspaces.some((workspace) => workspace.id === activeWorkspace)) {
+      const fallback = workspaces[0]?.id || '';
+      setActiveWorkspace(fallback);
+      preferencesRepository.set('activeWorkspaceId', fallback || null);
+    }
+  }, [activeWorkspace, pathname, workspaces]);
+
+  // Keep the collapse preference in step with other tabs (the repository
+  // re-reads on the cross-tab storage event).
+  useEffect(
+    () =>
+      preferencesRepository.subscribe(() => {
+        const persisted = preferencesRepository.get('sidebarCollapsed');
+        setIsCollapsed((prev) => (prev === persisted ? prev : persisted));
+      }),
+    [],
+  );
+
   // Collapse is a desktop affordance; the drawer takes over on small screens.
   const toggleCollapse = useCallback(() => {
     setIsCollapsed((prev) => {
       const next = !prev;
-      window.localStorage.setItem(SIDEBAR_COLLAPSE_KEY, next ? '1' : '0');
+      preferencesRepository.set('sidebarCollapsed', next);
       return next;
     });
   }, []);
@@ -127,6 +165,17 @@ export const DashboardLayout: React.FC = () => {
     [navigate],
   );
 
+  const handleWorkspaceSelect = useCallback(
+    (workspaceId: string) => {
+      setActiveWorkspace(workspaceId);
+      preferencesRepository.set('activeWorkspaceId', workspaceId);
+      navigate(`/app/workspaces/${workspaceId}/overview`);
+    },
+    [navigate],
+  );
+
+  const openWorkspaces = useCallback(() => navigate('/app/workspaces'), [navigate]);
+
   const handleToggleHabit = useCallback((id: string) => {
     setHabits(dataService.toggleHabit(id));
   }, []);
@@ -145,58 +194,66 @@ export const DashboardLayout: React.FC = () => {
   }, []);
 
   return (
-    <div className="clockit-layout-container">
-      <Sidebar
-        activeView={activeView}
-        onViewChange={handleViewChange}
-        workspaces={workspaces}
-        activeWorkspace={activeWorkspace}
-        onWorkspaceSelect={setActiveWorkspace}
-        userName={user?.name}
-        onOpenSettings={openSettings}
-        isCollapsed={isMobile ? false : isCollapsed}
-        onToggleCollapse={toggleCollapse}
-        isMobileOpen={isMobileNavOpen}
-      />
-
-      {/* Off-canvas scrim (only rendered while the drawer is open on phones). */}
-      {isMobile && isMobileNavOpen ? (
-        <div
-          className="clockit-sidebar-backdrop"
-          onClick={closeMobileNav}
-          aria-hidden="true"
-        />
-      ) : null}
-
-      <div className="clockit-main-viewport">
-        <Header
-          isDarkMode={isDark}
-          onToggleTheme={toggleTheme}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onOpenMobileNav={() => setIsMobileNavOpen(true)}
-          onOpenSettings={openSettings}
-          onSignOut={signOut}
-          onOpenTasks={openTasks}
-        />
-
-        <main style={{ flex: 1 }}>
-          <PageTransition>
-            <Outlet context={outletContext} />
-          </PageTransition>
-        </main>
-      </div>
-
-      {isMobile ? (
-        <MobileNavBar
+    <OnboardingProvider>
+      <div className="clockit-layout-container">
+        <Sidebar
           activeView={activeView}
           onViewChange={handleViewChange}
-          onOpenMenu={() => setIsMobileNavOpen(true)}
+          workspaces={workspaces}
+          activeWorkspace={activeWorkspace}
+          onWorkspaceSelect={handleWorkspaceSelect}
+          onOpenWorkspaces={openWorkspaces}
+          userName={user?.name}
+          onOpenSettings={openSettings}
+          isCollapsed={isMobile ? false : isCollapsed}
+          onToggleCollapse={toggleCollapse}
+          isMobileOpen={isMobileNavOpen}
         />
-      ) : null}
 
-      {showLoginTransition ? <LoginTransition onComplete={finishLoginTransition} /> : null}
-    </div>
+        {/* Off-canvas scrim (only rendered while the drawer is open on phones). */}
+        {isMobile && isMobileNavOpen ? (
+          <div
+            className="clockit-sidebar-backdrop"
+            onClick={closeMobileNav}
+            aria-hidden="true"
+          />
+        ) : null}
+
+        <div className="clockit-main-viewport">
+          <DemoBanner />
+          <Header
+            isDarkMode={isDark}
+            onToggleTheme={toggleTheme}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onOpenMobileNav={() => setIsMobileNavOpen(true)}
+            onOpenSettings={openSettings}
+            onSignOut={signOut}
+            onOpenTasks={openTasks}
+          />
+
+          <main style={{ flex: 1 }}>
+            <PageTransition>
+              <RouteErrorBoundary>
+                <Suspense fallback={<RouteLoadingFallback message="Loading view..." />}>
+                  <Outlet context={outletContext} />
+                </Suspense>
+              </RouteErrorBoundary>
+            </PageTransition>
+          </main>
+        </div>
+
+        {isMobile ? (
+          <MobileNavBar
+            activeView={activeView}
+            onViewChange={handleViewChange}
+            onOpenMenu={() => setIsMobileNavOpen(true)}
+          />
+        ) : null}
+
+        {showLoginTransition ? <LoginTransition onComplete={finishLoginTransition} /> : null}
+      </div>
+    </OnboardingProvider>
   );
 };
 

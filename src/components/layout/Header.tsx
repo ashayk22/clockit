@@ -10,8 +10,17 @@ import {
   Settings,
   LogOut,
   CircleCheckBig,
+  HelpCircle,
+  Cloud,
+  CloudOff,
+  RefreshCw,
 } from 'lucide-react';
+import { useOnboarding } from '../onboarding/OnboardingContext';
 import { dataService, ANCHOR_DATE } from '../../services/dataService';
+import { preferencesRepository } from '../../services/repositories';
+import { selectTaskNotifications, type TaskNotification } from '../../services/selectors';
+import { subscribeToSyncState, retrySync, type CloudSyncState } from '../../services/cloud';
+import { isCloudAuth } from '../../auth/authStore';
 import type { TaskItem } from '../../data/mockData';
 
 interface HeaderProps {
@@ -27,15 +36,15 @@ interface HeaderProps {
   onOpenTasks?: () => void;
 }
 
-interface AppNotification {
-  id: string;
-  title: string;
-  meta: string;
-  kind: 'overdue' | 'today';
-}
+/** The shared notification shape — derived from the user's tasks by the selector. */
+type AppNotification = TaskNotification;
 
 /** Stable identity for a notification so read/unread can be remembered. */
 const notifKey = (n: Pick<AppNotification, 'kind' | 'id'>) => `${n.kind}:${n.id}`;
+
+/** Content equality for the acknowledged-notification key lists. */
+const sameStringList = (a: readonly string[], b: readonly string[]): boolean =>
+  a.length === b.length && a.every((value, index) => value === b[index]);
 
 /** Closes a popover on outside click or Escape. */
 function useDismiss(active: boolean, onDismiss: () => void) {
@@ -68,29 +77,47 @@ export const Header: React.FC<HeaderProps> = ({
   onSignOut,
   onOpenTasks,
 }) => {
+  const { openTutorialDirectory } = useOnboarding();
   const [openMenu, setOpenMenu] = useState<'none' | 'notif' | 'more'>('none');
   const [tasks, setTasks] = useState<TaskItem[]>(() => dataService.getTasks());
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Keys of notifications the user has already acknowledged (persisted locally so
-  // read/unread survives a reload — no backend involved).
-  const [readNotifKeys, setReadNotifKeys] = useState<string[]>(() => {
-    try {
-      const raw = localStorage.getItem('clockit-notif-read');
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.filter((k) => typeof k === 'string') : [];
-    } catch {
-      return [];
-    }
-  });
+  // Keys of notifications the user has already acknowledged (persisted through
+  // the preferences repository so read/unread survives a reload and stays in
+  // step across tabs — no backend involved).
+  const [readNotifKeys, setReadNotifKeys] = useState<string[]>(() =>
+    preferencesRepository.get('notificationReadKeys'),
+  );
+
+  const [syncState, setSyncState] = useState<CloudSyncState>(() => ({
+    status: 'idle',
+    lastSyncedAt: null,
+    errorMessage: null,
+    pendingCount: 0,
+  }));
+
+  useEffect(() => {
+    if (!isCloudAuth) return;
+    return subscribeToSyncState((next) => setSyncState(next));
+  }, []);
 
   useEffect(() => dataService.subscribe(() => setTasks(dataService.getTasks())), []);
 
+  // Follow the acknowledged list from another tab. Compare before assigning so
+  // the fresh array identity cannot feed back into another write.
+  useEffect(
+    () =>
+      preferencesRepository.subscribe(() => {
+        const persisted = preferencesRepository.get('notificationReadKeys');
+        setReadNotifKeys((prev) => (sameStringList(prev, persisted) ? prev : persisted));
+      }),
+    [],
+  );
+
+  // Persist locally acknowledged notifications through the repository.
   useEffect(() => {
-    try {
-      localStorage.setItem('clockit-notif-read', JSON.stringify(readNotifKeys));
-    } catch {
-      /* storage unavailable — read state simply won't persist */
+    if (!sameStringList(preferencesRepository.get('notificationReadKeys'), readNotifKeys)) {
+      preferencesRepository.set('notificationReadKeys', readNotifKeys);
     }
   }, [readNotifKeys]);
 
@@ -110,15 +137,12 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  // Real notifications derived from the user's own tasks — nothing invented.
-  const notifications = useMemo<AppNotification[]>(() => {
-    const overdue = tasks.filter((t) => t.isOverdue && !t.completed);
-    const dueToday = tasks.filter((t) => t.isToday && !t.completed);
-    return [
-      ...overdue.map((t) => ({ id: t.id, title: t.title, meta: 'Overdue', kind: 'overdue' as const })),
-      ...dueToday.map((t) => ({ id: t.id, title: t.title, meta: 'Due today', kind: 'today' as const })),
-    ];
-  }, [tasks]);
+  // Notifications come from the shared selector — the same overdue/due-today
+  // definition the rest of the app uses. Nothing is invented.
+  const notifications = useMemo<AppNotification[]>(
+    () => selectTaskNotifications(tasks),
+    [tasks],
+  );
 
   const isRead = useCallback((n: AppNotification) => readNotifKeys.includes(notifKey(n)), [readNotifKeys]);
 
@@ -199,6 +223,46 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Controls */}
       <div className="clockit-topbar-right">
+        {isCloudAuth && syncState.status !== 'idle' ? (
+          <button
+            className={`clockit-icon-action-btn clockit-sync-btn is-${syncState.status}`}
+            onClick={() => {
+              if (syncState.status === 'error' || syncState.status === 'offline') {
+                void retrySync();
+              }
+            }}
+            aria-label={`Cloud synchronization: ${syncState.status}`}
+            title={
+              syncState.status === 'syncing'
+                ? 'Syncing with cloud...'
+                : syncState.status === 'error'
+                  ? `Sync error: ${syncState.errorMessage || 'Click to retry'}`
+                  : syncState.status === 'offline'
+                    ? 'Working offline (changes stored locally)'
+                    : 'All changes synced to cloud'
+            }
+            type="button"
+            style={{
+              color:
+                syncState.status === 'error'
+                  ? '#ef4444'
+                  : syncState.status === 'offline'
+                    ? '#f59e0b'
+                    : syncState.status === 'syncing'
+                      ? 'var(--accent-mint, #10b981)'
+                      : 'var(--text-muted, #64748b)',
+            }}
+          >
+            {syncState.status === 'error' ? (
+              <CloudOff size={16} />
+            ) : syncState.status === 'syncing' ? (
+              <RefreshCw size={14} className="clockit-spin" />
+            ) : (
+              <Cloud size={16} />
+            )}
+          </button>
+        ) : null}
+
         <span className="clockit-live-date-pill">{anchorLabel}</span>
 
         {/* Theme Switcher */}
@@ -210,6 +274,17 @@ export const Header: React.FC<HeaderProps> = ({
           type="button"
         >
           {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
+
+        {/* Guides & Tutorials */}
+        <button
+          className="clockit-icon-action-btn"
+          onClick={openTutorialDirectory}
+          aria-label="Feature guides and interactive tutorials"
+          title="Feature Guides & Tutorials"
+          type="button"
+        >
+          <HelpCircle size={17} />
         </button>
 
         {/* Notifications */}
@@ -336,6 +411,18 @@ export const Header: React.FC<HeaderProps> = ({
                   Settings
                 </button>
               ) : null}
+              <button
+                className="clockit-dropdown-item"
+                role="menuitem"
+                type="button"
+                onClick={() => {
+                  setOpenMenu('none');
+                  openTutorialDirectory();
+                }}
+              >
+                <HelpCircle size={15} />
+                Guides & Tutorials
+              </button>
               {onSignOut ? (
                 <>
                   <div className="clockit-dropdown-sep" />

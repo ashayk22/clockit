@@ -1,18 +1,44 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Navigate, Route, Routes, useNavigate, useOutletContext } from 'react-router-dom';
-import LandingPage from './landing/LandingPage';
-import AuthPage from './auth/AuthPage';
 import ProtectedRoute from './auth/ProtectedRoute';
 import { ScrollToTop } from './motion/ScrollToTop';
 import { DashboardLayout, DashboardOutletContext } from './components/layout/DashboardLayout';
 import { HomePage } from './components/pages/HomePage';
-import { FocusPage } from './components/pages/FocusPage';
 import { TasksPage } from './components/pages/TasksPage';
-import { NotesPage } from './components/pages/NotesPage';
-import { AnalyticsPage } from './components/pages/AnalyticsPage';
 import { HabitsPage } from './components/pages/HabitsPage';
-import { CalendarPage } from './components/pages/CalendarPage';
-import { SettingsPage } from './components/pages/SettingsPage';
+import { lazyWithRetry } from './utils/lazyWithRetry';
+import { RouteLoadingFallback } from './components/common/RouteLoadingFallback';
+
+// Top-level entrypoints lazy-loaded with resilient retry
+const LandingPage = lazyWithRetry(() => import('./landing/LandingPage'));
+const AuthPage = lazyWithRetry(() => import('./auth/AuthPage'));
+const ResetPasswordPage = lazyWithRetry(() => import('./auth/ResetPasswordPage'));
+const OnboardingWizard = lazyWithRetry(() =>
+  import('./components/onboarding/OnboardingWizard').then((m) => ({ default: m.OnboardingWizard }))
+);
+
+// Secondary authenticated views lazy-loaded on demand
+const FocusPage = lazyWithRetry(() =>
+  import('./components/pages/FocusPage').then((m) => ({ default: m.FocusPage }))
+);
+const NotesPage = lazyWithRetry(() =>
+  import('./components/pages/NotesPage').then((m) => ({ default: m.NotesPage }))
+);
+const AnalyticsPage = lazyWithRetry(() =>
+  import('./components/pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage }))
+);
+const CalendarPage = lazyWithRetry(() =>
+  import('./components/pages/CalendarPage').then((m) => ({ default: m.CalendarPage }))
+);
+const SettingsPage = lazyWithRetry(() =>
+  import('./components/pages/SettingsPage').then((m) => ({ default: m.SettingsPage }))
+);
+const WorkspaceOverviewPage = lazyWithRetry(() =>
+  import('./components/pages/WorkspacePages').then((m) => ({ default: m.WorkspaceOverviewPage }))
+);
+const WorkspaceDashboardPage = lazyWithRetry(() =>
+  import('./components/pages/WorkspacePages').then((m) => ({ default: m.WorkspaceDashboardPage }))
+);
 
 /** The home view links out to the other views through the router. */
 const HomeRoute: React.FC = () => {
@@ -46,7 +72,7 @@ const HabitsRoute: React.FC = () => {
  * Three distinct experiences, three sets of routes:
  *
  *   1. Public landing page   →  /
- *   2. Authentication        →  /login, /signup
+ *   2. Authentication        →  /login, /signup, /reset-password
  *   3. Authenticated app     →  /app/* (guarded)
  *
  * The dashboard is nested under a single layout element so its sidebar and
@@ -56,37 +82,52 @@ export const App: React.FC = () => {
   return (
     <>
       <ScrollToTop />
-      <Routes>
-        {/* 1. Public */}
-        <Route path="/" element={<LandingPage />} />
+      <Suspense fallback={<RouteLoadingFallback fullScreen message="Loading ClockIt..." />}>
+        <Routes>
+          {/* 1. Public */}
+          <Route path="/" element={<LandingPage />} />
 
-        {/* 2. Auth */}
-        <Route path="/login" element={<AuthPage mode="login" />} />
-        <Route path="/signup" element={<AuthPage mode="signup" />} />
+          {/* 2. Auth */}
+          <Route path="/login" element={<AuthPage mode="login" />} />
+          <Route path="/signup" element={<AuthPage mode="signup" />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-        {/* 3. Authenticated dashboard */}
-        <Route
-          path="/app"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<HomeRoute />} />
-          <Route path="focus" element={<FocusPage />} />
-          <Route path="tasks" element={<TasksRoute />} />
-          <Route path="notes" element={<NotesPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="habits" element={<HabitsRoute />} />
-          <Route path="calendar" element={<CalendarPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="*" element={<Navigate to="/app" replace />} />
-        </Route>
+          {/* 2b. Personalized Onboarding (Guarded) */}
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute>
+                <OnboardingWizard />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Unknown URLs land on the public page. */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* 3. Authenticated dashboard */}
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<HomeRoute />} />
+            <Route path="focus" element={<FocusPage />} />
+            <Route path="tasks" element={<TasksRoute />} />
+            <Route path="notes" element={<NotesPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="habits" element={<HabitsRoute />} />
+            <Route path="calendar" element={<CalendarPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="workspaces" element={<WorkspaceOverviewPage />} />
+            <Route path="workspaces/:workspaceId/:tab?" element={<WorkspaceDashboardPage />} />
+            <Route path="*" element={<Navigate to="/app" replace />} />
+          </Route>
+
+          {/* Unknown URLs land on the public page. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </>
   );
 };

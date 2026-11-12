@@ -1,54 +1,118 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { preferencesRepository } from '../services/repositories';
+import type { AppearanceMode } from '../services/repositories/types';
 
 export type Theme = 'light' | 'dark';
+export type { AppearanceMode };
 
 interface ThemeContextValue {
   theme: Theme;
+  appearance: AppearanceMode;
   isDark: boolean;
   setTheme: (theme: Theme) => void;
+  setAppearance: (appearance: AppearanceMode) => void;
   toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const STORAGE_KEY = 'tracker-theme';
+function getSystemTheme(): Theme {
+  if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  return 'light';
+}
+
+function resolveTheme(appearance: AppearanceMode): Theme {
+  if (appearance === 'system') {
+    return getSystemTheme();
+  }
+  return appearance;
+}
 
 /**
  * The document already carries the correct class thanks to the inline
  * bootstrapping script in index.html, so we read from there first to avoid
- * any flash of the wrong theme.
+ * any flash of the wrong theme. Otherwise fall back to the persisted
+ * preference.
  */
-function readInitialTheme(): Theme {
-  if (typeof document === 'undefined') return 'light';
-  if (document.documentElement.classList.contains('dark')) return 'dark';
-  try {
-    return localStorage.getItem(STORAGE_KEY) === 'dark' ? 'dark' : 'light';
-  } catch {
-    return 'light';
+function readInitialAppearance(): AppearanceMode {
+  return preferencesRepository.get('appearancePreference') || 'system';
+}
+
+function readInitialTheme(appearance: AppearanceMode): Theme {
+  if (typeof document !== 'undefined') {
+    if (document.documentElement.classList.contains('dark')) return 'dark';
   }
+  return resolveTheme(appearance);
 }
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>(readInitialTheme);
+  const [appearance, setAppearanceState] = useState<AppearanceMode>(readInitialAppearance);
+  const [theme, setThemeState] = useState<Theme>(() => readInitialTheme(appearance));
 
+  // Follow the persisted preference, including cross-tab storage changes
+  useEffect(() => {
+    return preferencesRepository.subscribe(() => {
+      const persistedAppearance = preferencesRepository.get('appearancePreference') || 'system';
+      setAppearanceState(persistedAppearance);
+      setThemeState(resolveTheme(persistedAppearance));
+    });
+  }, []);
+
+  // Listen to live OS system theme preference changes when mode is 'system'
+  useEffect(() => {
+    if (appearance !== 'system' || typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (e: MediaQueryListEvent) => {
+      const newTheme: Theme = e.matches ? 'dark' : 'light';
+      setThemeState(newTheme);
+    };
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [appearance]);
+
+  // Apply resolved theme class and color scheme to document element
   useEffect(() => {
     const root = document.documentElement;
-    // Toggle a class only — no re-render of the tree, no paint flash.
     root.classList.toggle('dark', theme === 'dark');
     root.style.colorScheme = theme;
-    try {
-      localStorage.setItem(STORAGE_KEY, theme);
-    } catch {
-      /* storage unavailable */
+
+    if (preferencesRepository.get('theme') !== theme) {
+      preferencesRepository.set('theme', theme);
     }
   }, [theme]);
 
-  const setTheme = useCallback((next: Theme) => setThemeState(next), []);
-  const toggleTheme = useCallback(() => setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark')), []);
+  const setAppearance = useCallback((next: AppearanceMode) => {
+    setAppearanceState(next);
+    preferencesRepository.set('appearancePreference', next);
+    const resolved = resolveTheme(next);
+    setThemeState(resolved);
+  }, []);
+
+  const setTheme = useCallback((next: Theme) => {
+    setAppearance(next);
+  }, [setAppearance]);
+
+  const toggleTheme = useCallback(() => {
+    setThemeState((prev) => {
+      const next: Theme = prev === 'dark' ? 'light' : 'dark';
+      preferencesRepository.set('appearancePreference', next);
+      setAppearanceState(next);
+      return next;
+    });
+  }, []);
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme, isDark: theme === 'dark', setTheme, toggleTheme }),
-    [theme, setTheme, toggleTheme],
+    () => ({
+      theme,
+      appearance,
+      isDark: theme === 'dark',
+      setTheme,
+      setAppearance,
+      toggleTheme,
+    }),
+    [theme, appearance, setTheme, setAppearance, toggleTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

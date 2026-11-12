@@ -24,6 +24,11 @@ import {
 } from 'lucide-react';
 import { TaskItem, TaskPriority, TaskStatus } from '../../data/mockData';
 import { dataService, ANCHOR_DATE, WORKSPACE_COLORS } from '../../services/dataService';
+import {
+  selectTasks,
+  selectCompletedTasks,
+  selectOverdueTasks,
+} from '../../services/selectors';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -276,74 +281,22 @@ export const TasksPage: React.FC<TasksPageProps> = ({
     return days;
   }, [tasks, monthPrefix]);
 
-  // Filter & Sort Tasks
+  // Filter & Sort Tasks — the shared selector, so this page and HomePage agree
+  // on what "today"/"overdue" mean and how tasks order.
   const filteredAndSortedTasks = useMemo(() => {
-    let result = [...tasks];
-
-    // Filter by tab
-    if (activeFilter === 'today') {
-      result = result.filter((t) => t.isToday || t.daysLeft === 'Today' || t.dueDate === ANCHOR_DATE);
-    } else if (activeFilter === 'upcoming') {
-      result = result.filter((t) => !t.completed && !t.isOverdue && t.daysLeft !== 'Today');
-    } else if (activeFilter === 'someday') {
-      result = result.filter((t) => t.priority === 'Low' || !t.dueDate);
-    } else if (activeFilter === 'completed') {
-      result = result.filter((t) => t.completed || t.status === 'completed');
-    } else if (activeFilter === 'overdue') {
-      result = result.filter((t) => t.isOverdue && !t.completed);
-    }
-
-    // Filter by calendar day
-    if (selectedCalendarDate !== null) {
-      const datePrefix = `${monthPrefix}${String(selectedCalendarDate).padStart(2, '0')}`;
-      result = result.filter((t) => t.dueDate === datePrefix);
-    }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        (t) =>
-          t.title.toLowerCase().includes(q) ||
-          t.description?.toLowerCase().includes(q) ||
-          t.workspace.toLowerCase().includes(q) ||
-          t.tags?.some((tag) => tag.toLowerCase().includes(q))
-      );
-    }
-
-    // Sort
-    result.sort((a, b) => {
-      if (sortBy === 'priority') {
-        const priorityOrder: Record<TaskPriority, number> = { Critical: 4, High: 3, Medium: 2, Low: 1 };
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
-      }
-      if (sortBy === 'created') {
-        return (b.createdAt || 0) - (a.createdAt || 0);
-      }
-      if (sortBy === 'status') {
-        const statusOrder: Record<TaskStatus, number> = { todo: 1, 'in-progress': 2, completed: 3 };
-        return statusOrder[a.status] - statusOrder[b.status];
-      }
-      if (sortBy === 'workspace') {
-        return a.workspace.localeCompare(b.workspace);
-      }
-      // Default: 'deadline' (overdue first, nearest due date next, completed/someday last)
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
-      if (a.isOverdue !== b.isOverdue) return a.isOverdue ? -1 : 1;
-      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
-      if (a.dueDate) return -1;
-      if (b.dueDate) return 1;
-      return 0;
-    });
-
-    return result;
+    // Map the mini-calendar selection onto an exact due date (YYYY-MM-DD).
+    const dueDate =
+      selectedCalendarDate === null
+        ? null
+        : `${monthPrefix}${String(selectedCalendarDate).padStart(2, '0')}`;
+    return selectTasks(tasks, { filter: activeFilter, sortBy, dueDate, searchQuery });
   }, [tasks, activeFilter, selectedCalendarDate, searchQuery, sortBy, monthPrefix]);
 
-  // Dynamic Task Statistics
+  // Dynamic Task Statistics — counts come from the shared selectors.
   const stats = useMemo(() => {
     const relevantTasks = statsTimeRange === 'week' ? tasks.slice(0, 8) : tasks;
-    const completedCount = relevantTasks.filter((t) => t.completed || t.status === 'completed').length;
-    const overdueCount = relevantTasks.filter((t) => t.isOverdue && !t.completed).length;
+    const completedCount = selectCompletedTasks(relevantTasks).length;
+    const overdueCount = selectOverdueTasks(relevantTasks).length;
     const pendingCount = Math.max(0, relevantTasks.length - completedCount - overdueCount);
     const totalCount = relevantTasks.length || 1;
     const percent = Math.round((completedCount / totalCount) * 100);
@@ -926,22 +879,23 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                 <div key={idx} className="clockit-calendar-day-header">{day}</div>
               ))}
               {calendarDays.map((date, idx) => {
-                const hasTask = date ? taskDaysSet.has(date) : false;
-                const isSelected = selectedCalendarDate === date;
-                const isTodayDate = date === anchor.day;
+                const isEmpty = date === null;
+                const hasTask = date !== null && taskDaysSet.has(date);
+                const isSelected = date !== null && selectedCalendarDate === date;
+                const isTodayDate = date !== null && date === anchor.day;
                 return (
                   <div
                     key={idx}
-                    className={`clockit-calendar-day ${isTodayDate ? 'active' : ''} ${hasTask ? 'has-task' : ''} ${isSelected ? 'selected' : ''}`}
-                    style={isSelected ? { outline: '2px solid var(--accent-mint)', outlineOffset: 1 } : {}}
+                    className={`clockit-calendar-day${isEmpty ? ' is-empty' : ''}${isTodayDate ? ' active' : ''}${hasTask ? ' has-task' : ''}${isSelected ? ' selected' : ''}`}
+                    aria-hidden={isEmpty || undefined}
+                    style={isSelected ? { outline: '2px solid var(--accent-mint)', outlineOffset: 1 } : undefined}
                     onClick={() => {
-                      if (date) {
-                        setSelectedCalendarDate(selectedCalendarDate === date ? null : date);
-                      }
+                      if (date === null) return;
+                      setSelectedCalendarDate(selectedCalendarDate === date ? null : date);
                     }}
                     title={hasTask ? `Tasks due on ${monthShort} ${date}` : undefined}
                   >
-                    {date || ''}
+                    {isEmpty ? '' : date}
                   </div>
                 );
               })}

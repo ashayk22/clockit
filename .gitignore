@@ -24,3 +24,6 @@ Thumbs.db
 
 # Local IDE generated files
 .gemini/
+
+# IDE-generated share packages
+.trae-html-share-packages/

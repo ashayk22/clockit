@@ -1,13 +1,28 @@
-export interface Workspace {
+import type { OwnedEntity } from './ownership';
+
+/**
+ * A workspace groups tasks and focus sessions.
+ *
+ * `description`, `icon` and `cover` are optional and were added after the
+ * initial model, so all existing persisted workspaces round-trip without them.
+ * Tasks still reference a workspace by its `name` (not `id`) — that legacy
+ * link is preserved rather than migrated, to avoid breaking existing data.
+ */
+export interface Workspace extends OwnedEntity {
   id: string;
   name: string;
   color: string;
+  description?: string;
+  /** Lucide icon name used for the workspace mark. */
+  icon?: string;
+  /** Cover illustration key — maps to a built-in SVG cover. */
+  cover?: string;
 }
 
 export type TaskPriority = 'Critical' | 'High' | 'Medium' | 'Low';
 export type TaskStatus = 'todo' | 'in-progress' | 'completed';
 
-export interface TaskItem {
+export interface TaskItem extends OwnedEntity {
   id: string;
   title: string;
   description?: string;
@@ -30,7 +45,7 @@ export interface TaskItem {
   focusSessionsCount?: number;
 }
 
-export interface FocusSession {
+export interface FocusSession extends OwnedEntity {
   id: string;
   taskId?: string | null;
   taskTitle?: string;
@@ -39,7 +54,7 @@ export interface FocusSession {
   completedAt: number;
 }
 
-export interface HabitItem {
+export interface HabitItem extends OwnedEntity {
   id: string;
   title: string;
   time: string;
@@ -54,7 +69,7 @@ export interface HabitDayState {
   status: 'all' | 'partial' | 'missed' | 'minimal' | 'active';
 }
 
-export interface CalendarEvent {
+export interface CalendarEvent extends OwnedEntity {
   id: string;
   day: number;
   title: string;
@@ -64,7 +79,7 @@ export interface CalendarEvent {
   tagColor: string;
 }
 
-export interface TimelineEvent {
+export interface TimelineEvent extends OwnedEntity {
   id: string;
   time: string;
   title: string;
@@ -86,11 +101,11 @@ export interface GraphLink {
 }
 
 export const INITIAL_WORKSPACES: Workspace[] = [
-  { id: 'personal', name: 'Personal', color: '#22c55e' },
-  { id: 'college', name: 'College', color: '#3b82f6' },
-  { id: 'club', name: 'Club', color: '#a855f7' },
-  { id: 'freelance', name: 'Freelance', color: '#f97316' },
-  { id: 'development', name: 'Development', color: '#10b981' },
+  { id: 'personal', name: 'Personal', color: '#22c55e', description: 'Daily life, goals and routines', icon: 'Home', cover: 'personal' },
+  { id: 'college', name: 'College', color: '#3b82f6', description: 'Academics, PBLs and submissions', icon: 'GraduationCap', cover: 'college' },
+  { id: 'club', name: 'Club', color: '#a855f7', description: 'Finance, events and design work', icon: 'Users', cover: 'club' },
+  { id: 'freelance', name: 'Freelance', color: '#f97316', description: 'Client work and projects', icon: 'Briefcase', cover: 'freelance' },
+  { id: 'development', name: 'Development', color: '#10b981', description: 'Side projects, experiments and learning', icon: 'Code2', cover: 'development' },
 ];
 
 export const INITIAL_TASKS: TaskItem[] = [

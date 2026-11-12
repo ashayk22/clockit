@@ -1,0 +1,363 @@
+﻿/* ==========================================================================
+   ClockIt Onboarding Wizard Styles
+   Adheres strictly to ClockIt design language: Newsreader serif headlines,
+   warm cream/charcoal backgrounds, subdued borders, refined green accents.
+   No AI gradients or oversized illustrations.
+   ========================================================================== */
+
+.clockit-onboarding-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 24px;
+}
+
+.clockit-onboarding-header {
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 24px 0;
+}
+
+.clockit-onboarding-skip-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.clockit-onboarding-skip-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-subtle);
+}
+
+.clockit-onboarding-container {
+  max-width: 680px;
+  width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Progress bar */
+.clockit-onboarding-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clockit-onboarding-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.clockit-onboarding-progress-track {
+  height: 4px;
+  width: 100%;
+  background: var(--border-subtle);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.clockit-onboarding-progress-fill {
+  height: 100%;
+  background: var(--accent-green);
+  border-radius: 999px;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Main card */
+.clockit-onboarding-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.clockit-onboarding-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clockit-onboarding-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent-green);
+}
+
+.clockit-onboarding-title {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: clamp(24px, 3.5vw, 30px);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.4px;
+}
+
+.clockit-onboarding-subtitle {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Options Grid */
+.clockit-onboarding-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .clockit-onboarding-grid.two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.clockit-onboarding-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: 14.5px;
+  transition: all 0.16s ease;
+}
+
+.clockit-onboarding-option:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-subtle);
+}
+
+.clockit-onboarding-option.is-selected {
+  border-color: var(--accent-green);
+  background: rgba(34, 197, 94, 0.06);
+}
+
+html.dark .clockit-onboarding-option.is-selected {
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.clockit-onboarding-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.clockit-onboarding-option-title {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.clockit-onboarding-option-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.clockit-onboarding-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.clockit-onboarding-option.is-selected .clockit-onboarding-indicator {
+  border-color: var(--accent-green);
+  background: var(--accent-green);
+  color: #ffffff;
+}
+
+.clockit-onboarding-option.multi .clockit-onboarding-indicator {
+  border-radius: var(--radius-xs);
+}
+
+/* Custom duration input */
+.clockit-onboarding-custom-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+}
+
+.clockit-onboarding-custom-input input {
+  width: 90px;
+  height: 38px;
+  padding: 0 12px;
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.clockit-onboarding-custom-input input:focus {
+  outline: none;
+  border-color: var(--accent-green);
+}
+
+/* Actions footer */
+.clockit-onboarding-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.clockit-onboarding-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 22px;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.clockit-onboarding-btn.secondary {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.clockit-onboarding-btn.secondary:hover {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+.clockit-onboarding-btn.primary {
+  border: 1px solid var(--accent-green);
+  background: var(--accent-green);
+  color: #ffffff;
+  margin-left: auto;
+}
+
+.clockit-onboarding-btn.primary:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.clockit-onboarding-btn.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Completion summary view */
+.clockit-onboarding-completion {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 0;
+}
+
+.clockit-onboarding-check-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--accent-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clockit-onboarding-summary-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  margin-top: 10px;
+}
+
+@media (max-width: 540px) {
+  .clockit-onboarding-summary-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.clockit-onboarding-summary-item {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.clockit-onboarding-summary-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.clockit-onboarding-summary-val {
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--text-primary);
+}
+
+@media (max-width: 600px) {
+  .clockit-onboarding-shell {
+    padding: 16px;
+  }
+  .clockit-onboarding-card {
+    padding: 24px 20px;
+  }
+}

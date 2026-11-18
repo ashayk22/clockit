@@ -32,11 +32,11 @@ async function run() {
     // 1. Verify hero headline exists
     const headline = await page.$eval('.hero-headline', el => el.textContent.replace(/\s+/g, ' ').trim());
     console.log(`[verify-restored-home] Detected headline: "${headline}"`);
-    if (!headline.includes('Work tracking built for')) {
-      console.error(`FAIL: Expected scrolling headline with dashboard composition, got: "${headline}"`);
+    if (!headline.includes('Make room for what matters.')) {
+      console.error(`FAIL: Expected scrolling headline with ClockIt copy, got: "${headline}"`);
       errors++;
     } else {
-      console.log(`✓ Restored hero headline verified.`);
+      console.log(`✓ Restored ClockIt hero headline verified.`);
     }
 
     // 2. Verify Case Studies button replaced Try interactive demo

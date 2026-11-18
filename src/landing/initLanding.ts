@@ -293,9 +293,9 @@ function initInteractiveKanbanBoard() {
       card.classList.add('card-done');
       if (hintEl) {
         hintEl.className = 'task-done-badge';
-        hintEl.textContent = 'Merged';
+        hintEl.textContent = 'Completed';
       }
-      toast(`${taskId} merged into main (+${taskPts} pts)`);
+      toast(`${taskId} completed (+${taskPts} pts)`);
     } else if (parent === stackDone) {
       stackTodo!.appendChild(card);
       card.classList.remove('card-done', 'active-pulse');
@@ -303,7 +303,7 @@ function initInteractiveKanbanBoard() {
         hintEl.className = 'task-action-hint';
         hintEl.textContent = 'Click to advance ->';
       }
-      toast(`${taskId} returned to Backlog`);
+      toast(`${taskId} returned to To Do`);
     }
     updateBoardMetrics();
   }
@@ -348,11 +348,11 @@ function initInteractiveKanbanBoard() {
 
   let nextId = 126;
   const sampleBacklog = [
-    { title: 'Zero-downtime database failover handler', squad: 'Platform', pts: 5 },
-    { title: 'Distributed edge rate-limiting middleware', squad: 'Infra', pts: 8 },
-    { title: 'Automated SOC 2 audit snapshot exporter', squad: 'Security', pts: 3 },
-    { title: 'Optimistic UI rollback for offline edits', squad: 'Frontend', pts: 5 },
-    { title: 'Webhook retry backoff with jitter queue', squad: 'DevOps', pts: 5 },
+    { title: 'Schedule weekly deep work and review blocks', squad: 'Planning', pts: 5 },
+    { title: 'Morning meditation and daily hydration routine', squad: 'Habits', pts: 3 },
+    { title: 'Organize research notes and backlink connections', squad: 'Notes', pts: 5 },
+    { title: '25-minute Pomodoro focus session on priorities', squad: 'Focus', pts: 5 },
+    { title: 'Weekly personal productivity review and audit', squad: 'Review', pts: 3 },
   ];
   let sampleIndex = 0;
 
@@ -536,7 +536,7 @@ function initLandingExtras() {
   const contactBtn = document.getElementById('open-contact-btn');
   if (contactBtn) {
     const onContact = () => {
-      toast('Support: support@tracker.app | Hotline: +1 (800) 555-0199', 4500);
+      toast('Support: support@clockit.app | Community & Help Center available 24/7', 4500);
     };
     contactBtn.addEventListener('click', onContact);
     cleanupFns.push(() => contactBtn.removeEventListener('click', onContact));

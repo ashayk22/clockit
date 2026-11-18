@@ -7,6 +7,7 @@
  * an external change, which is what prevents echo loops and duplicate writes.
  */
 import { crossTab } from './crossTab';
+import { setStorageOwner as setOwner, getStorageOwner } from './storage';
 import { LocalTaskRepository } from './taskRepository';
 import { LocalWorkspaceRepository } from './workspaceRepository';
 import { LocalFocusSessionRepository } from './focusRepository';
@@ -36,6 +37,14 @@ export const repositories: readonly Repository[] = [
   noteFolderRepository,
   preferencesRepository,
 ];
+
+/** Switches every repository's working view without clearing any owner's cache. */
+export function setRepositoryOwner(ownerId: string | null): void {
+  const nextOwner = ownerId || 'local';
+  if (getStorageOwner() === nextOwner) return;
+  setOwner(nextOwner);
+  repositories.forEach((repository) => repository.refreshFromStorage());
+}
 
 crossTab.onChange((changedKeys) => {
   repositories.forEach((repository) => {

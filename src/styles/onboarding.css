@@ -473,6 +473,28 @@
   flex-shrink: 0;
 }
 
+/* Mobile: Welcome Banner wraps on narrow screens */
+@media (max-width: 420px) {
+  .clockit-onboarding-welcome-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 12px 12px;
+    padding: 14px 16px;
+  }
+
+  .clockit-owc-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .clockit-tutorial-btn.primary {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+  }
+}
+
 /* Reduced Motion Override */
 @media (prefers-reduced-motion: reduce) {
   .clockit-tour-spotlight-box,

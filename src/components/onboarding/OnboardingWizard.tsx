@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Compass, Sparkles, Sun, Moon, Monitor } f
 import { useAuth } from '../../auth/AuthContext';
 import { useTheme, type AppearanceMode } from '../../theme/ThemeContext';
 import { preferencesRepository } from '../../services/repositories';
+import { scopedStorageKey } from '../../services/repositories/storage';
 import { ClockItLogo } from '../brand/ClockItLogo';
 import { useOnboarding } from './OnboardingContext';
 import './onboardingWizard.css';
@@ -133,10 +134,10 @@ export const OnboardingWizard: React.FC = () => {
 
     // 3. Initial Timer preset
     try {
-      const rawSettings = localStorage.getItem('clockit_timer_settings');
+      const rawSettings = localStorage.getItem(scopedStorageKey('clockit_timer_settings'));
       const settings = rawSettings ? JSON.parse(rawSettings) : { deepWork: 25, shortBreak: 5, longBreak: 15 };
       settings.deepWork = finalFocus;
-      localStorage.setItem('clockit_timer_settings', JSON.stringify(settings));
+      localStorage.setItem(scopedStorageKey('clockit_timer_settings'), JSON.stringify(settings));
     } catch {
       /* ignore */
     }

@@ -21,8 +21,8 @@
  */
 import { isSupabaseConfigured, supabase } from '../../lib/supabaseClient';
 import { dataService } from '../dataService';
-import { noteRepository, preferencesRepository } from '../repositories';
-import { localStore } from '../repositories/storage';
+import { noteRepository, preferencesRepository, setRepositoryOwner } from '../repositories';
+import { localStore, scopedStorageKey } from '../repositories/storage';
 import { toast } from '../../components/ui/NotificationToast';
 import { TABLES, entityDomains, type CloudEntity, type Row } from './mappers';
 
@@ -35,12 +35,16 @@ export interface CloudSyncState {
   pendingCount: number;
 }
 
-type SyncOp =
+type UnownedSyncOp =
   | { kind: 'upsert'; table: string; conflict: string; clientId: string; payload: Row }
   | { kind: 'delete'; table: string; clientId: string }
   | { kind: 'replace-quick-notes'; notes: string[] };
+type SyncOp = UnownedSyncOp & { ownerId: string };
 
-const QUEUE_KEY = 'clockit-sync-queue';
+const LEGACY_QUEUE_KEY = 'clockit-sync-queue';
+const queueKey = (owner: string) => `clockit-sync-queue:${encodeURIComponent(owner)}`;
+const SNAPSHOTS_KEY = 'clockit-sync-snapshots';
+const DIRTY_KEY = 'clockit-sync-local-dirty';
 const SCAN_DEBOUNCE_MS = 200;
 
 let userId: string | null = null;
@@ -52,7 +56,7 @@ let flushTimer: number | null = null;
 let flushing = false;
 
 const snapshots = new Map<string, string>();
-const queue: SyncOp[] = [];
+let queue: SyncOp[] = [];
 
 // ------------------------------------------------------------------ state management
 type SyncStateListener = (state: CloudSyncState) => void;
@@ -92,10 +96,35 @@ function report(message: string, error?: unknown): void {
   console.error(`[clockit/cloud] ${message}`, error ?? '');
 }
 
+const ownerKey = (key: string, uid: string) => scopedStorageKey(key, `user:${uid}`);
+const hasDirtyLocalState = (uid: string): boolean => {
+  const result = localStore.readJson<boolean>(ownerKey(DIRTY_KEY, uid));
+  return result.status === 'ok' && result.value === true;
+};
+
+/** Marks an owner-scoped local write so hydration preserves it until scanned. */
+export function markOwnerLocalChange(uid: string): void {
+  if (uid) localStore.writeJson(ownerKey(DIRTY_KEY, uid), true);
+}
+
+function persistSnapshots(uid: string): void {
+  localStore.writeJson(ownerKey(SNAPSHOTS_KEY, uid), Object.fromEntries(snapshots));
+}
+
+function loadSnapshots(uid: string): void {
+  const saved = localStore.readJson<Record<string, string>>(ownerKey(SNAPSHOTS_KEY, uid));
+  if (saved.status === 'ok' && saved.value && typeof saved.value === 'object') {
+    for (const [table, value] of Object.entries(saved.value)) {
+      if (typeof value === 'string') snapshots.set(table, value);
+    }
+  }
+}
+
 // ------------------------------------------------------------------ queue io
 function persistQueue(): void {
   try {
-    localStore.writeJson(QUEUE_KEY, { userId, ops: queue });
+    if (!userId) return;
+    localStore.writeJson(queueKey(userId), { userId, ops: queue });
     updateSyncState({ pendingCount: queue.length });
   } catch (error) {
     report('Could not persist the sync queue', error);
@@ -103,30 +132,60 @@ function persistQueue(): void {
 }
 
 function loadQueue(forUser: string): void {
-  queue.length = 0;
-  const stored = localStore.readJson<{ userId: string | null; ops: SyncOp[] }>(QUEUE_KEY);
-  if (stored.status === 'ok' && stored.value && stored.value.userId === forUser) {
-    queue.push(...(Array.isArray(stored.value.ops) ? stored.value.ops : []));
+  const stored = localStore.readJson<{ userId: string | null; ops: SyncOp[] }>(queueKey(forUser));
+  if (stored.status === 'ok' && stored.value && stored.value.userId !== forUser) {
+    const quarantineKey = `clockit-sync-queue-quarantine:${encodeURIComponent(forUser)}:${Date.now()}`;
+    if (!localStore.writeJson(quarantineKey, stored.value)) {
+      queue = [];
+      report('Queue owner mismatch found; original queue retained because quarantine storage failed.');
+      return;
+    }
   }
+  const rejected = stored.status === 'ok' && stored.value?.userId === forUser && Array.isArray(stored.value.ops)
+    ? stored.value.ops.filter((op) => !op || op.ownerId !== forUser)
+    : [];
+  if (stored.status === 'ok' && rejected.length > 0) {
+    const quarantineKey = `clockit-sync-queue-quarantine:${encodeURIComponent(forUser)}:${Date.now()}`;
+    if (!localStore.writeJson(quarantineKey, stored.value)) {
+      queue = [];
+      report('Queue ownership mismatch found; original queue retained because quarantine storage failed.');
+      return;
+    }
+  }
+  let ops = stored.status === 'ok' && stored.value?.userId === forUser && Array.isArray(stored.value.ops)
+    ? stored.value.ops.filter((op) => op && op.ownerId === forUser)
+    : [];
+  // Safely adopt the legacy single-owner queue only for its recorded owner; leave its original bytes intact.
+  if (ops.length === 0) {
+    const legacy = localStore.readJson<{ userId: string | null; ops: SyncOp[] }>(LEGACY_QUEUE_KEY);
+    if (legacy.status === 'ok' && legacy.value?.userId === forUser && Array.isArray(legacy.value.ops)) {
+      ops = legacy.value.ops.map((op) => ({ ...op, ownerId: forUser }));
+    }
+  }
+  queue = ops;
+  persistQueue();
   updateSyncState({ pendingCount: queue.length });
 }
 
 const opKey = (op: SyncOp): string =>
   op.kind === 'replace-quick-notes' ? 'quick_notes:*' : `${op.table}:${op.clientId}`;
 
-function enqueue(op: SyncOp): void {
-  const key = opKey(op);
+function enqueue(op: UnownedSyncOp): void {
+  if (!userId) return;
+  const ownedOp: SyncOp = { ...op, ownerId: userId } as SyncOp;
+  const key = opKey(ownedOp);
   const existing = queue.findIndex((candidate) => opKey(candidate) === key);
   if (existing !== -1) queue.splice(existing, 1);
-  queue.push(op);
+  queue.push(ownedOp);
   persistQueue();
 }
 
 // ------------------------------------------------------------------ flush & atomic apply
-async function applyOp(op: SyncOp): Promise<void> {
-  if (!supabase || !userId) return;
+async function applyOp(op: SyncOp, owner: string): Promise<void> {
+  if (!supabase || !owner || userId !== owner || op.ownerId !== owner) return;
 
   if (op.kind === 'upsert') {
+    if (op.payload.user_id !== owner) throw new Error('Queued operation owner does not match active account.');
     let { error } = await supabase.from(op.table).upsert(op.payload, { onConflict: op.conflict });
     if (error && op.table === TABLES.userPreferences) {
       // If table has not yet executed migration 0002, gracefully fall back to base columns
@@ -150,7 +209,7 @@ async function applyOp(op: SyncOp): Promise<void> {
     const { error } = await supabase
       .from(op.table)
       .delete()
-      .eq('user_id', userId)
+      .eq('user_id', owner)
       .eq('client_id', op.clientId);
     if (error) throw error;
     return;
@@ -184,7 +243,7 @@ async function applyOp(op: SyncOp): Promise<void> {
     // This strictly eliminates the risk of an empty cloud state if network drops.
     if (op.notes.length > 0) {
       const rows = op.notes.map((body, index) => ({
-        user_id: userId,
+        user_id: owner,
         client_id: `qn-${index}`,
         body,
         sort_index: index,
@@ -199,7 +258,7 @@ async function applyOp(op: SyncOp): Promise<void> {
     const { error: trimErr } = await supabase
       .from(TABLES.quickNotes)
       .delete()
-      .eq('user_id', userId)
+      .eq('user_id', owner)
       .gte('sort_index', op.notes.length);
     if (trimErr) throw trimErr;
   }
@@ -213,16 +272,20 @@ async function flush(): Promise<void> {
   }
 
   flushing = true;
+  const owner = userId;
+  const ownerQueue = queue;
   updateSyncState({ status: 'syncing' });
 
   try {
-    while (queue.length > 0) {
-      const op = queue[0];
+    while (userId === owner && queue === ownerQueue && ownerQueue.length > 0) {
+      const op = ownerQueue[0];
       try {
-        await applyOp(op);
-        queue.shift();
+        await applyOp(op, owner);
+        if (userId !== owner || queue !== ownerQueue) break;
+        if (ownerQueue[0] === op) ownerQueue.shift();
         persistQueue();
       } catch (error) {
+        if (userId !== owner || queue !== ownerQueue) break;
         report('A queued change could not be pushed; it will be retried', error);
         updateSyncState({
           status: 'error',
@@ -231,7 +294,7 @@ async function flush(): Promise<void> {
         break; // keep order and retry on the next trigger
       }
     }
-    if (queue.length === 0) {
+    if (userId === owner && queue === ownerQueue && ownerQueue.length === 0) {
       updateSyncState({
         status: 'synced',
         lastSyncedAt: Date.now(),
@@ -240,6 +303,7 @@ async function flush(): Promise<void> {
     }
   } finally {
     flushing = false;
+    if (queue.length && userId && userId !== owner) scheduleFlush();
   }
 }
 
@@ -294,6 +358,7 @@ async function scan(): Promise<void> {
 
   for (const domain of entityDomains) {
     const records = await domain.readLocal();
+    if (userId !== uid) return;
     const previousRaw = snapshots.get(domain.table);
     const previous: Record<string, string> = previousRaw ? safeParse(previousRaw) : {};
     const next: Record<string, string> = {};
@@ -318,6 +383,7 @@ async function scan(): Promise<void> {
   }
 
   const prefsJson = JSON.stringify(preferencesRepository.getAll());
+  if (userId !== uid) return;
   if (snapshots.get(TABLES.userPreferences) !== prefsJson) {
     snapshots.set(TABLES.userPreferences, prefsJson);
     enqueue({
@@ -336,6 +402,8 @@ async function scan(): Promise<void> {
     enqueue({ kind: 'replace-quick-notes', notes: quickNotes });
   }
 
+  persistSnapshots(uid);
+  localStore.remove(ownerKey(DIRTY_KEY, uid));
   void flush();
 }
 
@@ -350,6 +418,7 @@ function safeParse(json: string): Record<string, string> {
 
 function scheduleScan(): void {
   if (!started || applying || userId === null) return;
+  localStore.writeJson(ownerKey(DIRTY_KEY, userId), true);
   if (scanTimer !== null) return;
   scanTimer = window.setTimeout(() => {
     scanTimer = null;
@@ -361,15 +430,18 @@ function scheduleScan(): void {
 async function hydratePreferences(): Promise<void> {
   if (!supabase || !userId) return;
   const uid = userId;
+  if (hasDirtyLocalState(uid)) return;
   const { data, error } = await supabase
     .from(TABLES.userPreferences)
     .select('*')
     .eq('user_id', uid)
     .maybeSingle();
+  if (userId !== uid) return;
 
   if (error) {
     report('Could not load user preferences', error);
   } else if (data) {
+    if ((data as Row).user_id !== uid) return;
     const row = data as Row;
     const notifKeys = Array.isArray(row.notification_read_keys) ? (row.notification_read_keys as string[]) : [];
     preferencesRepository.set('theme', row.theme === 'dark' ? 'dark' : 'light');
@@ -425,9 +497,10 @@ async function hydratePreferences(): Promise<void> {
 async function hydrateQuickNotes(): Promise<void> {
   if (!supabase || !userId) return;
   const uid = userId;
+  if (hasDirtyLocalState(uid)) return;
 
   // If there are unpushed quick note edits queued locally, preserve them
-  const hasPendingQuickNotes = queue.some((op) => op.kind === 'replace-quick-notes');
+  const hasPendingQuickNotes = queue.some((op) => op.ownerId === uid && op.kind === 'replace-quick-notes');
   if (hasPendingQuickNotes) {
     snapshots.set(TABLES.quickNotes, JSON.stringify(noteRepository.getQuickNotes()));
     return;
@@ -435,15 +508,18 @@ async function hydrateQuickNotes(): Promise<void> {
 
   const { data, error } = await supabase
     .from(TABLES.quickNotes)
-    .select('body, sort_index')
+    .select('user_id, body, sort_index')
     .eq('user_id', uid)
     .order('sort_index', { ascending: true });
+  if (userId !== uid) return;
 
   if (error) {
     report('Could not load quick notes', error);
   } else if (Array.isArray(data) && data.length > 0) {
-    const list = data.map((row) => String((row as Row).body ?? ''));
-    localStore.writeJson('clockit_quick_notes', list);
+    const list = data
+      .filter((row) => (row as Row).user_id === uid)
+      .map((row) => String((row as Row).body ?? ''));
+    localStore.writeJson(scopedStorageKey('clockit_quick_notes', `user:${uid}`), list);
     noteRepository.refreshFromStorage();
   }
   snapshots.set(TABLES.quickNotes, JSON.stringify(noteRepository.getQuickNotes()));
@@ -465,25 +541,32 @@ async function hydrate(): Promise<void> {
       // Check if user has offline changes pending in queue for this table.
       // If yes, NEVER silently overwrite unpushed local changes with stale cloud rows.
       const hasPendingForDomain = queue.some(
-        (op) => (op.kind === 'upsert' || op.kind === 'delete') && op.table === domain.table,
+        (op) => op.ownerId === uid && (op.kind === 'upsert' || op.kind === 'delete') && op.table === domain.table,
       );
 
       const { data, error } = await supabase.from(domain.table).select('*').eq('user_id', uid);
+      if (userId !== uid) return;
       if (error) {
         report(`Could not load "${domain.table}"`, error);
         throw error;
       }
-      const rows = Array.isArray(data) ? (data as Row[]) : [];
+      const rows = Array.isArray(data) ? (data as Row[]).filter((row) => row.user_id === uid) : [];
       if (rows.length > 0) {
-        if (!hasPendingForDomain) {
+        if (hasDirtyLocalState(uid)) {
+          // Keep the owner-scoped cache; the durable baseline lets scan() queue edits/deletes after hydration.
+        } else if (!hasPendingForDomain) {
           await domain.writeLocal(rows.map((row) => domain.fromRow(row)));
         } else {
           console.warn(`[clockit/sync] Preserving local edits for ${domain.table}`);
         }
       }
-      snapshots.set(domain.table, entitySignature(await domain.readLocal()));
+      if (!hasDirtyLocalState(uid)) {
+        snapshots.set(domain.table, entitySignature(await domain.readLocal()));
+      }
     }
+    if (userId !== uid) return;
     await hydratePreferences();
+    if (userId !== uid) return;
     await hydrateQuickNotes();
 
     updateSyncState({
@@ -492,12 +575,13 @@ async function hydrate(): Promise<void> {
       errorMessage: null,
     });
   } catch (error) {
+    if (userId !== uid) return;
     const errorMsg = error instanceof Error ? error.message : 'Could not synchronize with cloud storage.';
     updateSyncState({ status: 'error', errorMessage: errorMsg });
     report('Cloud hydration failed', error);
     throw error;
   } finally {
-    applying = false;
+    if (userId === uid) applying = false;
   }
   void flush();
 }
@@ -557,11 +641,16 @@ export async function startCloudSync(nextUserId: string): Promise<void> {
   stopCloudSync();
   userId = nextUserId;
   started = true;
+  // Establish the cache owner before any hydration or queue replay.
+  setRepositoryOwner(`user:${nextUserId}`);
+  snapshots.clear();
+  loadSnapshots(nextUserId);
   loadQueue(nextUserId);
 
   try {
     await hydrate();
   } catch (error) {
+    if (userId !== nextUserId) return;
     report('Cloud hydration failed', error);
     toast('Cloud synchronization unavailable. Local data is preserved.', {
       kind: 'warning',
@@ -576,6 +665,7 @@ export async function startCloudSync(nextUserId: string): Promise<void> {
   }
 
   unsub = dataService.subscribe(scheduleScan);
+  if (hasDirtyLocalState(nextUserId)) void scan();
   if (typeof window !== 'undefined') {
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
@@ -604,14 +694,9 @@ export function stopCloudSync(): void {
   started = false;
   userId = null;
   snapshots.clear();
-  queue.length = 0;
+  queue = [];
+  applying = false;
   updateSyncState({ status: 'idle', lastSyncedAt: null, errorMessage: null, pendingCount: 0 });
 
-  // Reset the shared cache so the next user cannot see prior account records.
-  for (const domain of entityDomains) {
-    const seeds = domain.initialRecords ? domain.initialRecords() : [];
-    void domain.writeLocal(seeds);
-  }
-  localStore.writeJson('clockit_quick_notes', []);
-  noteRepository.refreshFromStorage();
+  // Each owner has a separate local cache and durable queue; preserve both.
 }

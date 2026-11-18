@@ -1,6 +1,6 @@
 import { notesStorage, type GraphLink, type GraphNode, type NoteFolder, type NoteItem } from '../notesStorage';
 import { crossTab, NOTES_SCOPE } from './crossTab';
-import { LocalJsonStore, ObservableRepository } from './storage';
+import { LocalJsonStore, ObservableRepository, scopedStorageKey } from './storage';
 import type { NoteFolderRepository, NoteRepository } from './types';
 
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value);
@@ -16,7 +16,7 @@ const QUICK_NOTES_KEY = 'clockit_quick_notes';
  * they ride the ordinary `storage` event as well.
  */
 export class LocalNoteRepository extends ObservableRepository implements NoteRepository {
-  readonly keys = [NOTES_SCOPE, QUICK_NOTES_KEY];
+  get keys(): readonly string[] { return [NOTES_SCOPE, scopedStorageKey(QUICK_NOTES_KEY)]; }
 
   private readonly quickNotes = new LocalJsonStore<string[]>(
     QUICK_NOTES_KEY,
@@ -133,7 +133,7 @@ export class LocalNoteRepository extends ObservableRepository implements NoteRep
   }
 
   private announce(): void {
-    crossTab.broadcast(NOTES_SCOPE);
+    crossTab.broadcast(`${NOTES_SCOPE}:${this.quickNotes.key}`);
     this.emit();
   }
 }
@@ -143,7 +143,7 @@ export class LocalNoteFolderRepository
   extends ObservableRepository
   implements NoteFolderRepository
 {
-  readonly keys = [NOTES_SCOPE];
+  get keys(): readonly string[] { return [`${NOTES_SCOPE}:${scopedStorageKey('owner')}`]; }
 
   async getAll(): Promise<NoteFolder[]> {
     return notesStorage.getAllFolders();
@@ -151,20 +151,20 @@ export class LocalNoteFolderRepository
 
   async create(name: string, color = '#3b82f6', parentId: string | null = null): Promise<NoteFolder> {
     const folder = await notesStorage.createFolder(name, color, parentId);
-    crossTab.broadcast(NOTES_SCOPE);
+    crossTab.broadcast(`${NOTES_SCOPE}:${scopedStorageKey('owner')}`);
     this.emit();
     return folder;
   }
 
   async rename(id: string, newName: string): Promise<void> {
     await notesStorage.renameFolder(id, newName);
-    crossTab.broadcast(NOTES_SCOPE);
+    crossTab.broadcast(`${NOTES_SCOPE}:${scopedStorageKey('owner')}`);
     this.emit();
   }
 
   async remove(id: string): Promise<void> {
     await notesStorage.deleteFolder(id);
-    crossTab.broadcast(NOTES_SCOPE);
+    crossTab.broadcast(`${NOTES_SCOPE}:${scopedStorageKey('owner')}`);
     this.emit();
   }
 

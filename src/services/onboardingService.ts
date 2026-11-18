@@ -744,7 +744,7 @@ const TUTORIAL_KEY_PREFIX = 'tutorial:';
 
 export function getSavedTourStep(): number {
   if (typeof window === 'undefined') return 0;
-  const raw = localStorage.getItem(ACTIVE_STEP_KEY);
+  const raw = localStorage.getItem(scopedStorageKey(ACTIVE_STEP_KEY));
   if (!raw) return 0;
   const num = parseInt(raw, 10);
   return isNaN(num) || num < 0 || num >= TOTAL_TOUR_STEPS ? 0 : num;
@@ -752,7 +752,7 @@ export function getSavedTourStep(): number {
 
 export function saveTourStep(stepIndex: number): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(ACTIVE_STEP_KEY, String(stepIndex));
+  localStorage.setItem(scopedStorageKey(ACTIVE_STEP_KEY), String(stepIndex));
 }
 
 export function isGlobalTourCompleted(): boolean {
@@ -761,21 +761,21 @@ export function isGlobalTourCompleted(): boolean {
   if (keys.includes(`${TUTORIAL_KEY_PREFIX}global:completed`)) {
     return true;
   }
-  return localStorage.getItem(TOUR_COMPLETED_KEY) === 'true';
+  return localStorage.getItem(scopedStorageKey(TOUR_COMPLETED_KEY)) === 'true';
 }
 
 export function setGlobalTourCompleted(completed: boolean): void {
   if (typeof window === 'undefined') return;
   if (completed) {
-    localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
-    localStorage.removeItem(ACTIVE_STEP_KEY);
+    localStorage.setItem(scopedStorageKey(TOUR_COMPLETED_KEY), 'true');
+    localStorage.removeItem(scopedStorageKey(ACTIVE_STEP_KEY));
     const current = preferencesRepository.get('notificationReadKeys');
     const key = `${TUTORIAL_KEY_PREFIX}global:completed`;
     if (!current.includes(key)) {
       preferencesRepository.set('notificationReadKeys', [...current, key]);
     }
   } else {
-    localStorage.removeItem(TOUR_COMPLETED_KEY);
+    localStorage.removeItem(scopedStorageKey(TOUR_COMPLETED_KEY));
     const current = preferencesRepository.get('notificationReadKeys');
     const filtered = current.filter((k) => k !== `${TUTORIAL_KEY_PREFIX}global:completed`);
     preferencesRepository.set('notificationReadKeys', filtered);
@@ -819,16 +819,16 @@ export function replayTutorial(pageId: string): void {
       k !== `${TUTORIAL_KEY_PREFIX}global:completed`,
   );
   preferencesRepository.set('notificationReadKeys', filtered);
-  localStorage.removeItem(TOUR_COMPLETED_KEY);
+  localStorage.removeItem(scopedStorageKey(TOUR_COMPLETED_KEY));
 }
 
 export function resetAllTutorials(): void {
   const current = preferencesRepository.get('notificationReadKeys');
   const filtered = current.filter((k) => !k.startsWith(TUTORIAL_KEY_PREFIX));
   preferencesRepository.set('notificationReadKeys', filtered);
-  localStorage.removeItem(ACTIVE_STEP_KEY);
-  localStorage.removeItem(TOUR_COMPLETED_KEY);
-  localStorage.removeItem(DISMISSED_WELCOME_KEY);
+  localStorage.removeItem(scopedStorageKey(ACTIVE_STEP_KEY));
+  localStorage.removeItem(scopedStorageKey(TOUR_COMPLETED_KEY));
+  localStorage.removeItem(scopedStorageKey(DISMISSED_WELCOME_KEY));
 }
 
 export function getTutorialProgress(): { completed: number; total: number; percentage: number } {
@@ -841,10 +841,11 @@ export function getTutorialProgress(): { completed: number; total: number; perce
 export function shouldShowInitialWelcome(): boolean {
   if (typeof window === 'undefined') return false;
   if (isGlobalTourCompleted()) return false;
-  return !localStorage.getItem(DISMISSED_WELCOME_KEY);
+  return !localStorage.getItem(scopedStorageKey(DISMISSED_WELCOME_KEY));
 }
 
 export function dismissInitialWelcome(): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(DISMISSED_WELCOME_KEY, 'true');
+  localStorage.setItem(scopedStorageKey(DISMISSED_WELCOME_KEY), 'true');
 }
+import { scopedStorageKey } from './repositories/storage';

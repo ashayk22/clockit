@@ -1,5 +1,5 @@
 import { type FocusSession } from '../../data/mockData';
-import { LocalJsonStore, ObservableRepository } from './storage';
+import { LocalJsonStore, ObservableRepository, scopedStorageKey } from './storage';
 import type { FocusSessionInput, FocusSessionRepository } from './types';
 
 const isSessionArray = (value: unknown): value is FocusSession[] => Array.isArray(value);
@@ -15,7 +15,7 @@ export class LocalFocusSessionRepository
   extends ObservableRepository
   implements FocusSessionRepository
 {
-  readonly keys = ['clockit_focus_sessions', 'clockit_selected_focus_task_id'];
+  get keys(): readonly string[] { return ['clockit_focus_sessions', 'clockit_selected_focus_task_id'].map((key) => scopedStorageKey(key)); }
 
   private readonly store = new LocalJsonStore<FocusSession[]>(
     'clockit_focus_sessions',

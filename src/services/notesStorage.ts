@@ -1,5 +1,6 @@
 import { openDB, IDBPDatabase } from 'idb';
 import type { OwnedEntity } from '../data/ownership';
+import { getStorageOwner } from './repositories/storage';
 
 export interface NoteFolder extends OwnedEntity {
   id: string;
@@ -39,11 +40,14 @@ export interface GraphLink {
 const DB_NAME = 'clockit-notes-db';
 const DB_VERSION = 1;
 
-let dbPromise: Promise<IDBPDatabase> | null = null;
+const dbPromises = new Map<string, Promise<IDBPDatabase>>();
+const currentOwner = () => getStorageOwner();
+const owns = (record: OwnedEntity) => record.userId === currentOwner();
 
-export const getDB = () => {
-  if (!dbPromise) {
-    dbPromise = openDB(DB_NAME, DB_VERSION, {
+export const getDB = (requestedOwner = currentOwner()) => {
+  const owner = requestedOwner;
+  if (!dbPromises.has(owner)) {
+    dbPromises.set(owner, openDB(`${DB_NAME}:${encodeURIComponent(owner)}`, DB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains('folders')) {
           const folderStore = db.createObjectStore('folders', { keyPath: 'id' });
@@ -57,13 +61,13 @@ export const getDB = () => {
           noteStore.createIndex('updatedAt', 'updatedAt');
         }
       },
-    });
+    }));
   }
-  return dbPromise;
+  return dbPromises.get(owner)!;
 };
 
-// Default seed data matching ClockIt's visual reference
-const DEFAULT_FOLDERS: NoteFolder[] = [
+// Demo-only fixtures. Real and local accounts start with an empty notebook.
+const DEMO_FOLDERS: NoteFolder[] = [
   { id: 'f-personal', name: 'Personal', color: '#f59e0b', parentId: null, createdAt: Date.now() - 300000 },
   { id: 'f-personal-ideas', name: 'Ideas', color: '#f59e0b', parentId: 'f-personal', createdAt: Date.now() - 290000 },
   { id: 'f-personal-goals', name: 'Goals', color: '#f59e0b', parentId: 'f-personal', createdAt: Date.now() - 280000 },
@@ -78,7 +82,7 @@ const DEFAULT_FOLDERS: NoteFolder[] = [
   { id: 'f-freelance', name: 'Freelance', color: '#f97316', parentId: null, createdAt: Date.now() - 210000 },
 ];
 
-const DEFAULT_NOTES: NoteItem[] = [
+const DEMO_NOTES: NoteItem[] = [
   {
     id: 'n-clockit-features',
     title: 'ClockIt Features',
@@ -234,15 +238,18 @@ const DEFAULT_NOTES: NoteItem[] = [
 
 export const notesStorage = {
   async init(): Promise<void> {
-    const db = await getDB();
+    const owner = currentOwner();
+    const db = await getDB(owner);
+    if (currentOwner() !== owner || owner !== 'demo') return;
     const folderCount = await db.count('folders');
-    if (folderCount === 0) {
+    const noteCount = await db.count('notes');
+    if (folderCount === 0 && noteCount === 0) {
       const tx = db.transaction(['folders', 'notes'], 'readwrite');
-      for (const folder of DEFAULT_FOLDERS) {
-        await tx.objectStore('folders').put(folder);
+      for (const folder of DEMO_FOLDERS) {
+        await tx.objectStore('folders').put({ ...folder, userId: owner });
       }
-      for (const note of DEFAULT_NOTES) {
-        await tx.objectStore('notes').put(note);
+      for (const note of DEMO_NOTES) {
+        await tx.objectStore('notes').put({ ...note, userId: owner });
       }
       await tx.done;
     }
@@ -250,35 +257,44 @@ export const notesStorage = {
 
   async getAllFolders(): Promise<NoteFolder[]> {
     const db = await getDB();
-    return db.getAll('folders');
+    return (await db.getAll('folders')).filter(owns);
   },
 
   async createFolder(name: string, color = '#3b82f6', parentId: string | null = null): Promise<NoteFolder> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during folder creation.');
     const folder: NoteFolder = {
       id: `f-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       name: name.trim(),
       color,
       parentId,
       createdAt: Date.now(),
+      userId: owner,
     };
     await db.put('folders', folder);
     return folder;
   },
 
   async renameFolder(id: string, newName: string): Promise<void> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during folder update.');
     const folder = await db.get('folders', id);
-    if (folder) {
+    if (folder && owns(folder)) {
       folder.name = newName.trim();
       await db.put('folders', folder);
     }
   },
 
   async deleteFolder(id: string): Promise<void> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during folder deletion.');
+    const folder = await db.get('folders', id);
+    if (!folder || !owns(folder)) return;
     // Move notes in this folder to personal or default folder
-    const notes = await db.getAll('notes');
+    const notes = (await db.getAll('notes')).filter(owns);
     const tx = db.transaction(['folders', 'notes'], 'readwrite');
     for (const note of notes) {
       if (note.folderId === id) {
@@ -293,24 +309,25 @@ export const notesStorage = {
   async getAllNotes(): Promise<NoteItem[]> {
     const db = await getDB();
     const all = await db.getAll('notes');
-    return all.filter((n) => !n.isTrash);
+    return all.filter((n) => owns(n) && !n.isTrash);
   },
 
   async getTrashNotes(): Promise<NoteItem[]> {
     const db = await getDB();
     const all = await db.getAll('notes');
-    return all.filter((n) => n.isTrash);
+    return all.filter((n) => owns(n) && n.isTrash);
   },
 
   async getNoteById(id: string): Promise<NoteItem | undefined> {
     const db = await getDB();
-    return db.get('notes', id);
+    const note = await db.get('notes', id);
+    return note && owns(note) ? note : undefined;
   },
 
   /** Every note, including trashed ones — used by cloud hydration. */
   async getAllNotesIncludingTrash(): Promise<NoteItem[]> {
     const db = await getDB();
-    return db.getAll('notes');
+    return (await db.getAll('notes')).filter(owns);
   },
 
   /**
@@ -319,48 +336,62 @@ export const notesStorage = {
    * user's notes can be swapped in atomically without deleting the database.
    */
   async replaceAllNotes(notes: NoteItem[]): Promise<void> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during hydration.');
     const tx = db.transaction('notes', 'readwrite');
     await tx.objectStore('notes').clear();
-    for (const note of notes) await tx.objectStore('notes').put(note);
+    for (const note of notes) await tx.objectStore('notes').put({ ...note, userId: owner });
     await tx.done;
   },
 
   /** Replaces the whole folders store in one transaction (Phase 12 cloud hydration). */
   async replaceAllFolders(folders: NoteFolder[]): Promise<void> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during hydration.');
     const tx = db.transaction('folders', 'readwrite');
     await tx.objectStore('folders').clear();
-    for (const folder of folders) await tx.objectStore('folders').put(folder);
+    for (const folder of folders) await tx.objectStore('folders').put({ ...folder, userId: owner });
     await tx.done;
   },
 
-  async createNote(folderId = 'f-dev-webdev', title = 'Untitled Note'): Promise<NoteItem> {
+  async createNote(folderId = '', title = 'Untitled Note'): Promise<NoteItem> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during note creation.');
+    const folderExists = folderId ? await db.get('folders', folderId) : undefined;
+    const safeFolderId = folderExists && folderExists.userId === owner ? folderId : '';
     const newNote: NoteItem = {
       id: `n-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       title: title.trim(),
-      folderId,
-      content: '<p>Start typing or use <strong>[[Note Title]]</strong> to create links...</p>',
-      tags: ['#note'],
+      folderId: safeFolderId,
+      content: '<p></p>',
+      tags: [],
       isFavorite: false,
       isTrash: false,
       isTemplate: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      userId: owner,
     };
     await db.put('notes', newNote);
     return newNote;
   },
 
   async updateNote(id: string, updates: Partial<NoteItem>): Promise<NoteItem> {
-    const db = await getDB();
+    return this.updateNoteForOwner(currentOwner(), id, updates);
+  },
+
+  async updateNoteForOwner(owner: string, id: string, updates: Partial<NoteItem>): Promise<NoteItem> {
+    const db = await getDB(owner);
     const existing = await db.get('notes', id);
-    if (!existing) throw new Error(`Note ${id} not found`);
+    if (!existing || existing.userId !== owner) throw new Error(`Note ${id} not found for owner.`);
 
     const updated: NoteItem = {
       ...existing,
       ...updates,
+      userId: owner,
       updatedAt: Date.now(),
     };
     await db.put('notes', updated);
@@ -368,9 +399,11 @@ export const notesStorage = {
   },
 
   async toggleFavorite(id: string): Promise<boolean> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during update.');
     const note = await db.get('notes', id);
-    if (!note) return false;
+    if (!note || !owns(note)) return false;
     note.isFavorite = !note.isFavorite;
     note.updatedAt = Date.now();
     await db.put('notes', note);
@@ -378,9 +411,11 @@ export const notesStorage = {
   },
 
   async moveToTrash(id: string): Promise<void> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during update.');
     const note = await db.get('notes', id);
-    if (note) {
+    if (note && owns(note)) {
       note.isTrash = true;
       note.updatedAt = Date.now();
       await db.put('notes', note);
@@ -388,9 +423,11 @@ export const notesStorage = {
   },
 
   async restoreFromTrash(id: string): Promise<void> {
+    const owner = currentOwner();
     const db = await getDB();
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during update.');
     const note = await db.get('notes', id);
-    if (note) {
+    if (note && owns(note)) {
       note.isTrash = false;
       note.updatedAt = Date.now();
       await db.put('notes', note);
@@ -398,8 +435,11 @@ export const notesStorage = {
   },
 
   async deletePermanently(id: string): Promise<void> {
+    const owner = currentOwner();
     const db = await getDB();
-    await db.delete('notes', id);
+    if (currentOwner() !== owner) throw new Error('Notes owner changed during deletion.');
+    const note = await db.get('notes', id);
+    if (note && owns(note)) await db.delete('notes', id);
   },
 
   // Parse [[Note Title]] internal links from HTML content

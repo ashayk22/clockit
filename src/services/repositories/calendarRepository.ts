@@ -1,5 +1,5 @@
 import type { CalendarEvent, TimelineEvent } from '../../data/mockData';
-import { LocalJsonStore, ObservableRepository } from './storage';
+import { LocalJsonStore, ObservableRepository, scopedStorageKey } from './storage';
 import type { CalendarRepository } from './types';
 
 const isEventArray = (value: unknown): value is CalendarEvent[] => Array.isArray(value);
@@ -7,7 +7,7 @@ const isTimelineArray = (value: unknown): value is TimelineEvent[] => Array.isAr
 
 /** Local-storage backed calendar repository (`clockit_calendar_events`, `clockit_timeline_events`). */
 export class LocalCalendarRepository extends ObservableRepository implements CalendarRepository {
-  readonly keys = ['clockit_calendar_events', 'clockit_timeline_events'];
+  get keys(): readonly string[] { return ['clockit_calendar_events', 'clockit_timeline_events'].map((key) => scopedStorageKey(key)); }
 
   private readonly store = new LocalJsonStore<CalendarEvent[]>(
     'clockit_calendar_events',

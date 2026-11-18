@@ -23,7 +23,7 @@ import {
 } from '../../data/mockData';
 import type { NoteFolder, NoteItem } from '../notesStorage';
 import { notesStorage } from '../notesStorage';
-import { localStore } from '../repositories/storage';
+import { localStore, scopedStorageKey } from '../repositories/storage';
 import {
   calendarRepository,
   focusRepository,
@@ -108,7 +108,7 @@ const strArray = (value: unknown): string[] =>
 
 /** Writes a JSON array into a local-storage key, then asks the repository to re-read. */
 function writeJsonAndRefresh<T>(key: string, records: T[], refresh: () => void): Promise<void> {
-  localStore.writeJson(key, records);
+  localStore.writeJson(scopedStorageKey(key), records);
   refresh();
   return Promise.resolve();
 }

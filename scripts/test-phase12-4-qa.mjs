@@ -106,20 +106,22 @@ async function runTests() {
     'New accounts receive 1 clean Personal workspace and empty arrays for tasks, focus, habits, calendar, timeline'
   );
 
-  // TEST 5: Interactive Onboarding & Tutorials (11 Modules)
+  // TEST 5: Interactive Onboarding & Tutorials (11 Product Areas)
   const onboardingSrc = fs.readFileSync('src/services/onboardingService.ts', 'utf8');
   const requiredModules = [
     'dashboard', 'tasks', 'workspaces', 'calendar', 'focus',
-    'habits', 'notes', 'note_folders', 'quick_notes', 'timeline', 'preferences'
+    'habits', 'notes', 'quick_notes', 'timeline', 'analytics', 'settings'
   ];
 
   let missingModules = [];
   for (const mod of requiredModules) {
     if (!onboardingSrc.includes(`id: '${mod}'`)) missingModules.push(mod);
   }
+  if (!onboardingSrc.includes("id: 'notes-folders'")) missingModules.push('notes folder walkthrough');
+  if (!onboardingSrc.includes("id: 'settings-personalization'")) missingModules.push('settings preferences walkthrough');
 
   record(
-    'Interactive Tutorials (11 Feature Walkthroughs)',
+    'Interactive Tutorials (11 Product Areas)',
     missingModules.length === 0,
     missingModules.length === 0 ? 'All 11 tutorial modules defined with steps, tips, shortcuts, and target selectors' : `Missing: ${missingModules.join(', ')}`
   );

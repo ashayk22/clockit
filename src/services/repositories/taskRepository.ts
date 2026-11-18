@@ -5,7 +5,7 @@ import {
   computeDaysDiff,
   formatDeadlineString,
 } from '../taskUtils';
-import { LocalJsonStore, ObservableRepository } from './storage';
+import { LocalJsonStore, ObservableRepository, scopedStorageKey } from './storage';
 import type { TaskRepository } from './types';
 
 const isTaskArray = (value: unknown): value is TaskItem[] => Array.isArray(value);
@@ -66,7 +66,7 @@ export function normalizeTask(raw: Partial<TaskItem>, index = 0): TaskItem {
 
 /** Local-storage backed task repository (`clockit_tasks`). */
 export class LocalTaskRepository extends ObservableRepository implements TaskRepository {
-  readonly keys = ['clockit_tasks'];
+  get keys(): readonly string[] { return [scopedStorageKey('clockit_tasks')]; }
 
   private readonly store = new LocalJsonStore<TaskItem[]>('clockit_tasks', [], isTaskArray);
 

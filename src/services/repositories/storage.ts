@@ -54,6 +54,20 @@ export class StorageWriteError extends StorageError {
 }
 
 const issueListeners = new Set<(issue: StorageIssue) => void>();
+let activeStorageOwner = 'local';
+
+/** Stable storage namespace. Unscoped pre-Hotfix data is deliberately left untouched. */
+export function setStorageOwner(ownerId: string | null): void {
+  activeStorageOwner = ownerId || 'local';
+}
+
+export function getStorageOwner(): string {
+  return activeStorageOwner;
+}
+
+export function scopedStorageKey(baseKey: string, owner = activeStorageOwner): string {
+  return `clockit:owner:${encodeURIComponent(owner)}:${baseKey}`;
+}
 const recentIssues: StorageIssue[] = [];
 const MAX_RECENT_ISSUES = 50;
 
@@ -175,18 +189,19 @@ export const localStore = {
  * back — the combination is what makes corruption-safe storage possible.
  */
 export class LocalJsonStore<T> {
-  readonly key: string;
+  private readonly baseKey: string;
+  get key(): string { return scopedStorageKey(this.baseKey); }
   private readonly fallback: T;
   private readonly guard?: (value: unknown) => value is T;
   private quarantined = false;
   value: T;
 
   constructor(key: string, fallback: T, guard?: (value: unknown) => value is T) {
-    this.key = key;
+    this.baseKey = key;
     this.fallback = fallback;
     this.guard = guard;
 
-    const result = localStore.readJson<T>(key);
+    const result = localStore.readJson<T>(this.key);
     if (result.status === 'ok' && (!guard || guard(result.value))) {
       this.value = result.value;
       return;
@@ -194,8 +209,8 @@ export class LocalJsonStore<T> {
     if (result.status === 'ok') {
       reportStorageIssue(
         'corrupt',
-        key,
-        `Stored data for "${key}" has an unexpected shape. The existing value was left untouched.`,
+        this.key,
+        `Stored data for "${this.key}" has an unexpected shape. The existing value was left untouched.`,
       );
     }
     this.value = fallback;

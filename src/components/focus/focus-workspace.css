@@ -11,6 +11,7 @@
   --focus-line: var(--border-strong, #d5cfc2);
   --focus-cream: var(--bg-primary, #fbf9f5);
   --focus-surface: var(--bg-surface, #fff);
+  --focus-sage-soft: rgba(137, 161, 119, 0.13);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: clamp(18px, 2.3vw, 32px);
@@ -139,10 +140,11 @@
 
 .focus-workspace-main {
   display: grid;
-  grid-template-columns: minmax(245px, 1fr) minmax(230px, 0.9fr) minmax(300px, 1.02fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 1.15fr) minmax(310px, 0.95fr);
+  align-items: stretch;
   gap: clamp(14px, 2vw, 30px);
   min-width: 0;
+  width: 100%;
 }
 
 .focus-clock-pane,
@@ -152,6 +154,41 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.focus-clock-workspace-pane {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.9fr) minmax(245px, 1fr);
+  gap: clamp(16px, 2vw, 28px);
+  width: 100%;
+}
+
+.focus-clock-display-wrap {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  place-items: center;
+}
+
+.focus-clock-display-wrap .focus-analog-clock { width: min(100%, 390px); }
+.focus-clock-display-wrap .focus-digital-clock { font-size: clamp(39px, 5vw, 66px); }
+
+.focus-session-controls {
+  width: 100%;
+}
+
+.focus-fullscreen-error {
+  position: fixed;
+  z-index: 10100;
+  right: 16px;
+  bottom: 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--focus-line);
+  border-radius: 10px;
+  color: var(--focus-green);
+  background: var(--focus-cream);
+  box-shadow: 0 5px 20px rgba(28, 45, 33, 0.12);
+  font-size: 12px;
 }
 
 .focus-analog-clock {
@@ -421,13 +458,164 @@
 .focus-notes-panel {
   display: flex;
   min-width: 0;
-  min-height: 365px;
+  min-height: 480px;
+  height: 100%;
+  max-height: calc(100vh - 190px);
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--focus-line);
   border-radius: 25px;
   background: var(--focus-cream);
 }
+
+.focus-workspace.is-expanded .focus-notes-panel {
+  max-height: calc(100vh - 120px);
+}
+
+.focus-notes-live {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.focus-notes-create {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--focus-green);
+  background: transparent;
+  border: 1px solid var(--focus-line);
+  border-radius: 11px;
+  cursor: pointer;
+}
+
+.focus-notes-create:hover { background: var(--focus-sage-soft); }
+
+.focus-note-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 17px 8px;
+  border-bottom: 1px solid var(--focus-line);
+}
+
+.focus-note-title-row input {
+  min-width: 0;
+  flex: 1;
+  color: var(--focus-green);
+  font: 600 16px/1.3 'Newsreader', Georgia, serif;
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.focus-note-title-row select {
+  width: min(42%, 150px);
+  min-width: 0;
+  padding: 5px 7px;
+  color: var(--focus-green);
+  background: var(--focus-cream);
+  border: 1px solid var(--focus-line);
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.focus-notes-editor-wrap {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1;
+  padding: 9px 14px 0;
+  overflow: hidden;
+}
+
+.focus-notes-editor-wrap > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+.focus-notes-editor-wrap .clockit-editor-toolbar {
+  gap: 3px;
+  padding: 4px 6px;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.focus-notes-editor-wrap .clockit-toolbar-btn {
+  padding: 4px;
+}
+
+.focus-notes-editor-wrap .clockit-editor-content-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 4px 20px;
+}
+
+.focus-notes-editor-wrap .clockit-prose-editor {
+  min-height: 140px;
+  font-size: 13px;
+}
+
+.focus-notes-message,
+.focus-notes-empty {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 22px;
+  color: var(--focus-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+.focus-notes-message.is-error { color: #9a3e31; }
+.focus-notes-empty p { margin: 0; }
+
+.focus-notes-empty button,
+.focus-notes-message button,
+.focus-notes-error button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  color: var(--focus-green);
+  background: var(--focus-sage-soft);
+  border: 1px solid var(--focus-line);
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.focus-notes-error,
+.focus-notes-offline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 13px;
+  color: #963c30;
+  font-size: 11px;
+}
+
+.focus-notes-offline { justify-content: center; color: var(--focus-muted); }
 
 .focus-notes-header {
   display: flex;
@@ -617,14 +805,40 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-@media (max-width: 1120px) {
+@media (max-width: 1023px) {
+  .focus-workspace-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+
+  .focus-clock-mode-switch {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: min(100%, 330px);
+  }
+
+  .focus-clock-mode-switch button { flex: 1 1 0; min-width: 0; min-height: 38px; }
+
   .focus-workspace-main {
-    grid-template-columns: minmax(220px, 0.9fr) minmax(230px, 0.9fr);
+    grid-template-columns: minmax(0, 1fr);
     row-gap: 22px;
   }
 
-  .focus-notes-panel { grid-column: 1 / -1; min-height: 290px; }
-  .focus-notes-content { min-height: 150px; }
+  .focus-clock-workspace-pane {
+    grid-template-columns: minmax(180px, 0.85fr) minmax(220px, 1fr);
+    gap: 16px;
+  }
+
+  .focus-notes-panel {
+    grid-column: auto;
+    min-height: 420px;
+    height: 500px;
+    max-height: 65vh;
+  }
+
+  .focus-notes-content {
+    min-height: 150px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -659,11 +873,17 @@
     gap: 19px;
   }
 
-  .focus-clock-pane { order: 0; }
-  .focus-session-pane { order: 1; }
-  .focus-notes-panel { grid-column: auto; order: 2; min-height: 260px; border-radius: 20px; }
-  .focus-analog-clock { width: min(76vw, 310px); }
-  .focus-digital-clock { font-size: clamp(48px, 15vw, 70px); }
+  .focus-clock-workspace-pane { order: 0; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .focus-clock-display-wrap .focus-analog-clock { width: min(63vw, 285px); }
+  .focus-clock-display-wrap .focus-digital-clock { font-size: clamp(48px, 15vw, 70px); }
+  .focus-notes-panel {
+    grid-column: auto;
+    order: 1;
+    min-height: 380px;
+    height: 460px;
+    max-height: 72vh;
+    border-radius: 20px;
+  }
   .focus-countdown { margin-top: 7px; font-size: clamp(62px, 18vw, 82px); }
   .focus-session-kind { margin-top: 4px; }
   .focus-session-status { margin-top: 3px; }

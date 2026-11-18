@@ -7,7 +7,7 @@
  *  - Enforces read-only notifications for mutating actions
  *  - Cleans up state when exiting demo mode
  */
-import { localStore } from '../services/repositories/storage';
+import { localStore, scopedStorageKey } from '../services/repositories/storage';
 import {
   calendarRepository,
   focusRepository,
@@ -45,13 +45,13 @@ export function isDemoActive(): boolean {
  * Completely bypassed by real authenticated users.
  */
 export function loadDemoData(): void {
-  localStore.writeJson('clockit_workspaces', DEMO_WORKSPACES);
-  localStore.writeJson('clockit_tasks', DEMO_TASKS);
-  localStore.writeJson('clockit_focus_sessions', DEMO_FOCUS_SESSIONS);
-  localStore.writeJson('clockit_habits', DEMO_HABITS);
-  localStore.writeJson('clockit_calendar_events', DEMO_CALENDAR_EVENTS);
-  localStore.writeJson('clockit_timeline_events', DEMO_TIMELINE_EVENTS);
-  localStore.writeJson('clockit_quick_notes', DEMO_QUICK_NOTES);
+  localStore.writeJson(scopedStorageKey('clockit_workspaces'), DEMO_WORKSPACES);
+  localStore.writeJson(scopedStorageKey('clockit_tasks'), DEMO_TASKS);
+  localStore.writeJson(scopedStorageKey('clockit_focus_sessions'), DEMO_FOCUS_SESSIONS);
+  localStore.writeJson(scopedStorageKey('clockit_habits'), DEMO_HABITS);
+  localStore.writeJson(scopedStorageKey('clockit_calendar_events'), DEMO_CALENDAR_EVENTS);
+  localStore.writeJson(scopedStorageKey('clockit_timeline_events'), DEMO_TIMELINE_EVENTS);
+  localStore.writeJson(scopedStorageKey('clockit_quick_notes'), DEMO_QUICK_NOTES);
 
   // Trigger repositories to re-read
   workspaceRepository.refreshFromStorage();
@@ -69,7 +69,7 @@ export function loadDemoData(): void {
  * Clears demo data from local storage and resets repositories to clean state.
  */
 export function clearDemoData(): void {
-  localStore.writeJson('clockit_workspaces', [
+  localStore.writeJson(scopedStorageKey('clockit_workspaces'), [
     {
       id: 'personal',
       name: 'Personal',
@@ -79,12 +79,12 @@ export function clearDemoData(): void {
       cover: 'personal',
     },
   ]);
-  localStore.writeJson('clockit_tasks', []);
-  localStore.writeJson('clockit_focus_sessions', []);
-  localStore.writeJson('clockit_habits', []);
-  localStore.writeJson('clockit_calendar_events', []);
-  localStore.writeJson('clockit_timeline_events', []);
-  localStore.writeJson('clockit_quick_notes', []);
+  localStore.writeJson(scopedStorageKey('clockit_tasks'), []);
+  localStore.writeJson(scopedStorageKey('clockit_focus_sessions'), []);
+  localStore.writeJson(scopedStorageKey('clockit_habits'), []);
+  localStore.writeJson(scopedStorageKey('clockit_calendar_events'), []);
+  localStore.writeJson(scopedStorageKey('clockit_timeline_events'), []);
+  localStore.writeJson(scopedStorageKey('clockit_quick_notes'), []);
 
   workspaceRepository.refreshFromStorage();
   taskRepository.refreshFromStorage();

@@ -34,6 +34,7 @@ interface NotesEditorProps {
   onChange: (content: string) => void;
   onNavigateToNote: (title: string) => void;
   isSaving: boolean;
+  saveError?: boolean;
 }
 
 export const NotesEditor: React.FC<NotesEditorProps> = ({
@@ -43,13 +44,15 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
   onChange,
   onNavigateToNote,
   isSaving,
+  saveError = false,
 }) => {
   const [linkInputOpen, setLinkInputOpen] = useState(false);
   const [internalLinkQuery, setInternalLinkQuery] = useState('');
   const [showInternalLinkMenu, setShowInternalLinkMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
-  const debounceTimerRef = useRef<any>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSaveRef = useRef<{ content: string; callback: (content: string) => void } | null>(null);
   // Anchors the [[link]] suggestion popup inside the editor surface.
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -124,9 +127,13 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
+      pendingSaveRef.current = { content: html, callback: onChange };
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = setTimeout(() => {
-        onChange(html);
+        debounceTimerRef.current = null;
+        const pending = pendingSaveRef.current;
+        pendingSaveRef.current = null;
+        pending?.callback(pending.content);
       }, 600);
 
       // Detect [[ for internal link autocomplete
@@ -155,12 +162,20 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
     },
   });
 
-  // Re-sync editor content when switching active note
+  // Flush the outgoing note before switching/unmounting, and re-sync on content changes.
+  useEffect(() => () => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = null;
+    const pending = pendingSaveRef.current;
+    pendingSaveRef.current = null;
+    pending?.callback(pending.content);
+  }, [noteId]);
+
   useEffect(() => {
     if (editor && editor.getHTML() !== initialContent) {
       editor.commands.setContent(initialContent, { emitUpdate: false });
     }
-  }, [noteId, editor]);
+  }, [noteId, editor, initialContent]);
 
   if (!editor) {
     return <div style={{ padding: 20, color: 'var(--text-muted)' }}>Loading editor...</div>;
@@ -414,6 +429,8 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-muted)' }}>
           {isSaving ? (
             <span>Saving...</span>
+          ) : saveError ? (
+            <span role="alert" style={{ color: 'var(--danger, #b42318)' }}>Save failed</span>
           ) : (
             <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--accent-mint)' }}>
               <Check size={11} strokeWidth={2.5} />

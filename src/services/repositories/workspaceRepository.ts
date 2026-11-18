@@ -1,5 +1,5 @@
 import { type Workspace } from '../../data/mockData';
-import { LocalJsonStore, ObservableRepository } from './storage';
+import { LocalJsonStore, ObservableRepository, scopedStorageKey } from './storage';
 import type { WorkspaceRepository } from './types';
 
 const isWorkspaceArray = (value: unknown): value is Workspace[] => Array.isArray(value);
@@ -13,7 +13,7 @@ const slugify = (name: string): string =>
 
 /** Local-storage backed workspace repository (`clockit_workspaces`). */
 export class LocalWorkspaceRepository extends ObservableRepository implements WorkspaceRepository {
-  readonly keys = ['clockit_workspaces'];
+  get keys(): readonly string[] { return [scopedStorageKey('clockit_workspaces')]; }
 
   private readonly store = new LocalJsonStore<Workspace[]>(
     'clockit_workspaces',

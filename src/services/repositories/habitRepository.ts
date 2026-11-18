@@ -1,12 +1,12 @@
 import type { HabitItem } from '../../data/mockData';
-import { LocalJsonStore, ObservableRepository } from './storage';
+import { LocalJsonStore, ObservableRepository, scopedStorageKey } from './storage';
 import type { HabitRepository } from './types';
 
 const isHabitArray = (value: unknown): value is HabitItem[] => Array.isArray(value);
 
 /** Local-storage backed habit repository (`clockit_habits`). */
 export class LocalHabitRepository extends ObservableRepository implements HabitRepository {
-  readonly keys = ['clockit_habits'];
+  get keys(): readonly string[] { return [scopedStorageKey('clockit_habits')]; }
 
   private readonly store = new LocalJsonStore<HabitItem[]>(
     'clockit_habits',

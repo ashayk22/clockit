@@ -1,4 +1,4 @@
-import { ObservableRepository, localStore } from './storage';
+import { ObservableRepository, localStore, scopedStorageKey } from './storage';
 import type { AppearanceMode, PreferenceKey, PreferencesRepository, UserPreferences } from './types';
 
 const THEME_KEY = 'tracker-theme';
@@ -23,7 +23,7 @@ export class LocalPreferencesRepository
   extends ObservableRepository
   implements PreferencesRepository
 {
-  readonly keys = [
+  private readonly baseKeys = [
     THEME_KEY,
     APPEARANCE_KEY,
     SIDEBAR_KEY,
@@ -34,6 +34,7 @@ export class LocalPreferencesRepository
     PLANNING_KEY,
     FOCUS_KEY,
   ];
+  get keys(): readonly string[] { return this.baseKeys.map((key) => scopedStorageKey(key)); }
 
   private theme: UserPreferences['theme'] = 'light';
   private appearancePreference: AppearanceMode = 'system';
@@ -74,54 +75,54 @@ export class LocalPreferencesRepository
     switch (key) {
       case 'theme':
         this.theme = value as UserPreferences['theme'];
-        localStore.writeRaw(THEME_KEY, this.theme);
+        localStore.writeRaw(scopedStorageKey(THEME_KEY), this.theme);
         break;
       case 'appearancePreference':
         this.appearancePreference = value as AppearanceMode;
-        localStore.writeRaw(APPEARANCE_KEY, this.appearancePreference);
+        localStore.writeRaw(scopedStorageKey(APPEARANCE_KEY), this.appearancePreference);
         break;
       case 'sidebarCollapsed':
         this.sidebarCollapsed = Boolean(value);
-        localStore.writeRaw(SIDEBAR_KEY, this.sidebarCollapsed ? '1' : '0');
+        localStore.writeRaw(scopedStorageKey(SIDEBAR_KEY), this.sidebarCollapsed ? '1' : '0');
         break;
       case 'notificationReadKeys': {
         const keys = Array.isArray(value) ? (value as string[]).filter((k) => typeof k === 'string') : [];
         this.notificationReadKeys = keys;
         if (!this.notificationKeysQuarantined) {
-          localStore.writeRaw(NOTIF_KEY, JSON.stringify(keys));
+          localStore.writeRaw(scopedStorageKey(NOTIF_KEY), JSON.stringify(keys));
         }
         break;
       }
       case 'activeWorkspaceId':
         this.activeWorkspaceId = typeof value === 'string' && value ? value : null;
         if (this.activeWorkspaceId) {
-          localStore.writeRaw(WORKSPACE_KEY, this.activeWorkspaceId);
+          localStore.writeRaw(scopedStorageKey(WORKSPACE_KEY), this.activeWorkspaceId);
         } else {
-          localStore.remove(WORKSPACE_KEY);
+          localStore.remove(scopedStorageKey(WORKSPACE_KEY));
         }
         break;
       case 'onboardingCompleted':
         this.onboardingCompleted = Boolean(value);
-        localStore.writeRaw(ONBOARDING_KEY, this.onboardingCompleted ? '1' : '0');
+        localStore.writeRaw(scopedStorageKey(ONBOARDING_KEY), this.onboardingCompleted ? '1' : '0');
         break;
       case 'productivityChallenges': {
         const arr = Array.isArray(value) ? (value as string[]).filter((c) => typeof c === 'string') : [];
         this.productivityChallenges = arr;
-        localStore.writeRaw(CHALLENGES_KEY, JSON.stringify(arr));
+        localStore.writeRaw(scopedStorageKey(CHALLENGES_KEY), JSON.stringify(arr));
         break;
       }
       case 'planningPreference':
         this.planningPreference = typeof value === 'string' && value ? value : null;
         if (this.planningPreference) {
-          localStore.writeRaw(PLANNING_KEY, this.planningPreference);
+          localStore.writeRaw(scopedStorageKey(PLANNING_KEY), this.planningPreference);
         } else {
-          localStore.remove(PLANNING_KEY);
+          localStore.remove(scopedStorageKey(PLANNING_KEY));
         }
         break;
       case 'preferredFocusDuration': {
         const dur = typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.round(value) : 25;
         this.preferredFocusDuration = dur;
-        localStore.writeRaw(FOCUS_KEY, String(dur));
+        localStore.writeRaw(scopedStorageKey(FOCUS_KEY), String(dur));
         break;
       }
       default:
@@ -149,11 +150,11 @@ export class LocalPreferencesRepository
   }
 
   private readTheme(): void {
-    this.theme = localStore.readRaw(THEME_KEY) === 'dark' ? 'dark' : 'light';
+    this.theme = localStore.readRaw(scopedStorageKey(THEME_KEY)) === 'dark' ? 'dark' : 'light';
   }
 
   private readAppearance(): void {
-    const raw = localStore.readRaw(APPEARANCE_KEY);
+    const raw = localStore.readRaw(scopedStorageKey(APPEARANCE_KEY));
     if (raw === 'light' || raw === 'dark' || raw === 'system') {
       this.appearancePreference = raw;
     } else {
@@ -162,19 +163,19 @@ export class LocalPreferencesRepository
   }
 
   private readSidebar(): void {
-    this.sidebarCollapsed = localStore.readRaw(SIDEBAR_KEY) === '1';
+    this.sidebarCollapsed = localStore.readRaw(scopedStorageKey(SIDEBAR_KEY)) === '1';
   }
 
   private readActiveWorkspace(): void {
-    this.activeWorkspaceId = localStore.readRaw(WORKSPACE_KEY) || null;
+    this.activeWorkspaceId = localStore.readRaw(scopedStorageKey(WORKSPACE_KEY)) || null;
   }
 
   private readOnboarding(): void {
-    this.onboardingCompleted = localStore.readRaw(ONBOARDING_KEY) === '1';
+    this.onboardingCompleted = localStore.readRaw(scopedStorageKey(ONBOARDING_KEY)) === '1';
   }
 
   private readChallenges(): void {
-    const raw = localStore.readRaw(CHALLENGES_KEY);
+    const raw = localStore.readRaw(scopedStorageKey(CHALLENGES_KEY));
     if (!raw) {
       this.productivityChallenges = [];
       return;
@@ -188,17 +189,17 @@ export class LocalPreferencesRepository
   }
 
   private readPlanning(): void {
-    this.planningPreference = localStore.readRaw(PLANNING_KEY) || null;
+    this.planningPreference = localStore.readRaw(scopedStorageKey(PLANNING_KEY)) || null;
   }
 
   private readFocus(): void {
-    const raw = localStore.readRaw(FOCUS_KEY);
+    const raw = localStore.readRaw(scopedStorageKey(FOCUS_KEY));
     const parsed = raw ? parseInt(raw, 10) : 25;
     this.preferredFocusDuration = Number.isFinite(parsed) && parsed > 0 ? parsed : 25;
   }
 
   private readNotificationKeys(): void {
-    const raw = localStore.readRaw(NOTIF_KEY);
+    const raw = localStore.readRaw(scopedStorageKey(NOTIF_KEY));
     if (raw === null || raw === '') {
       this.notificationReadKeys = [];
       this.notificationKeysQuarantined = false;

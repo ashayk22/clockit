@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, RotateCcw } from 'lucide-react';
+import { scopedStorageKey } from '../../services/repositories/storage';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -65,8 +66,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     try {
       sessionStorage.clear();
       // Remove potentially corrupt transient state but preserve user credentials
-      localStorage.removeItem('clockit_active_timer_state');
-      localStorage.removeItem('clockit-tour-active-step');
+      localStorage.removeItem(scopedStorageKey('clockit_active_timer_state'));
+      localStorage.removeItem(scopedStorageKey('clockit-tour-active-step'));
     } catch {
       /* ignore */
     }

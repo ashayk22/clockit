@@ -12,6 +12,7 @@ import { RouteLoadingFallback } from './components/common/RouteLoadingFallback';
 
 // Top-level entrypoints lazy-loaded with resilient retry
 const LandingPage = lazyWithRetry(() => import('./landing/LandingPage'));
+const CaseStudiesPage = lazyWithRetry(() => import('./pages/CaseStudiesPage'));
 const AuthPage = lazyWithRetry(() => import('./auth/AuthPage'));
 const ResetPasswordPage = lazyWithRetry(() => import('./auth/ResetPasswordPage'));
 const OnboardingWizard = lazyWithRetry(() =>
@@ -87,6 +88,7 @@ export const App: React.FC = () => {
         <Routes>
           {/* 1. Public */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/case-studies" element={<CaseStudiesPage />} />
 
           {/* 2. Auth */}
           <Route path="/login" element={<AuthPage mode="login" />} />

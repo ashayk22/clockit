@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Bold, CheckSquare, Clock3, Coffee, Italic, Layers2, List, Maximize2,
-  Minimize2, Pause, Play, RotateCcw, Settings2, SkipForward,
-  Underline, Link2,
+  Clock3, Coffee, Maximize2, Minimize2, Pause, Play, RotateCcw,
+  Settings2, SkipForward,
 } from 'lucide-react';
 import { ClockItLogo } from '../brand/ClockItLogo';
 import { FocusClockDisplay, type FocusClockMode } from './FocusClockDisplay';
+import { FocusNotesPanel } from './FocusNotesPanel';
 import './focus-workspace.css';
 
 export type FocusSessionMode = 'Deep Work' | 'Short Break' | 'Long Break';
@@ -48,18 +48,28 @@ export const FocusWorkspacePresentation: React.FC<FocusWorkspacePresentationProp
   const [clockMode, setClockMode] = useState<FocusClockMode>('analog');
   const [showSeconds, setShowSeconds] = useState(true);
   const [expanded, setExpanded] = useState(false);
+  const [fullscreenError, setFullscreenError] = useState(false);
+  const workspaceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!expanded) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setExpanded(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [expanded]);
+    const syncFullscreen = () => setExpanded(document.fullscreenElement === workspaceRef.current);
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    return () => document.removeEventListener('fullscreenchange', syncFullscreen);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    setFullscreenError(false);
+    try {
+      if (document.fullscreenElement === workspaceRef.current) await document.exitFullscreen();
+      else await workspaceRef.current?.requestFullscreen();
+    } catch (error) {
+      console.error('[clockit/focus] Fullscreen request failed', error);
+      setFullscreenError(true);
+    }
+  };
 
   return (
-    <div className={`focus-workspace${expanded ? ' is-expanded' : ''}`}>
+    <div ref={workspaceRef} className={`focus-workspace${expanded ? ' is-expanded' : ''}`}>
       <header className="focus-workspace-header">
         <div className="focus-workspace-brand">
           <ClockItLogo size={34} />
@@ -83,66 +93,45 @@ export const FocusWorkspacePresentation: React.FC<FocusWorkspacePresentationProp
             </button>
           )}
           <button type="button" className="focus-utility-button" aria-label="Timer settings" title="Timer settings" onClick={onSettings}><Settings2 size={19} /></button>
-          <button type="button" className="focus-utility-button" aria-label={expanded ? 'Exit expanded workspace' : 'Expand workspace'} title={expanded ? 'Exit expanded workspace' : 'Expand workspace'} onClick={() => setExpanded((value) => !value)}>
+          <button type="button" className="focus-utility-button" aria-label={expanded ? 'Exit fullscreen' : 'Enter fullscreen'} title={expanded ? 'Exit fullscreen' : 'Enter fullscreen'} onClick={() => void toggleFullscreen()}>
             {expanded ? <Minimize2 size={19} /> : <Maximize2 size={19} />}
           </button>
         </div>
       </header>
 
       <main className="focus-workspace-main">
-        <section className={`focus-clock-pane${clockMode === 'digital' ? ' is-digital' : ''}`} aria-label="Current time">
-          <FocusClockDisplay mode={clockMode} showSeconds={showSeconds} progress={progress} />
-        </section>
-
-        <section className={`focus-session-pane${isRunning ? ' is-running' : ''}`} aria-label="Focus session timer">
-          <div className="focus-session-eyebrow"><span />Focus Session<span /></div>
-          <div className="focus-countdown" aria-live="off">{timerText}</div>
-          <div className="focus-session-kind">{mode}</div>
-          <div className="focus-session-status">{isRunning ? 'Session in progress' : isPaused ? 'Paused' : 'Ready when you are'}</div>
-          <div className="focus-mode-picker" role="group" aria-label="Focus session type">
-            {SESSION_MODES.map((sessionMode) => (
-              <button key={sessionMode} type="button" className={mode === sessionMode ? 'is-active' : ''} aria-pressed={mode === sessionMode} onClick={() => onModeChange(sessionMode)}>
-                {sessionMode === 'Deep Work' ? 'Focus' : sessionMode === 'Short Break' ? 'Short break' : 'Long break'}
-              </button>
-            ))}
-          </div>
-
-          <div className="focus-playback-controls">
-            <button type="button" className="focus-round-control" onClick={onReset} title="Reset session" aria-label="Reset session"><RotateCcw size={19} /></button>
-            <button type="button" className="focus-primary-control" onClick={onStartPause} title={isRunning ? 'Pause session' : 'Start session'} aria-label={isRunning ? 'Pause session' : 'Start session'}>
-              {isRunning ? <Pause size={25} fill="currentColor" /> : <Play size={27} fill="currentColor" />}
-            </button>
-            <button type="button" className="focus-round-control" onClick={onNext} title="Next session" aria-label="Next session"><SkipForward size={20} /></button>
-          </div>
-          <div className="focus-elapsed-readout">{elapsedText} elapsed</div>
-          {taskSelector}
-          {selectedTaskTitle && <div className="focus-selected-task">Working on <strong>{selectedTaskTitle}</strong></div>}
-        </section>
-
-        <aside className="focus-notes-panel" aria-label="Session notes preview">
-          <div className="focus-notes-header">
-            <div className="focus-notes-tabs">
-              <span className="focus-notes-tab is-active"><Italic size={16} /> Notes</span>
-              <span className="focus-notes-tab"><Layers2 size={17} /> Session Notes</span>
+        <section className={`focus-clock-pane focus-clock-workspace-pane${clockMode === 'digital' ? ' is-digital' : ''}`} aria-label="Focus clock and session controls">
+          <div className="focus-clock-display-wrap"><FocusClockDisplay mode={clockMode} showSeconds={showSeconds} progress={progress} /></div>
+          <div className={`focus-session-pane focus-session-controls${isRunning ? ' is-running' : ''}`}>
+            <div className="focus-session-eyebrow"><span />Focus Session<span /></div>
+            <div className="focus-countdown" aria-live="off">{timerText}</div>
+            <div className="focus-session-kind">{mode}</div>
+            <div className="focus-session-status">{isRunning ? 'Session in progress' : isPaused ? 'Paused' : 'Ready when you are'}</div>
+            <div className="focus-mode-picker" role="group" aria-label="Focus session type">
+              {SESSION_MODES.map((sessionMode) => (
+                <button key={sessionMode} type="button" className={mode === sessionMode ? 'is-active' : ''} aria-pressed={mode === sessionMode} onClick={() => onModeChange(sessionMode)}>
+                  {sessionMode === 'Deep Work' ? 'Focus' : sessionMode === 'Short Break' ? 'Short break' : 'Long break'}
+                </button>
+              ))}
             </div>
-            <button type="button" className="focus-notes-more" aria-label="Notes options" title="Notes options" disabled>•••</button>
+
+            <div className="focus-playback-controls">
+              <button type="button" className="focus-round-control" onClick={onReset} title="Reset session" aria-label="Reset session"><RotateCcw size={19} /></button>
+              <button type="button" className="focus-primary-control" onClick={onStartPause} title={isRunning ? 'Pause session' : 'Start session'} aria-label={isRunning ? 'Pause session' : 'Start session'}>
+                {isRunning ? <Pause size={25} fill="currentColor" /> : <Play size={27} fill="currentColor" />}
+              </button>
+              <button type="button" className="focus-round-control" onClick={onNext} title="Next session" aria-label="Next session"><SkipForward size={20} /></button>
+            </div>
+            <div className="focus-elapsed-readout">{elapsedText} elapsed</div>
+            {taskSelector}
+            {selectedTaskTitle && <div className="focus-selected-task">Working on <strong>{selectedTaskTitle}</strong></div>}
           </div>
-          <div className="focus-notes-toolbar" role="toolbar" aria-label="Formatting preview (not connected)">
-            <button type="button" disabled aria-label="Bold preview"><Bold size={17} /></button>
-            <button type="button" disabled aria-label="Italic preview"><Italic size={17} /></button>
-            <button type="button" disabled aria-label="Underline preview"><Underline size={17} /></button>
-            <span />
-            <button type="button" disabled aria-label="Checklist preview"><CheckSquare size={17} /></button>
-            <button type="button" disabled aria-label="List preview"><List size={18} /></button>
-            <button type="button" disabled aria-label="Link preview"><Link2 size={17} /></button>
-          </div>
-          <div className="focus-notes-content" role="textbox" aria-readonly="true" aria-label="Notes editor preview">
-            <span className="focus-notes-caret" />
-            <span className="focus-notes-placeholder">Session notes preview — editing is not connected.</span>
-          </div>
-          <div className="focus-notes-footer"><span>Visual preview only</span><span>0 words</span></div>
-        </aside>
+        </section>
+
+        <FocusNotesPanel />
       </main>
+
+      {fullscreenError && <div className="focus-fullscreen-error" role="status">Fullscreen is unavailable in this browser context.</div>}
 
       <footer className="focus-session-config" aria-label="Session configuration">
         <button type="button" onClick={onSettings}>

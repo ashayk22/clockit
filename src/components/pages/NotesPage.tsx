@@ -17,13 +17,15 @@ import {
   Hash,
 } from 'lucide-react';
 import { notesStorage, NoteFolder, NoteItem, GraphNode, GraphLink } from '../../services/notesStorage';
+import { noteRepository, noteFolderRepository } from '../../services/repositories';
+import { getStorageOwner } from '../../services/repositories/storage';
 import { NotesEditor } from '../notes/NotesEditor';
 
 export const NotesPage: React.FC = () => {
   const [folders, setFolders] = useState<NoteFolder[]>([]);
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string>('');
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>('f-dev-webdev');
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedView, setSelectedView] = useState<'all' | 'favorites' | 'templates' | 'trash'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -37,12 +39,7 @@ export const NotesPage: React.FC = () => {
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
 
   // Folder accordion collapse states
-  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
-    'f-personal': true,
-    'f-dev': true,
-    'f-college': false,
-    'f-freelance': false,
-  });
+  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
 
   // Modal / prompt dialog states
   const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
@@ -73,6 +70,7 @@ export const NotesPage: React.FC = () => {
   // Initialize IndexedDB and load data
   useEffect(() => {
     let isMounted = true;
+    let owner = getStorageOwner();
     const initAndLoad = async () => {
       try {
         await notesStorage.init();
@@ -80,15 +78,11 @@ export const NotesPage: React.FC = () => {
           notesStorage.getAllFolders(),
           notesStorage.getAllNotes(),
         ]);
-        if (isMounted) {
+        if (isMounted && getStorageOwner() === owner) {
           setFolders(loadedFolders);
           setNotes(loadedNotes);
-          if (loadedNotes.length > 0 && !activeNoteId) {
-            // Default to 'ClockIt Features' or first available note
-            const defaultNote = loadedNotes.find((n) => n.id === 'n-clockit-features') || loadedNotes[0];
-            setActiveNoteId(defaultNote.id);
-            setSelectedFolderId(defaultNote.folderId);
-          }
+          setActiveNoteId((current) => loadedNotes.some((note) => note.id === current) ? current : loadedNotes[0]?.id ?? '');
+          setSelectedFolderId((current) => loadedFolders.some((folder) => folder.id === current) ? current : null);
         }
       } catch (err) {
         console.error('Failed to initialize notes storage:', err);
@@ -97,8 +91,23 @@ export const NotesPage: React.FC = () => {
       }
     };
     initAndLoad();
+    const refresh = () => {
+      const nextOwner = getStorageOwner();
+      if (nextOwner === owner) return;
+      owner = nextOwner;
+      setIsLoadingNotes(true);
+      setNotes([]);
+      setFolders([]);
+      setActiveNoteId('');
+      setSelectedFolderId(null);
+      void initAndLoad();
+    };
+    const unsubscribeNotes = noteRepository.subscribe(refresh);
+    const unsubscribeFolders = noteFolderRepository.subscribe(refresh);
     return () => {
       isMounted = false;
+      unsubscribeNotes();
+      unsubscribeFolders();
     };
   }, []);
 
@@ -186,8 +195,8 @@ export const NotesPage: React.FC = () => {
   };
 
   const handleCreateNote = async (folderId?: string) => {
-    const targetFolder = folderId || selectedFolderId || folders[0]?.id || 'f-dev-webdev';
-    const newNote = await notesStorage.createNote(targetFolder, 'Untitled Note');
+    const targetFolder = folderId || selectedFolderId || folders[0]?.id;
+    const newNote = await noteRepository.create(targetFolder, 'Untitled Note');
     setNotes((prev) => [newNote, ...prev]);
     setActiveNoteId(newNote.id);
     setSelectedFolderId(targetFolder);
@@ -199,7 +208,7 @@ export const NotesPage: React.FC = () => {
     if (!activeNoteId) return;
     setIsSaving(true);
     try {
-      const updated = await notesStorage.updateNote(activeNoteId, { content: newContent });
+      const updated = await noteRepository.update(activeNoteId, { content: newContent });
       setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
     } catch (err) {
       console.error('Error saving note:', err);
@@ -213,7 +222,7 @@ export const NotesPage: React.FC = () => {
     if (!activeNoteId) return;
     setNotes((prev) => prev.map((n) => (n.id === activeNoteId ? { ...n, title: newTitle } : n)));
     try {
-      await notesStorage.updateNote(activeNoteId, { title: newTitle });
+      await noteRepository.update(activeNoteId, { title: newTitle });
     } catch (err) {
       console.error('Error renaming note:', err);
     }
@@ -221,7 +230,7 @@ export const NotesPage: React.FC = () => {
 
   const handleToggleFavorite = async () => {
     if (!activeNoteId) return;
-    const isFav = await notesStorage.toggleFavorite(activeNoteId);
+    const isFav = await noteRepository.toggleFavorite(activeNoteId);
     setNotes((prev) => prev.map((n) => (n.id === activeNoteId ? { ...n, isFavorite: isFav } : n)));
   };
 
@@ -229,10 +238,10 @@ export const NotesPage: React.FC = () => {
     if (!activeNote) return;
     if (activeNote.isTrash) {
       // Permanent deletion
-      await notesStorage.deletePermanently(activeNote.id);
+      await noteRepository.deletePermanently(activeNote.id);
       setNotes((prev) => prev.filter((n) => n.id !== activeNote.id));
     } else {
-      await notesStorage.moveToTrash(activeNote.id);
+      await noteRepository.moveToTrash(activeNote.id);
       setNotes((prev) => prev.map((n) => (n.id === activeNote.id ? { ...n, isTrash: true } : n)));
     }
     setNoteToDelete(null);
@@ -248,7 +257,7 @@ export const NotesPage: React.FC = () => {
       setActiveNoteId(existing.id);
     } else {
       // Create referenced note if doesn't exist
-      const newNote = await notesStorage.createNote(selectedFolderId || 'f-dev-webdev', title);
+      const newNote = await noteRepository.create(selectedFolderId || folders[0]?.id || '', title);
       setNotes((prev) => [newNote, ...prev]);
       setActiveNoteId(newNote.id);
     }
@@ -263,7 +272,7 @@ export const NotesPage: React.FC = () => {
     const existingTags = activeNote.tags || [];
     if (!existingTags.includes(tag)) {
       const updatedTags = [...existingTags, tag];
-      const updated = await notesStorage.updateNote(activeNote.id, { tags: updatedTags });
+      const updated = await noteRepository.update(activeNote.id, { tags: updatedTags });
       setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
     }
     setNewTagInput('');
@@ -273,14 +282,14 @@ export const NotesPage: React.FC = () => {
   const handleRemoveTag = async (tagToRemove: string) => {
     if (!activeNote) return;
     const updatedTags = activeNote.tags.filter((t) => t !== tagToRemove);
-    const updated = await notesStorage.updateNote(activeNote.id, { tags: updatedTags });
+    const updated = await noteRepository.update(activeNote.id, { tags: updatedTags });
     setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
   };
 
   const handleCreateFolderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFolderName.trim()) return;
-    const folder = await notesStorage.createFolder(newFolderName, newFolderColor, newFolderParentId);
+    const folder = await noteFolderRepository.create(newFolderName, newFolderColor, newFolderParentId);
     setFolders((prev) => [...prev, folder]);
     setSelectedFolderId(folder.id);
     setNewFolderName('');

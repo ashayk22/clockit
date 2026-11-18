@@ -4047,6 +4047,13 @@ textarea:focus-visible {
 
   .clockit-nav-trigger {
     display: flex;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .clockit-topbar .clockit-icon-action-btn {
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .clockit-collapse-trigger {
@@ -4101,6 +4108,19 @@ textarea:focus-visible {
    Scoped to the trailing anchor so the notification bell (which is also the
    last child of its own wrapper) is never hidden. */
 @media (max-width: 420px) {
+  .clockit-topbar {
+    gap: 6px;
+    padding: 0 10px;
+  }
+
+  .clockit-topbar-left {
+    gap: 6px;
+  }
+
+  .clockit-topbar-right {
+    gap: 4px;
+  }
+
   .clockit-topbar-right > .clockit-menu-anchor:last-child .clockit-icon-action-btn {
     display: none;
   }
@@ -4548,6 +4568,7 @@ textarea:focus-visible {
   .clockit-mobile-nav-item {
     flex: 1 1 0;
     min-width: 0;
+    min-height: 44px;
     display: flex;
     flex-direction: column;
     align-items: center;

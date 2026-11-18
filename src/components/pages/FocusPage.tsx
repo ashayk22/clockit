@@ -7,6 +7,7 @@ import {
 import { dataService } from '../../services/dataService';
 import { TaskItem } from '../../data/mockData';
 import { FocusWorkspacePresentation } from '../focus/FocusWorkspacePresentation';
+import { scopedStorageKey } from '../../services/repositories/storage';
 
 type FocusMode = 'Deep Work' | 'Short Break' | 'Long Break';
 
@@ -27,7 +28,7 @@ const ACTIVE_TIMER_KEY = 'clockit_active_timer_state';
 
 function loadTimerSettings(): TimerSettings {
   try {
-    const raw = localStorage.getItem(TIMER_SETTINGS_KEY);
+    const raw = localStorage.getItem(scopedStorageKey(TIMER_SETTINGS_KEY));
     if (!raw) return DEFAULT_TIMER_SETTINGS;
     const parsed = JSON.parse(raw);
     return {
@@ -42,7 +43,7 @@ function loadTimerSettings(): TimerSettings {
 
 function saveTimerSettings(settings: TimerSettings): void {
   try {
-    localStorage.setItem(TIMER_SETTINGS_KEY, JSON.stringify(settings));
+    localStorage.setItem(scopedStorageKey(TIMER_SETTINGS_KEY), JSON.stringify(settings));
   } catch {
     /* storage unavailable */
   }
@@ -93,7 +94,7 @@ export const FocusPage: React.FC<FocusPageProps> = ({ workspaceName }) => {
   // Active Timer State with browser recovery
   const initialSaved = useMemo(() => {
     try {
-      const raw = localStorage.getItem(ACTIVE_TIMER_KEY);
+      const raw = localStorage.getItem(scopedStorageKey(ACTIVE_TIMER_KEY));
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       const mode: FocusMode = ['Deep Work', 'Short Break', 'Long Break'].includes(parsed?.mode)
@@ -143,7 +144,7 @@ export const FocusPage: React.FC<FocusPageProps> = ({ workspaceName }) => {
   useEffect(() => {
     try {
       localStorage.setItem(
-        ACTIVE_TIMER_KEY,
+        scopedStorageKey(ACTIVE_TIMER_KEY),
         JSON.stringify({
           mode,
           secondsLeft,

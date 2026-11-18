@@ -10,6 +10,7 @@ export {
   retrySync,
   getSyncState,
   subscribeToSyncState,
+  markOwnerLocalChange,
   type CloudSyncStatus,
   type CloudSyncState,
 } from './syncEngine';
